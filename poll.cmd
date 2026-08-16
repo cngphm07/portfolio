@@ -1,5 +1,3 @@
 @echo off
-for /L %%i in (1,1,5) do (
-  timeout /t 120 >NUL 2>&1
-  curl -s -o NUL -w "attempt %%i: %%{http_code}\n" --max-time 20 https://oddpig.io.vn/
-)
+"C:\Program Files\GitHub CLI\gh.exe" run watch %1 --exit-status >NUL 2>&1
+curl -s -o NUL -w "site: %%{http_code}\n" --max-time 30 http://oddpig.io.vn/
