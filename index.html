@@ -346,7 +346,8 @@
     Filmmaker<br>&amp; Videographer
     <span>Director of Photography — Based in Saigon, Vietnam</span>
   </h1>
-  <button class="showreel-btn" id="showreelBtn"><span class="dot"></span>Watch showreel</button>
+  <!-- showreel button hidden until showreel is finished: remove "hidden" attribute to re-enable -->
+  <button class="showreel-btn" id="showreelBtn" hidden><span class="dot"></span>Watch showreel</button>
   <div class="hero-meta">
     <div><b>252</b>Selected Films</div>
     <div><b>10+</b>Years of Craft</div>
@@ -512,7 +513,7 @@
 
   // showreel button: open lightbox on a showreel-named video, restore grid context on close
   const showreelVid = allVids.find(v => /showreel/i.test(v.title)) || PORTFOLIO_DATA['TVC'][0];
-  document.getElementById('showreelBtn').addEventListener('click', () => {
+  document.getElementById('showreelBtn')?.addEventListener('click', () => {
     const prev = { list: currentList, idx: currentIdx };
     currentList = [showreelVid];
     open(0);
