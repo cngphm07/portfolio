@@ -54,6 +54,44 @@
     display:flex;flex-direction:column;justify-content:flex-end;
     padding:0 2.5rem 4rem;
     position:relative;
+    overflow:hidden;
+    isolation:isolate;
+  }
+  .hero-reel{
+    position:absolute;inset:-15% -5%;
+    z-index:-2;
+    display:flex;flex-direction:column;gap:1.5rem;
+    transform:rotate(-6deg) scale(1.15);
+    opacity:.32;
+    pointer-events:none;
+  }
+  .reel-row{
+    display:flex;gap:1.5rem;
+    width:max-content;
+    animation:reelScroll 60s linear infinite;
+  }
+  .reel-row.reverse{animation-direction:reverse}
+  .reel-row img{
+    width:240px;aspect-ratio:16/9;object-fit:cover;
+    filter:grayscale(1) brightness(.85);
+    border:1px solid #000;
+  }
+  @keyframes reelScroll{to{transform:translateX(-50%)}}
+  .hero::after{
+    content:'';
+    position:absolute;inset:0;z-index:-1;
+    background:
+      radial-gradient(ellipse at 30% 20%,transparent 0%,var(--bg) 75%),
+      linear-gradient(to top,var(--bg) 12%,rgba(10,10,10,.55) 45%,rgba(10,10,10,.75));
+  }
+  .grain{
+    position:fixed;inset:-100%;z-index:999;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation:grainShift 1.2s steps(4) infinite;
+  }
+  @keyframes grainShift{
+    0%{transform:translate(0,0)}25%{transform:translate(-2%,3%)}
+    50%{transform:translate(3%,-2%)}75%{transform:translate(-3%,-3%)}100%{transform:translate(0,0)}
   }
   .hero h1{
     font-family:'Space Grotesk',sans-serif;
@@ -74,8 +112,28 @@
     text-transform:uppercase;
     margin-top:1.6rem;
   }
+  .showreel-btn{
+    display:inline-flex;align-items:center;gap:.9rem;
+    margin-top:2.4rem;
+    background:transparent;
+    border:1px solid #3a3a3a;border-radius:99px;
+    color:var(--text);
+    padding:.85rem 1.7rem;
+    font-family:'Inter',sans-serif;font-size:.72rem;font-weight:300;
+    letter-spacing:.22em;text-transform:uppercase;
+    cursor:pointer;transition:all .3s;
+    width:fit-content;
+  }
+  .showreel-btn .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--accent);
+    animation:pulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+  .showreel-btn:hover{background:var(--accent);border-color:var(--accent);color:#000}
+  .showreel-btn:hover .dot{background:#000}
   .hero-meta{
-    display:flex;gap:3.5rem;margin-top:3.5rem;
+    display:flex;gap:3.5rem;margin-top:3rem;
     color:var(--muted);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;
   }
   .hero-meta b{display:block;color:var(--text);font-weight:400;margin-bottom:.45rem}
@@ -116,7 +174,9 @@
     backdrop-filter:blur(8px);
     border-top:1px solid var(--line);
     border-bottom:1px solid var(--line);
+    scroll-margin-top:4.5rem;
   }
+  section[id]{scroll-margin-top:4.5rem}
   .filter-btn{
     background:transparent;border:1px solid var(--line);
     color:var(--muted);
@@ -240,14 +300,21 @@
   @media(max-width:640px){
     header,main,.filters,.hero,footer{padding-left:1.25rem;padding-right:1.25rem}
     nav{display:none}
+    header{padding:.9rem 1.25rem}
+    .logo{font-size:.9rem}
+    .filters{top:3.1rem}
+    section[id],.filters{scroll-margin-top:3.1rem}
     .hero-line{display:none}
     .about{padding:4rem 1.25rem 3rem}
     .lb-nav{display:none}
     .foot-meta{text-align:left}
+    .hero-reel{inset:-10% -8%;opacity:.22}
+    .reel-row img{width:180px}
   }
 </style>
 </head>
 <body>
+<div class="grain" aria-hidden="true"></div>
 
 <header>
   <a class="logo" href="#top">CNG<em>PHM</em></a>
@@ -259,11 +326,13 @@
 </header>
 
 <section class="hero" id="top">
+  <div class="hero-reel" id="heroReel" aria-hidden="true"></div>
   <div class="hero-line">Reel — 2026</div>
   <h1>
     Filmmaker<br>&amp; Videographer
     <span>Director of Photography — Based in Saigon, Vietnam</span>
   </h1>
+  <button class="showreel-btn" id="showreelBtn"><span class="dot"></span>Watch showreel</button>
   <div class="hero-meta">
     <div><b>252</b>Selected Films</div>
     <div><b>10+</b>Years of Craft</div>
@@ -397,6 +466,36 @@
     if (e.key === 'Escape') close();
     if (e.key === 'ArrowLeft') step(-1);
     if (e.key === 'ArrowRight') step(1);
+  });
+
+  // hero background: two drifting rows of video thumbnails
+  const heroReel = document.getElementById('heroReel');
+  const allVids = cats.flatMap(c => PORTFOLIO_DATA[c].map(v => ({...v, cat: c})));
+  const withThumbs = allVids.filter(v => v.thumb);
+  const pick = n => Array.from({length: n}, (_, i) => withThumbs[(i * 7 + 3) % withThumbs.length]);
+  ['', 'reverse'].forEach((cls, r) => {
+    const row = document.createElement('div');
+    row.className = 'reel-row ' + cls;
+    const imgs = pick(8).map(v => '<img src="' + v.thumb + '" alt="">').join('');
+    row.innerHTML = imgs + imgs; // duplicate for seamless loop
+    heroReel.appendChild(row);
+  });
+
+  // showreel button: open lightbox on a showreel-named video, restore grid context on close
+  const showreelVid = allVids.find(v => /showreel/i.test(v.title)) || PORTFOLIO_DATA['TVC'][0];
+  document.getElementById('showreelBtn').addEventListener('click', () => {
+    const prev = { list: currentList, idx: currentIdx };
+    currentList = [showreelVid];
+    open(0);
+    const onEsc = e => { if (e.key === 'Escape') setTimeout(restore, 60); };
+    const restore = () => {
+      currentList = prev.list; currentIdx = prev.idx;
+      document.removeEventListener('keydown', onEsc);
+      lightbox.removeEventListener('click', onBackdrop);
+    };
+    const onBackdrop = e => { if (e.target === lightbox) setTimeout(restore, 60); };
+    document.addEventListener('keydown', onEsc);
+    lightbox.addEventListener('click', onBackdrop);
   });
 
   render('TVC');

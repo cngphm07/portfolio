@@ -1,3 +1,6 @@
 node_modules/
 drive-data.json
 scan-log.txt
+"scan.js"  
+"cf-https.txt"  
+"poll.cmd"  
