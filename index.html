@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuong Pham Quoc — Filmmaker & Media Producer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --surface:#111111;
+    --line:#1f1f1f;
+    --text:#e8e8e8;
+    --muted:#6f6f6f;
+    --accent:#c9f24b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    font-weight:300;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--accent);color:#000}
+
+  /* ---------- header ---------- */
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:1.4rem 2.5rem;
+    background:linear-gradient(to bottom,rgba(10,10,10,.92),rgba(10,10,10,0));
+    backdrop-filter:blur(6px);
+  }
+  .logo{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:1.05rem;letter-spacing:.35em;text-transform:uppercase;
+    color:var(--text);text-decoration:none;
+  }
+  .logo em{font-style:normal;color:var(--accent)}
+  nav{display:flex;gap:2rem}
+  nav a{
+    color:var(--muted);text-decoration:none;font-size:.72rem;
+    letter-spacing:.18em;text-transform:uppercase;
+    transition:color .25s;
+  }
+  nav a:hover{color:var(--text)}
+
+  /* ---------- hero ---------- */
+  .hero{
+    min-height:100vh;
+    display:flex;flex-direction:column;justify-content:flex-end;
+    padding:0 2.5rem 4rem;
+    position:relative;
+  }
+  .hero h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:300;
+    font-size:clamp(2.6rem,8.5vw,7.5rem);
+    line-height:1.02;
+    letter-spacing:-.02em;
+    text-transform:uppercase;
+  }
+  .hero h1 span{
+    display:block;
+    font-style:italic;
+    font-family:'Inter',sans-serif;
+    font-weight:300;
+    color:var(--muted);
+    font-size:.32em;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    margin-top:1.6rem;
+  }
+  .hero-meta{
+    display:flex;gap:3.5rem;margin-top:3.5rem;
+    color:var(--muted);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;
+  }
+  .hero-meta b{display:block;color:var(--text);font-weight:400;margin-bottom:.45rem}
+  .hero-line{
+    position:absolute;top:50%;right:2.5rem;
+    writing-mode:vertical-rl;
+    color:var(--muted);font-size:.65rem;letter-spacing:.4em;text-transform:uppercase;
+  }
+
+  /* ---------- about ---------- */
+  .about{
+    padding:6rem 2.5rem;
+    border-top:1px solid var(--line);
+  }
+  .about-heading{
+    font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;
+    color:var(--accent);margin-bottom:2.2rem;
+  }
+  .about-lead{
+    max-width:680px;
+    font-size:clamp(1.05rem,2vw,1.4rem);
+    font-weight:300;line-height:1.7;color:var(--text);
+  }
+  .about-lead b{font-weight:400}
+  .brands{
+    margin-top:2.6rem;
+    color:var(--muted);
+    font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;
+    line-height:2.2;
+  }
+
+  /* ---------- filters ---------- */
+  .filters{
+    position:sticky;top:0;z-index:90;
+    display:flex;flex-wrap:wrap;gap:.55rem;
+    padding:1.15rem 2.5rem;
+    background:rgba(10,10,10,.94);
+    backdrop-filter:blur(8px);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  .filter-btn{
+    background:transparent;border:1px solid var(--line);
+    color:var(--muted);
+    padding:.5rem 1.05rem;
+    font-family:'Inter',sans-serif;font-size:.68rem;font-weight:300;
+    letter-spacing:.16em;text-transform:uppercase;
+    cursor:pointer;transition:all .25s;border-radius:99px;
+  }
+  .filter-btn:hover{color:var(--text);border-color:#3a3a3a}
+  .filter-btn.active{background:var(--accent);border-color:var(--accent);color:#000}
+  .filter-btn .count{opacity:.5;margin-left:.35em}
+
+  /* ---------- grid ---------- */
+  main{padding:2.5rem}
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+    gap:1.5rem;
+  }
+  .card{
+    position:relative;
+    background:var(--surface);
+    cursor:pointer;
+    overflow:hidden;
+    aspect-ratio:16/9;
+    border:1px solid var(--line);
+    transition:border-color .3s;
+  }
+  .card:hover{border-color:#3d3d3d}
+  .card img{
+    width:100%;height:100%;object-fit:cover;
+    filter:grayscale(1) brightness(.75);
+    transition:filter .5s,transform .6s cubic-bezier(.2,.6,.2,1);
+    display:block;
+  }
+  .card:hover img{filter:grayscale(.15) brightness(.95);transform:scale(1.03)}
+  .card .label{
+    position:absolute;left:0;right:0;bottom:0;
+    padding:2.2rem 1rem .85rem;
+    background:linear-gradient(to top,rgba(0,0,0,.85),transparent);
+    font-size:.72rem;letter-spacing:.08em;
+    color:var(--text);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .card .cat-tag{
+    position:absolute;top:.8rem;left:.8rem;
+    font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--accent);opacity:0;transition:opacity .3s;
+  }
+  .card:hover .cat-tag{opacity:1}
+  .card .play{
+    position:absolute;top:50%;left:50%;
+    width:44px;height:44px;margin:-22px 0 0 -22px;
+    border:1px solid rgba(255,255,255,.35);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    opacity:0;transition:opacity .3s,background .3s;
+  }
+  .card:hover .play{opacity:1;background:rgba(201,242,75,.9);border-color:transparent}
+  .card .play::after{
+    content:'';margin-left:3px;
+    border-left:9px solid #000;border-top:6px solid transparent;border-bottom:6px solid transparent;
+  }
+
+  /* ---------- lightbox ---------- */
+  .lightbox{
+    position:fixed;inset:0;z-index:200;
+    background:rgba(5,5,5,.97);
+    display:none;
+    flex-direction:column;align-items:center;justify-content:center;
+    padding:2rem;
+  }
+  .lightbox.open{display:flex}
+  .lightbox iframe{
+    width:min(1100px,92vw);
+    aspect-ratio:16/9;
+    border:1px solid var(--line);
+    background:#000;
+  }
+  .lightbox .lb-title{
+    margin-top:1.1rem;
+    font-size:.78rem;letter-spacing:.12em;color:var(--muted);
+    max-width:min(1100px,92vw);
+    text-align:center;
+  }
+  .lb-close{
+    position:absolute;top:1.4rem;right:1.8rem;
+    background:none;border:none;cursor:pointer;
+    color:var(--muted);font-size:1.6rem;line-height:1;
+    transition:color .25s;font-weight:300;
+  }
+  .lb-close:hover{color:var(--accent)}
+  .lb-nav{
+    position:absolute;top:50%;transform:translateY(-50%);
+    background:none;border:1px solid var(--line);border-radius:50%;
+    width:46px;height:46px;cursor:pointer;
+    color:var(--muted);font-size:1.1rem;
+    transition:all .25s;
+  }
+  .lb-nav:hover{color:#000;background:var(--accent);border-color:transparent}
+  .lb-prev{left:1.6rem}
+  .lb-next{right:1.6rem}
+
+  /* ---------- footer ---------- */
+  footer{
+    margin-top:5rem;
+    border-top:1px solid var(--line);
+    padding:3.5rem 2.5rem 2.5rem;
+    display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:2rem;
+  }
+  footer h2{
+    font-family:'Space Grotesk',sans-serif;font-weight:300;
+    font-size:clamp(1.6rem,4vw,3rem);letter-spacing:-.01em;text-transform:uppercase;line-height:1.15;
+  }
+  footer h2 a{color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent)}
+  .foot-meta{color:var(--muted);font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;text-align:right;line-height:2.1}
+  .foot-meta a{color:var(--muted);text-decoration:none}
+  .foot-meta a:hover{color:var(--text)}
+
+  .empty-note{color:var(--muted);font-size:.8rem;letter-spacing:.1em;padding:4rem 0;text-align:center;display:none}
+
+  @media(max-width:640px){
+    header,main,.filters,.hero,footer{padding-left:1.25rem;padding-right:1.25rem}
+    nav{display:none}
+    .hero-line{display:none}
+    .about{padding:4rem 1.25rem 3rem}
+    .lb-nav{display:none}
+    .foot-meta{text-align:left}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="#top">CNG<em>PHM</em></a>
+  <nav>
+    <a href="#work">Works</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<section class="hero" id="top">
+  <div class="hero-line">Reel — 2026</div>
+  <h1>
+    Filmmaker<br>&amp; Videographer
+    <span>Director of Photography — Based in Saigon, Vietnam</span>
+  </h1>
+  <div class="hero-meta">
+    <div><b>252</b>Selected Films</div>
+    <div><b>10+</b>Years of Craft</div>
+    <div><b>TVC · Doc · Arch</b>Fields</div>
+  </div>
+</section>
+
+<div class="filters" id="work"></div>
+
+<main>
+  <div class="grid" id="grid"></div>
+  <div class="empty-note" id="emptyNote">No films in this category.</div>
+</main>
+
+<section class="about" id="about">
+  <div class="about-inner">
+    <div class="about-heading">About me</div>
+    <p class="about-lead">
+      I'm <b>Cuong Pham Quoc</b> — a filmmaker &amp; media producer with nearly a decade
+      in video production, from pre-production planning to shooting and post.
+      Skilled in editing, color grading and special effects, working across documentary,
+      architecture, TV commercials and music videos with international brands.
+    </p>
+    <div class="brands">Google · Honda · Lazada · Shopee · PepsiCo · Unilever</div>
+  </div>
+</section>
+
+<footer id="contact">
+  <h2>Let's make<br>something <a href="mailto:cuongphamworks@gmail.com">together</a></h2>
+  <div class="foot-meta">
+    <a href="mailto:cuongphamworks@gmail.com">cuongphamworks@gmail.com</a><br>
+    <a href="tel:+84971807891">+84 97 180 7891</a> (Zalo) · <a href="tel:+84336167122">+84 336 167 122</a><br>
+    Cuong Pham Quoc — Ho Chi Minh City, Vietnam<br>
+    © 2026 — All rights reserved
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <button class="lb-close" id="lbClose" aria-label="Close">×</button>
+  <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous">‹</button>
+  <button class="lb-nav lb-next" id="lbNext" aria-label="Next">›</button>
+  <iframe id="lbFrame" src="" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+  <div class="lb-title" id="lbTitle"></div>
+</div>
+
+<script src="data.js"></script>
+<script>
+(function(){
+  const grid = document.getElementById('grid');
+  const filtersEl = document.querySelector('.filters');
+  const lightbox = document.getElementById('lightbox');
+  const lbFrame = document.getElementById('lbFrame');
+  const lbTitle = document.getElementById('lbTitle');
+  const emptyNote = document.getElementById('emptyNote');
+
+  const cats = Object.keys(PORTFOLIO_DATA);
+  let currentList = [];
+  let currentIdx = 0;
+
+  // build filter buttons
+  // build filter buttons: priority categories first, then the rest, All last
+  const priority = ['TVC', 'Corporate Film', 'Architecture Video', 'Documentary Film'];
+  const orderedCats = [...priority.filter(c => cats.includes(c)), ...cats.filter(c => !priority.includes(c))];
+  orderedCats.forEach(cat => {
+    const b = document.createElement('button');
+    b.className = 'filter-btn' + (cat === 'TVC' ? ' active' : '');
+    b.dataset.cat = cat;
+    b.innerHTML = cat + '<span class="count">' + PORTFOLIO_DATA[cat].length + '</span>';
+    filtersEl.appendChild(b);
+  });
+  const allBtn = document.createElement('button');
+  allBtn.className = 'filter-btn';
+  allBtn.dataset.cat = 'all';
+  allBtn.innerHTML = 'All<span class="count">' + cats.reduce((s, c) => s + PORTFOLIO_DATA[c].length, 0) + '</span>';
+  filtersEl.appendChild(allBtn);
+
+  filtersEl.addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    filtersEl.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(btn.dataset.cat);
+  });
+
+  function render(cat){
+    grid.innerHTML = '';
+    currentList = cat === 'all'
+      ? orderedCats.flatMap(c => PORTFOLIO_DATA[c].map(v => ({...v, cat: c})))
+      : PORTFOLIO_DATA[cat].map(v => ({...v, cat}));
+    emptyNote.style.display = currentList.length ? 'none' : 'block';
+
+    currentList.forEach((v, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML =
+        (v.thumb ? '<img loading="lazy" src="' + v.thumb + '" alt="">' : '') +
+        '<span class="cat-tag">' + v.cat + '</span>' +
+        '<span class="play"></span>' +
+        '<div class="label">' + v.title + '</div>';
+      card.addEventListener('click', () => open(i));
+      grid.appendChild(card);
+    });
+    if (initial) initial = false;
+    else document.getElementById('work').scrollIntoView({behavior:'smooth'});
+  }
+  let initial = true;
+
+  function open(i){
+    currentIdx = i;
+    const v = currentList[i];
+    lbFrame.src = 'https://drive.google.com/file/d/' + v.id + '/preview';
+    lbTitle.textContent = v.title + ' — ' + v.cat;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close(){
+    lightbox.classList.remove('open');
+    lbFrame.src = '';
+    document.body.style.overflow = '';
+  }
+  function step(d){
+    open((currentIdx + d + currentList.length) % currentList.length);
+  }
+
+  document.getElementById('lbClose').addEventListener('click', close);
+  document.getElementById('lbPrev').addEventListener('click', () => step(-1));
+  document.getElementById('lbNext').addEventListener('click', () => step(1));
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) close(); });
+  document.addEventListener('keydown', e => {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowLeft') step(-1);
+    if (e.key === 'ArrowRight') step(1);
+  });
+
+  render('TVC');
+})();
+</script>
+</body>
+</html>
