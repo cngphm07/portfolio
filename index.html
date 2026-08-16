@@ -179,6 +179,24 @@
     font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;
     line-height:2.2;
   }
+  .about-contact{
+    margin-top:2.4rem;
+    display:flex;flex-wrap:wrap;align-items:center;gap:1.1rem;
+    font-size:.82rem;letter-spacing:.06em;
+  }
+  .about-contact a{
+    color:var(--text);text-decoration:none;
+    border-bottom:1px solid var(--line);
+    padding-bottom:.15rem;
+    transition:border-color .25s,color .25s;
+  }
+  .about-contact a:hover{color:var(--accent);border-color:var(--accent)}
+  .about-contact .sep{color:var(--muted)}
+  .about-contact .zalo{
+    font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+    color:#000;background:var(--accent);
+    padding:.25rem .6rem;border-radius:99px;
+  }
 
   /* ---------- filters ---------- */
   .filters{
@@ -356,25 +374,30 @@
   <div class="marquee" aria-hidden="true"><div class="marquee-track" id="marqueeTrack"></div></div>
 </section>
 
+<section class="about" id="about">
+  <div class="about-heading">About me</div>
+  <p class="about-lead">
+    I'm <b>Cuong Pham Quoc</b> — a filmmaker &amp; media producer with nearly a decade
+    in video production, from pre-production planning to shooting and post.
+    Skilled in editing, color grading and special effects, working across documentary,
+    architecture, TV commercials and music videos with international brands.
+  </p>
+  <div class="brands">Google · Honda · Lazada · Shopee · PepsiCo · Unilever</div>
+  <div class="about-contact">
+    <a href="mailto:cuongphamworks@gmail.com">cuongphamworks@gmail.com</a>
+    <a href="tel:+84971807891">+84 97 180 7891</a>
+    <span class="sep">·</span>
+    <a href="tel:+84336167122">+84 336 167 122</a>
+    <span class="zalo">Zalo</span>
+  </div>
+</section>
+
 <div class="filters" id="work"></div>
 
 <main>
   <div class="grid" id="grid"></div>
   <div class="empty-note" id="emptyNote">No films in this category.</div>
 </main>
-
-<section class="about" id="about">
-  <div class="about-inner">
-    <div class="about-heading">About me</div>
-    <p class="about-lead">
-      I'm <b>Cuong Pham Quoc</b> — a filmmaker &amp; media producer with nearly a decade
-      in video production, from pre-production planning to shooting and post.
-      Skilled in editing, color grading and special effects, working across documentary,
-      architecture, TV commercials and music videos with international brands.
-    </p>
-    <div class="brands">Google · Honda · Lazada · Shopee · PepsiCo · Unilever</div>
-  </div>
-</section>
 
 <footer id="contact">
   <h2>Let's make<br>something <a href="mailto:cuongphamworks@gmail.com">together</a></h2>
