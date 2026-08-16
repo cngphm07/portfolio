@@ -52,38 +52,53 @@
   .hero{
     min-height:100vh;
     display:flex;flex-direction:column;justify-content:flex-end;
-    padding:0 2.5rem 4rem;
+    padding:0 2.5rem 6.5rem;
     position:relative;
     overflow:hidden;
     isolation:isolate;
   }
   .hero-reel{
-    position:absolute;inset:-15% -5%;
+    position:absolute;inset:0;
     z-index:-2;
-    display:flex;flex-direction:column;gap:1.5rem;
-    transform:rotate(-6deg) scale(1.15);
-    opacity:.32;
     pointer-events:none;
+    overflow:hidden;
   }
-  .reel-row{
-    display:flex;gap:1.5rem;
-    width:max-content;
-    animation:reelScroll 60s linear infinite;
+  .hero-reel .slide{
+    position:absolute;inset:0;
+    background-size:cover;background-position:center;
+    filter:grayscale(1) brightness(.5) contrast(1.1);
+    opacity:0;
+    transition:opacity 1.6s ease;
+    transform:scale(1.08);
   }
-  .reel-row.reverse{animation-direction:reverse}
-  .reel-row img{
-    width:240px;aspect-ratio:16/9;object-fit:cover;
-    filter:grayscale(1) brightness(.85);
-    border:1px solid #000;
-  }
-  @keyframes reelScroll{to{transform:translateX(-50%)}}
+  .hero-reel .slide.on{opacity:1;animation:kenburns 7s ease-out forwards}
+  @keyframes kenburns{from{transform:scale(1.02)}to{transform:scale(1.14)}}
   .hero::after{
     content:'';
     position:absolute;inset:0;z-index:-1;
     background:
-      radial-gradient(ellipse at 30% 20%,transparent 0%,var(--bg) 75%),
-      linear-gradient(to top,var(--bg) 12%,rgba(10,10,10,.55) 45%,rgba(10,10,10,.75));
+      radial-gradient(ellipse at 30% 20%,transparent 0%,var(--bg) 78%),
+      linear-gradient(to top,var(--bg) 8%,rgba(10,10,10,.5) 40%,rgba(10,10,10,.7));
   }
+  .marquee{
+    position:absolute;left:0;right:0;bottom:0;
+    z-index:1;
+    overflow:hidden;
+    border-top:1px solid var(--line);
+    background:rgba(10,10,10,.4);
+    backdrop-filter:blur(4px);
+    padding:.65rem 0;
+    white-space:nowrap;
+  }
+  .marquee-track{
+    display:inline-flex;gap:3rem;
+    animation:marqueeScroll 28s linear infinite;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:.85rem;letter-spacing:.35em;text-transform:uppercase;
+    color:var(--muted);
+  }
+  .marquee-track em{font-style:normal;color:var(--accent)}
+  @keyframes marqueeScroll{to{transform:translateX(-50%)}}
   .grain{
     position:fixed;inset:-100%;z-index:999;pointer-events:none;opacity:.05;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -308,8 +323,7 @@
     .about{padding:4rem 1.25rem 3rem}
     .lb-nav{display:none}
     .foot-meta{text-align:left}
-    .hero-reel{inset:-10% -8%;opacity:.22}
-    .reel-row img{width:180px}
+    .hero-reel .slide{filter:grayscale(1) brightness(.45)}
   }
 </style>
 </head>
@@ -338,6 +352,7 @@
     <div><b>10+</b>Years of Craft</div>
     <div><b>TVC · Doc · Arch</b>Fields</div>
   </div>
+  <div class="marquee" aria-hidden="true"><div class="marquee-track" id="marqueeTrack"></div></div>
 </section>
 
 <div class="filters" id="work"></div>
@@ -468,18 +483,32 @@
     if (e.key === 'ArrowRight') step(1);
   });
 
-  // hero background: two drifting rows of video thumbnails
+  // hero background: crossfading Ken Burns slides from video thumbnails
   const heroReel = document.getElementById('heroReel');
   const allVids = cats.flatMap(c => PORTFOLIO_DATA[c].map(v => ({...v, cat: c})));
   const withThumbs = allVids.filter(v => v.thumb);
-  const pick = n => Array.from({length: n}, (_, i) => withThumbs[(i * 7 + 3) % withThumbs.length]);
-  ['', 'reverse'].forEach((cls, r) => {
-    const row = document.createElement('div');
-    row.className = 'reel-row ' + cls;
-    const imgs = pick(8).map(v => '<img src="' + v.thumb + '" alt="">').join('');
-    row.innerHTML = imgs + imgs; // duplicate for seamless loop
-    heroReel.appendChild(row);
+  const slidePicks = Array.from({length: 6}, (_, i) => withThumbs[(i * 11 + 5) % withThumbs.length]);
+  const slides = slidePicks.map(v => {
+    const el = document.createElement('div');
+    el.className = 'slide';
+    el.style.backgroundImage = 'url(' + v.thumb.replace(/=s190$/, '=s1280') + ')';
+    heroReel.appendChild(el);
+    return el;
   });
+  let slideIdx = 0;
+  slides[0].classList.add('on');
+  setInterval(() => {
+    slides[slideIdx].classList.remove('on');
+    slideIdx = (slideIdx + 1) % slides.length;
+    const el = slides[slideIdx];
+    el.classList.remove('on'); void el.offsetWidth; // restart kenburns animation
+    el.classList.add('on');
+  }, 5000);
+
+  // marquee strip
+  const words = ['Showreel 2026', 'TVC', 'Documentary', 'Architecture', 'Corporate', 'Music Video', 'Wedding', 'Podcast'];
+  const seq = words.map(w => '<span>' + w + '</span><em>✦</em>').join('');
+  document.getElementById('marqueeTrack').innerHTML = seq + seq;
 
   // showreel button: open lightbox on a showreel-named video, restore grid context on close
   const showreelVid = allVids.find(v => /showreel/i.test(v.title)) || PORTFOLIO_DATA['TVC'][0];
