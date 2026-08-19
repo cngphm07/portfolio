@@ -66,7 +66,12 @@ async function scanAll() {
   }
   const data = {};
   for (const [cat, items] of Object.entries(out)) {
-    data[cat] = items.map(i => ({ id: i.id, title: cleanName(i.name), thumb: i.thumb }));
+    data[cat] = items.map(i => ({
+      id: i.id,
+      title: cleanName(i.name),
+      // stable per-file thumbnail; the lh3 URLs from the folder view expire
+      thumb: `https://drive.google.com/thumbnail?id=${i.id}&sz=w400`,
+    }));
   }
   return data;
 }

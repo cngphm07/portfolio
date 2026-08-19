@@ -516,7 +516,7 @@
   const slides = slidePicks.map(v => {
     const el = document.createElement('div');
     el.className = 'slide';
-    el.style.backgroundImage = 'url(' + v.thumb.replace(/=s190$/, '=s1280') + ')';
+    el.style.backgroundImage = 'url(' + v.thumb.replace('sz=w400', 'sz=w1280') + ')';
     heroReel.appendChild(el);
     return el;
   });

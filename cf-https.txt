@@ -1,1 +1,0 @@
-{"cname":"oddpig.io.vn","build_type":"workflow","https_enforced":true}
