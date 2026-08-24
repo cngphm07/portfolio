@@ -222,6 +222,13 @@
   .filter-btn:hover{color:var(--text);border-color:#3a3a3a}
   .filter-btn.active{background:var(--accent);border-color:var(--accent);color:#000}
   .filter-btn .count{opacity:.5;margin-left:.35em}
+  .sub-filters{
+    position:static;
+    border-top:none;
+    padding-top:.6rem;padding-bottom:1rem;
+    background:rgba(10,10,10,.97);
+  }
+  .sub-filters .filter-btn{border-color:transparent;background:#161616;font-size:.62rem}
 
   /* ---------- grid ---------- */
   main{padding:2.5rem}
@@ -394,6 +401,7 @@
 </section>
 
 <div class="filters" id="work"></div>
+<div class="filters sub-filters" id="subFilters" style="display:none"></div>
 
 <main>
   <div class="grid" id="grid"></div>
@@ -432,21 +440,30 @@
   let currentList = [];
   let currentIdx = 0;
 
-  // build filter buttons
+  // helpers for flat vs nested (subfolder) categories
+  const isNested = cat => !Array.isArray(PORTFOLIO_DATA[cat]);
+  const countOf = cat => isNested(cat)
+    ? Object.values(PORTFOLIO_DATA[cat]).reduce((s, a) => s + a.length, 0)
+    : PORTFOLIO_DATA[cat].length;
+  // flatten a category into [{...video, cat}] — nested cats label cards by subfolder name
+  const flattenCat = cat => isNested(cat)
+    ? Object.entries(PORTFOLIO_DATA[cat]).flatMap(([sub, vids]) => vids.map(v => ({...v, cat: sub})))
+    : PORTFOLIO_DATA[cat].map(v => ({...v, cat}));
+
   // build filter buttons: priority categories first, then the rest, All last
-  const priority = ['TVC', 'Corporate Film', 'Architecture Video', 'Documentary Film'];
+  const priority = ['TVC', 'Corporate Film', 'Architecture Video', 'Architecture Videography', 'Documentary Film'];
   const orderedCats = [...priority.filter(c => cats.includes(c)), ...cats.filter(c => !priority.includes(c))];
   orderedCats.forEach(cat => {
     const b = document.createElement('button');
     b.className = 'filter-btn' + (cat === 'TVC' ? ' active' : '');
     b.dataset.cat = cat;
-    b.innerHTML = cat + '<span class="count">' + PORTFOLIO_DATA[cat].length + '</span>';
+    b.innerHTML = cat + '<span class="count">' + countOf(cat) + '</span>';
     filtersEl.appendChild(b);
   });
   const allBtn = document.createElement('button');
   allBtn.className = 'filter-btn';
   allBtn.dataset.cat = 'all';
-  allBtn.innerHTML = 'All<span class="count">' + cats.reduce((s, c) => s + PORTFOLIO_DATA[c].length, 0) + '</span>';
+  allBtn.innerHTML = 'All<span class="count">' + orderedCats.reduce((s, c) => s + countOf(c), 0) + '</span>';
   filtersEl.appendChild(allBtn);
 
   filtersEl.addEventListener('click', e => {
@@ -457,13 +474,49 @@
     render(btn.dataset.cat);
   });
 
+  const subFiltersEl = document.getElementById('subFilters');
+  subFiltersEl.addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    subFiltersEl.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderSub(btn.closest('.filters').dataset.cat, btn.dataset.sub);
+  });
+
+  function buildSubFilters(cat) {
+    subFiltersEl.innerHTML = '';
+    subFiltersEl.dataset.cat = cat;
+    if (cat === 'all' || !isNested(cat)) { subFiltersEl.style.display = 'none'; return; }
+    subFiltersEl.style.display = 'flex';
+    [['all', 'All', countOf(cat)], ...Object.entries(PORTFOLIO_DATA[cat]).map(([sub, vids]) => [sub, sub, vids.length])]
+      .forEach(([key, label, n], i) => {
+        const b = document.createElement('button');
+        b.className = 'filter-btn' + (i === 0 ? ' active' : '');
+        b.dataset.sub = key;
+        b.innerHTML = label + '<span class="count">' + n + '</span>';
+        subFiltersEl.appendChild(b);
+      });
+  }
+
+  function renderSub(cat, sub) {
+    grid.innerHTML = '';
+    currentList = sub === 'all'
+      ? flattenCat(cat)
+      : PORTFOLIO_DATA[cat][sub].map(v => ({...v, cat: sub}));
+    fillGrid();
+  }
+
   function render(cat){
+    buildSubFilters(cat);
     grid.innerHTML = '';
     currentList = cat === 'all'
-      ? orderedCats.flatMap(c => PORTFOLIO_DATA[c].map(v => ({...v, cat: c})))
-      : PORTFOLIO_DATA[cat].map(v => ({...v, cat}));
-    emptyNote.style.display = currentList.length ? 'none' : 'block';
+      ? orderedCats.flatMap(flattenCat)
+      : flattenCat(cat);
+    fillGrid();
+  }
 
+  function fillGrid(){
+    emptyNote.style.display = currentList.length ? 'none' : 'block';
     currentList.forEach((v, i) => {
       const card = document.createElement('div');
       card.className = 'card';
@@ -510,7 +563,7 @@
 
   // hero background: crossfading Ken Burns slides from video thumbnails
   const heroReel = document.getElementById('heroReel');
-  const allVids = cats.flatMap(c => PORTFOLIO_DATA[c].map(v => ({...v, cat: c})));
+  const allVids = orderedCats.flatMap(flattenCat);
   const withThumbs = allVids.filter(v => v.thumb);
   const slidePicks = Array.from({length: 6}, (_, i) => withThumbs[(i * 11 + 5) % withThumbs.length]);
   const slides = slidePicks.map(v => {

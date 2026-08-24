@@ -15,6 +15,9 @@ const FOLDERS = {
 };
 
 const SAIGONTOURIST_ROOT = "1SyHI868_X9sloaWt1uO8peNQINB1RCam";
+const ARCH_VIDEOGRAPHY_ROOT = "1b4Nyhcg_UVP6jDQsXLASxWJoGzo51d7P";
+// subfolder that duplicates the standalone "Architecture Video" category
+const ARCH_VIDEOGRAPHY_SKIP = ["Architecture Video"];
 
 async function fetchEntries(folderId) {
   const res = await fetch("https://drive.google.com/embeddedfolderview?id=" + folderId);
@@ -64,16 +67,43 @@ async function scanAll() {
   } catch (e) {
     console.error("[scan] Saigontourist: " + e.message);
   }
+
+  // Architecture Videography: nested category — one entry per subfolder
+  try {
+    const subs = {};
+    for (const e of await fetchEntries(ARCH_VIDEOGRAPHY_ROOT)) {
+      if (!e.isFolder || ARCH_VIDEOGRAPHY_SKIP.includes(e.name)) continue;
+      const vids = await scanFolderRecursive(e.id);
+      if (vids.length) subs[e.name] = vids;
+      console.log(`[scan] Arch Videography / ${e.name}: ${vids.length}`);
+    }
+    out["Architecture Videography"] = subs;
+  } catch (e) {
+    console.error("[scan] Arch Videography: " + e.message);
+  }
+
   const data = {};
   for (const [cat, items] of Object.entries(out)) {
-    data[cat] = items.map(i => ({
-      id: i.id,
-      title: cleanName(i.name),
-      // stable per-file thumbnail; the lh3 URLs from the folder view expire
-      thumb: `https://drive.google.com/thumbnail?id=${i.id}&sz=w400`,
-    }));
+    if (Array.isArray(items)) {
+      data[cat] = items.map(toVideo);
+    } else {
+      // nested category: { subName: [entries] }
+      data[cat] = {};
+      for (const [sub, vids] of Object.entries(items)) {
+        data[cat][sub] = vids.map(toVideo);
+      }
+    }
   }
   return data;
+}
+
+function toVideo(i) {
+  return {
+    id: i.id,
+    title: cleanName(i.name),
+    // stable per-file thumbnail; the lh3 URLs from the folder view expire
+    thumb: `https://drive.google.com/thumbnail?id=${i.id}&sz=w400`,
+  };
 }
 
 module.exports = { scanAll, cleanName };
