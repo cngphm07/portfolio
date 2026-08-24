@@ -451,7 +451,7 @@
     : PORTFOLIO_DATA[cat].map(v => ({...v, cat}));
 
   // build filter buttons: priority categories first, then the rest, All last
-  const priority = ['TVC', 'Corporate Film', 'Architecture Video', 'Architecture Videography', 'Documentary Film'];
+  const priority = ['TVC', 'Corporate Film', 'Architecture Film', 'Architecture', 'Documentary Film'];
   const orderedCats = [...priority.filter(c => cats.includes(c)), ...cats.filter(c => !priority.includes(c))];
   orderedCats.forEach(cat => {
     const b = document.createElement('button');

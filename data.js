@@ -76,7 +76,7 @@ const PORTFOLIO_DATA = {
       "thumb": "https://drive.google.com/thumbnail?id=1m-kVXrkdT6XLbJ8sl1RNbvKN45GMC3aN&sz=w400"
     }
   ],
-  "Architecture Video": [
+  "Architecture Film": [
     {
       "id": "1wQRclN9VnN7qJD4Pt7B9ylI8jqU6-tyo",
       "title": "717 VillaBinhChanh v005",
@@ -1328,7 +1328,7 @@ const PORTFOLIO_DATA = {
       "thumb": "https://drive.google.com/thumbnail?id=1z4PLxugLlh3fGdsKNLieGhfHCL6QMkdM&sz=w400"
     }
   ],
-  "Architecture Videography": {
+  "Architecture": {
     "3D Render": [
       {
         "id": "1WsWBF2QU2WVVh_eq0VzfYZnxLI6yoUi9",

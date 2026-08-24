@@ -1,7 +1,7 @@
 // Shared Drive scanning logic used by both build-data.js and server.js
 const FOLDERS = {
   "Animation Film": "1yEraPbAtP8aQaekiq6cF6Fjxq7log1Sd",
-  "Architecture Video": "1E89Ifl6K3kjlqhK2t_E7cQwHShOJ6XKW",
+  "Architecture Film": "1E89Ifl6K3kjlqhK2t_E7cQwHShOJ6XKW",
   "Corporate Film": "1WU45wvJYdSNDIepJq-7hWXY6hLC-Zj1F",
   "Documentary Film": "1nLKpfJwpNn7niHKqJpdw1pYr9MxBuNvm",
   "Event": "1G_2ufnr2DcDTnLLtA82dP0q9eTt4qdTK",
@@ -77,7 +77,7 @@ async function scanAll() {
       if (vids.length) subs[e.name] = vids;
       console.log(`[scan] Arch Videography / ${e.name}: ${vids.length}`);
     }
-    out["Architecture Videography"] = subs;
+    out["Architecture"] = subs;
   } catch (e) {
     console.error("[scan] Arch Videography: " + e.message);
   }
