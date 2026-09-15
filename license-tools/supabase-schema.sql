@@ -21,6 +21,9 @@ create index if not exists accounts_user_id_idx on public.accounts(user_id);
 
 alter table public.accounts enable row level security;
 
+-- user_id tự lấy từ phiên đăng nhập khi INSERT (RLS with check auth.uid() = user_id)
+alter table public.accounts alter column user_id set default auth.uid();
+
 -- Quyền truy cập cho role authenticated (RLS vẫn chặn: mỗi user chỉ thấy data của mình)
 grant usage on schema public to authenticated;
 grant select, insert, update, delete on table public.accounts to authenticated;

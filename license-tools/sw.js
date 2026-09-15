@@ -1,7 +1,7 @@
 // Service worker — cache shell để app mở nhanh và cài được lên màn hình chính.
 // API Supabase luôn đi thẳng mạng, không cache.
 'use strict';
-const VERSION = 'lt-v6';
+const VERSION = 'lt-v7';
 const CORE = [
   './',
   './index.html',

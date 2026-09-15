@@ -71,6 +71,7 @@
     createdAt: r.created_at || ''
   });
   const toRow = a => ({
+    user_id: user ? user.id : null,
     username: a.username,
     password: a.password,
     service: a.service || '',
@@ -512,6 +513,7 @@
       if (seen.has(k)) { skipped++; continue; }
       seen.add(k); rows.push(r);
     }
+    rows.forEach(r => { r.user_id = user.id; });
     if (!rows.length) { toast('Không có tài khoản mới nào để nhập' + (skipped ? ' (bỏ qua ' + skipped + ' mục trùng/không hợp lệ)' : '')); return; }
     const { data: inserted, error } = await sb.from('accounts').insert(rows).select();
     if (error) { toast('⚠️ ' + viErr(error)); return; }
