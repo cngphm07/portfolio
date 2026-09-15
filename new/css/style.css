@@ -158,13 +158,22 @@ header nav a:hover::after{transform:scaleX(1);transform-origin:left}
 }
 .hero-content{position:relative;z-index:3;pointer-events:none}
 .hero-kicker{
-  font-size:.62rem;color:var(--g1);letter-spacing:.34em;margin-bottom:1.4rem;
+  font-size:.62rem;color:var(--g1);letter-spacing:.34em;margin-bottom:1rem;
 }
-.hero-sub{
-  font-size:clamp(1.9rem,7.6vw,7rem);
+.hero-name{
+  font-size:clamp(1.7rem,5.2vw,4.6rem);
   color:var(--ink);
+  white-space:nowrap;
 }
-.hero-sub span{font-weight:200;font-stretch:80%}
+/* particle lockup lives on the canvas; DOM copy only for no-WebGL fallback */
+.hero-words{display:none}
+body.no-webgl .hero-words{
+  display:block;
+  font-size:clamp(1.8rem,5.6vw,5rem);
+  line-height:1.04;
+  margin-bottom:1.6rem;
+}
+body.no-webgl .hero-words span{display:block}
 .hero-loc{
   font-size:.64rem;color:var(--g2);letter-spacing:.3em;margin-top:1.3rem;
 }
@@ -186,11 +195,6 @@ header nav a:hover::after{transform:scaleX(1);transform-origin:left}
   background:var(--accent);animation:hsDrop 1.8s var(--ease) infinite;
 }
 @keyframes hsDrop{0%{top:-100%}55%{top:0}100%{top:100%}}
-
-/* fallback hero headline when WebGL is unavailable */
-.sub-fill{display:none}
-body.no-webgl .sub-fill{display:inline}
-body.no-webgl .hero-sub{font-size:clamp(2.4rem,7.6vw,7rem)}
 
 /* ============ marquee ============ */
 .marquee{
@@ -425,6 +429,7 @@ footer{
   .tc{display:none}
   .hero-side,.hero-side-r,.hero-scroll{display:none}
   .hero{padding-bottom:4.5rem}
+  .hero-name{white-space:normal}
   .hero-meta{flex-wrap:wrap;gap:1.4rem 2rem}
   .about{padding:4.5rem 1.25rem 3.5rem}
   main{padding:0 1.25rem 4rem}

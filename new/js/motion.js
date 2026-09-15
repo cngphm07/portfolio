@@ -250,7 +250,7 @@ function setupClock(){
 /* ---------- reveal after preloader ---------- */
 function revealIn(){
   if(!hasGsap || reduced){
-    document.querySelectorAll('#siteHeader, #heroKicker, #heroSub, #heroLoc, #heroMeta, #heroScroll, .hero-frame, .marquee')
+    document.querySelectorAll('#siteHeader, #heroKicker, #heroName, #heroLoc, #heroMeta, #heroScroll, .hero-frame, .marquee')
       .forEach(function(el){ el.style.opacity = '1'; });
     runCounters(document.getElementById('heroMeta'));
     return;
@@ -258,7 +258,7 @@ function revealIn(){
   var tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
   tl.fromTo('#siteHeader', { y: -24, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, 0)
     .fromTo('#heroKicker', { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .9 }, .12)
-    .fromTo('#heroSub', { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1 }, .24)
+    .fromTo('#heroName', { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1 }, .24)
     .fromTo('#heroLoc', { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .9 }, .42)
     .fromTo('#heroMeta', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, .54)
     .fromTo('#heroScroll', { opacity: 0 }, { opacity: 1, duration: 1.2 }, .9)

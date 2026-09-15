@@ -93,7 +93,7 @@ if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){ fallback(); return; }
 gl.useProgram(prog);
 
 var isMobile = window.matchMedia('(max-width: 760px)').matches || !window.matchMedia('(pointer: fine)').matches;
-var COUNT = isMobile ? 30000 : 70000;
+var COUNT = isMobile ? 34000 : 76000;
 var dpr = Math.min(window.devicePixelRatio || 1, 1.75);
 
 /* ---------- buffers ---------- */
@@ -133,7 +133,7 @@ var scroll = 0;
 var mouse = { x: 0, y: -2, force: 0, last: -1e9 };
 var inView = true, running = true;
 var start = performance.now();
-var SW = 1400, SH = 360;    // sample canvas size
+var SW = 1400, SH = 440;    // sample canvas size
 
 function resize(){
   var rect = canvas.getBoundingClientRect();
@@ -147,6 +147,7 @@ function resize(){
 }
 
 function sampleText(){
+  var SW = 1400, SH = 440;
   var c = document.createElement('canvas');
   c.width = SW; c.height = SH;
   var x = c.getContext('2d', { willReadFrequently: true });
@@ -154,15 +155,17 @@ function sampleText(){
   x.fillStyle = '#fff';
   x.textAlign = 'center';
   x.textBaseline = 'middle';
-  var fontSize = 230;
-  x.font = '900 ' + fontSize + 'px Archivo, sans-serif';
   if('fontStretch' in x){ try{ x.fontStretch = 'expanded'; }catch(e){} }
-  var w = x.measureText('FILMMAKER').width;
-  if(w > SW - 40){
-    fontSize = Math.floor(fontSize * (SW - 40) / w);
-    x.font = '900 ' + fontSize + 'px Archivo, sans-serif';
-  }
-  x.fillText('FILMMAKER', SW / 2, SH / 2 + fontSize * 0.03);
+  // both lines fitted to the same width -> poster lockup
+  var lines = [['FILMMAKER', 150], ['& VIDEOGRAPHER', 330]];
+  lines.forEach(function(ln){
+    var fs = 300;
+    x.font = '900 ' + fs + 'px Archivo, sans-serif';
+    var w = x.measureText(ln[0]).width;
+    fs = Math.floor(fs * (SW - 40) / w);
+    x.font = '900 ' + fs + 'px Archivo, sans-serif';
+    x.fillText(ln[0], SW / 2, ln[1]);
+  });
   var img;
   try{ img = x.getImageData(0, 0, SW, SH).data; }catch(e){ return null; }
   var step = 2, pts = [];
@@ -179,10 +182,10 @@ function sampleText(){
 function fillTargets(){
   if(!points || !points.length) return;
   var maxW = Math.min(W * 0.92, 1500);
-  var maxH = H * 0.46;
+  var maxH = H * 0.41;
   var s = Math.min(maxW / SW, maxH / SH);
   var ox = (W - SW * s) / 2;
-  var oy = (H - SH * s) / 2 - H * 0.09;
+  var oy = H * 0.05; // lockup anchored to the upper area, clear of the name block below
   var n = points.length / 2;
   for(var i = 0; i < COUNT; i++){
     var k = (i % n) * 2;
