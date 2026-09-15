@@ -35,6 +35,7 @@ var VERT = [
   'uniform float uForce;',
   'uniform float uDPR;',
   'varying float vAlpha;',
+  'varying float vTint;',
   'float hash(float n){ return fract(sin(n)*43758.5453123); }',
   'void main(){',
   '  vec2 scatter = vec2(hash(aSeed.x*91.7), hash(aSeed.y*45.3)) * 2.0 - 1.0;',
@@ -57,16 +58,19 @@ var VERT = [
   '  gl_PointSize = mix(1.2, 2.7, uMorph) * depth * uDPR * (1.0 + 0.7*push);',
   '  float tw = 0.86 + 0.14*sin(t*(1.5 + hash(aSeed.x*3.3)*2.0) + aSeed.y*40.0);',
   '  vAlpha = mix(0.38, 1.0, hash(aSeed.z*5.31)) * mix(0.55, 1.0, depth) * tw * (0.35 + 0.65*uMorph);',
+  '  vTint = step(0.93, hash(aSeed.w*3.7)) * 0.9;',
   '}'
 ].join('\n');
 
 var FRAG = [
   'precision mediump float;',
   'varying float vAlpha;',
+  'varying float vTint;',
   'void main(){',
   '  float d = length(gl_PointCoord - vec2(0.5));',
   '  float a = smoothstep(0.5, 0.06, d);',
-  '  gl_FragColor = vec4(vec3(1.0), a * vAlpha);',
+  '  vec3 col = mix(vec3(1.0), vec3(0.788, 0.949, 0.294), vTint);',
+  '  gl_FragColor = vec4(col, a * vAlpha);',
   '}'
 ].join('\n');
 
