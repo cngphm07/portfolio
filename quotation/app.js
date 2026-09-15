@@ -67,6 +67,42 @@ async function copyText(text) {
   toast('Đã copy vào clipboard');
 }
 
+/* ================= chi phí theo dòng (line items) ================= */
+const CATS = [
+  ['nhanSu', 'Nhân sự'],
+  ['thietBi', 'Thiết bị'],
+  ['logistic', 'Logistic'],
+  ['post', 'Post production'],
+];
+// sinh các dòng chi phí mặc định từ thông số job + đơn giá mặc định
+function generateCosts(spec, rates) {
+  const it = (label, qty, price) => ({ id: uid(), label, qty: Math.max(0, num(qty)), price: Math.max(0, num(price)) });
+  const items = {
+    nhanSu: [it('Nhân sự quay (ekip)', spec.days, rates.personnel)],
+    thietBi: [it(`Camera (${spec.cameras} máy)`, spec.days, spec.cameras * rates.camera)],
+    logistic: [it('Di chuyển', spec.days, rates.travel)],
+    post: [
+      it(`Dựng video dài (${spec.minutes} phút)`, 1, spec.minutes * rates.minute),
+      it('Dựng short', spec.shorts, rates.short),
+    ],
+  };
+  if (spec.sound) items.thietBi.push(it('Âm thanh', spec.days, rates.sound));
+  if (spec.drone) items.thietBi.push(it('Flycam', spec.days, rates.drone));
+  return items;
+}
+// đảm bảo calc.costs luôn đúng shape (kể cả dữ liệu cũ từ localStorage/import)
+function ensureCalcCosts(st) {
+  const c = st.calc;
+  if (!c.costs || !c.costs.nhanSu) c.costs = generateCosts(c, st.settings.rates);
+  CATS.forEach(([cat]) => {
+    if (!Array.isArray(c.costs[cat])) c.costs[cat] = [];
+    c.costs[cat] = c.costs[cat].filter(it => it && typeof it === 'object').map(it => ({
+      id: it.id || uid(), label: String(it.label || ''), qty: num(it.qty), price: num(it.price),
+    }));
+  });
+}
+const DEFAULT_RATE_FOR_CAT = { nhanSu: 'personnel', thietBi: 'camera', logistic: 'travel', post: 'minute' };
+
 /* ================= state ================= */
 const LS_KEY = 'oddpig_baogia_v1';
 
@@ -120,6 +156,7 @@ function migrate(st) {
   st.calc = Object.assign({}, d.calc, st.calc || {});
   st.ui = Object.assign({}, d.ui, st.ui || {});
   if (!Array.isArray(st.projects)) st.projects = [];
+  ensureCalcCosts(st);
   return st;
 }
 
@@ -128,8 +165,9 @@ function load() {
     const raw = localStorage.getItem(LS_KEY);
     if (raw) S = JSON.parse(raw);
   } catch (e) { S = null; }
-  if (!S || typeof S !== 'object' || !S.settings) { S = DEFAULT_STATE(); seedSample(); return; }
+  if (!S || typeof S !== 'object' || !S.settings) { S = DEFAULT_STATE(); ensureCalcCosts(S); seedSample(); return; }
   migrate(S);
+  ensureCalcCosts(S);
 }
 
 function save() {
@@ -192,17 +230,14 @@ function seedSample() {
 
 /* ================= calculator ================= */
 function computeQuote() {
-  const c = S.calc, r = S.settings.rates;
-  const equipPerDay = c.cameras * r.camera + (c.sound ? r.sound : 0) + (c.drone ? r.drone : 0);
-  const personnel = c.days * r.personnel;
-  const equipment = c.days * equipPerDay;
-  const travel = c.days * r.travel;
-  const editing = c.minutes * r.minute + c.shorts * r.short;
-  const cost = personnel + equipment + travel + editing;
+  const c = S.calc;
+  const sum = cat => (c.costs[cat] || []).reduce((s, it) => s + (num(it.qty) * num(it.price)), 0);
+  const nhanSu = sum('nhanSu'), thietBi = sum('thietBi'), logistic = sum('logistic'), post = sum('post');
+  const cost = nhanSu + thietBi + logistic + post;
   const proposed = cost / (1 - c.margin / 100);
   const floor = proposed * (1 - S.settings.floorDiscount / 100);
   const floorMargin = floor > 0 ? (floor - cost) / floor * 100 : 0;
-  return { personnel, equipment, travel, editing, cost, equipPerDay, proposed, floor, floorMargin };
+  return { nhanSu, thietBi, logistic, post, cost, proposed, floor, floorMargin };
 }
 
 function readQuoteInputs() {
@@ -239,15 +274,15 @@ function fillQuoteInputs() {
   $('#r_short').value = fmt(r.short);
   $('#n_offer').value = c.offerRaw || '';
   $$('#jobChips .chip').forEach(ch => ch.classList.toggle('active', ch.dataset.name === c.jobType));
+  renderCostDetail();
 }
 
 function refreshQuote() {
   const q = computeQuote(), c = S.calc;
-  $('#o_personnel').textContent = fmt(q.personnel);
-  $('#o_equipment').textContent = fmt(q.equipment);
-  $('#o_travel').textContent = fmt(q.travel);
-  $('#o_editing').textContent = fmt(q.editing);
-  $('#o_equipNote').textContent = `(${c.cameras} cam${c.sound ? ' + âm thanh' : ''}${c.drone ? ' + flycam' : ''}) × ${c.days} ngày`;
+  $('#o_nhanSu').textContent = fmt(q.nhanSu);
+  $('#o_thietBi').textContent = fmt(q.thietBi);
+  $('#o_logistic').textContent = fmt(q.logistic);
+  $('#o_post').textContent = fmt(q.post);
   $('#o_cost').textContent = fmtM(q.cost);
   $('#o_proposed').textContent = fmtM(q.proposed);
   $('#o_proposedFull').textContent = fmt(q.proposed) + ' ₫';
@@ -259,24 +294,24 @@ function refreshQuote() {
 }
 
 function buildSuggestions(q, offer) {
-  const c = S.calc, r = S.settings.rates;
   const list = [];
-  const add = (key, label, saveAmt) => { if (saveAmt > 0 && label) list.push({ key, label, save: saveAmt }); };
-  if (c.drone)    add('drone',  `Bỏ flycam (${fmt(r.drone)}/ngày × ${c.days} ngày)`, r.drone * c.days);
-  if (c.sound)    add('sound',  `Bỏ âm thanh (${fmt(r.sound)}/ngày × ${c.days} ngày)`, r.sound * c.days);
-  if (c.cameras > 1) add('camera', `Bớt 1 camera (${fmt(r.camera)}/ngày × ${c.days} ngày)`, r.camera * c.days);
-  if (c.days > 1) add('day',    `Bớt 1 ngày quay (nhân sự + thiết bị + di chuyển)`, r.personnel + q.equipPerDay + r.travel);
-  if (c.shorts >= 5) add('shorts', `Bớt 5 video short (${fmt(r.short)}/short)`, 5 * r.short);
-  if (c.minutes >= 1) add('minute', `Giảm 1 phút video dài (${fmt(r.minute)}/phút)`, r.minute);
+  CATS.forEach(([cat, catName]) => {
+    (S.calc.costs[cat] || []).forEach(it => {
+      const amt = it.qty * it.price;
+      if (amt > 0) list.push({ key: `del:${cat}:${it.id}`, label: `Bỏ "${it.label || 'hạng mục'}" (${catName})`, save: amt });
+      if (it.qty > 1) list.push({ key: `cut:${cat}:${it.id}`, label: `Bớt 1 × "${it.label || 'hạng mục'}"`, save: it.price });
+    });
+  });
+  if (!list.length) return '<div class="neg-line">Chưa có hạng mục nào để cắt — thêm dòng ở phần Chi phí chi tiết.</div>';
   list.sort((a, b) => b.save - a.save);
-  return list.map(it => {
+  return list.slice(0, 8).map(it => {
     const newCost = Math.max(0, q.cost - it.save);
     const m = offer > 0 ? (offer - newCost) / offer * 100 : 0;
     const ok = m >= S.settings.minMargin;
     return `<div class="sug ${ok ? 'ok' : ''}">
       <span>${esc(it.label)}</span>
       <span class="sug-save">−${fmt(it.save)} ₫ → margin ${m.toFixed(1)}%</span>
-      <button class="btn sm ghost" data-act="apply-cut" data-cut="${it.key}">Áp dụng</button>
+      <button class="btn sm" data-act="apply-cut" data-cut="${it.key}">Áp dụng</button>
     </div>`;
   }).join('');
 }
@@ -311,14 +346,16 @@ function renderNeg() {
 }
 
 function applyCut(key) {
-  const c = S.calc;
-  if (key === 'drone') c.drone = false;
-  else if (key === 'sound') c.sound = false;
-  else if (key === 'camera') c.cameras = Math.max(0, c.cameras - 1);
-  else if (key === 'day') c.days = Math.max(0, c.days - 1);
-  else if (key === 'shorts') c.shorts = Math.max(0, c.shorts - 5);
-  else if (key === 'minute') c.minutes = Math.max(0, c.minutes - 1);
-  fillQuoteInputs();
+  const [op, cat, id] = key.split(':');
+  const arr = S.calc.costs[cat] || [];
+  const it = arr.find(x => x.id === id);
+  if (!it) return;
+  if (op === 'del') {
+    S.calc.costs[cat] = arr.filter(x => x.id !== id);
+  } else {
+    it.qty = Math.max(0, it.qty - 1);
+  }
+  renderCostDetail();
   refreshQuote();
   toast('Đã áp dụng — kiểm tra margin mới');
 }
@@ -326,16 +363,20 @@ function applyCut(key) {
 function quoteText(q) {
   const c = S.calc;
   const pad = (label, val) => label + ' '.repeat(Math.max(1, 15 - label.length)) + val;
+  const sec = (name, items) => [
+    `— ${name.toUpperCase()}`,
+    ...items.map(it => `  ${it.label || '(hạng mục)'}: ${fmt(it.qty)} x ${fmt(it.price)} = ${fmt(it.qty * it.price)}`),
+  ];
   return [
     `LOẠI JOB: ${c.jobType || '—'}`,
     `QUAY: ${c.days} ngày · ${c.cameras} camera · âm thanh ${c.sound ? '✓' : '✗'} · flycam ${c.drone ? '✓' : '✗'}`,
     `DỰNG: ${c.minutes} phút video dài · ${c.shorts} short`,
     ``,
     `CHI PHÍ`,
-    pad('Nhân sự', fmt(q.personnel)),
-    pad('Thiết bị', fmt(q.equipment)),
-    pad('Di chuyển', fmt(q.travel)),
-    pad('Dựng', fmt(q.editing)),
+    ...sec('Nhân sự', c.costs.nhanSu),
+    ...sec('Thiết bị', c.costs.thietBi),
+    ...sec('Logistic', c.costs.logistic),
+    ...sec('Post production', c.costs.post),
     `────────────────`,
     pad('COST:', fmt(q.cost)),
     pad('MARGIN:', c.margin + '%'),
@@ -412,6 +453,27 @@ function sheetBtn(p) {
     return `<button class="btn sm" data-act="sync-sheet" title="Chưa cấu hình Apps Script URL — vào tab Cài đặt">${label(p.sheetStatus)}</button>`;
   }
   return `<button class="btn sm" data-act="sync-sheet">${label(p.sheetStatus)}</button>`;
+}
+
+function renderCostDetail() {
+  const host = $('#costDetail');
+  if (!host) return;
+  host.innerHTML = CATS.map(([cat, name]) => {
+    const items = S.calc.costs[cat] || [];
+    const sub = items.reduce((s, it) => s + it.qty * it.price, 0);
+    return `<div class="cat">
+      <div class="cat-head"><span class="cat-name mono">${name}</span><b class="cat-sub mono">${fmt(sub)}</b></div>
+      <div class="cat-cols mono"><span>HẠNG MỤC</span><span>SL</span><span>ĐƠN GIÁ</span><span>THÀNH TIỀN</span><span></span></div>
+      ${items.map(it => `<div class="item-row">
+        <input class="it-label" data-act="ci-label" data-cat="${cat}" data-id="${it.id}" value="${esc(it.label)}" placeholder="Hạng mục...">
+        <input class="it-qty" type="number" min="0" step="any" data-act="ci-qty" data-cat="${cat}" data-id="${it.id}" value="${it.qty}">
+        <input class="it-price money" data-act="ci-price" data-cat="${cat}" data-id="${it.id}" value="${it.price ? fmt(it.price) : ''}" placeholder="0">
+        <span class="it-amt">${fmt(it.qty * it.price)}</span>
+        <button class="icon" data-act="ci-del" data-cat="${cat}" data-id="${it.id}" title="Xóa dòng">✕</button>
+      </div>`).join('')}
+      <button class="btn sm" data-act="ci-add" data-cat="${cat}" style="margin-top:.55rem">+ Dòng</button>
+    </div>`;
+  }).join('');
 }
 
 /* ================= projects ================= */
@@ -669,7 +731,7 @@ function doCreateFromQuote() {
     committedDays: c.days,
     deliverables: dels,
     fromQuote: true,
-    breakdown: { personnel: q.personnel, equipment: q.equipment, travel: q.travel, editing: q.editing, total: q.cost },
+    breakdown: { nhanSu: q.nhanSu, thietBi: q.thietBi, logistic: q.logistic, post: q.post, total: q.cost, items: JSON.parse(JSON.stringify(S.calc.costs)) },
     proposed: q.proposed, floor: q.floor, margin: c.margin,
     config: { days: c.days, cameras: c.cameras, sound: c.sound, drone: c.drone, minutes: c.minutes, shorts: c.shorts }
   });
@@ -705,13 +767,23 @@ function modalOriginal(p) {
     html += `<div class="os-item"><span>Cấu hình quay</span><b style="font-family:inherit;font-weight:500">${cfg.days} ngày · ${cfg.cameras} camera · âm thanh ${cfg.sound ? '✓' : '✗'} · flycam ${cfg.drone ? '✓' : '✗'}</b></div>`;
   }
   if (bd) {
-    html += `<div class="neg-sub">Cost breakdown ban đầu</div>
-      <div class="os-item"><span>Nhân sự</span><b>${fmt(bd.personnel)} ₫</b></div>
-      <div class="os-item"><span>Thiết bị</span><b>${fmt(bd.equipment)} ₫</b></div>
-      <div class="os-item"><span>Di chuyển</span><b>${fmt(bd.travel)} ₫</b></div>
-      <div class="os-item"><span>Dựng</span><b>${fmt(bd.editing)} ₫</b></div>
-      <div class="os-item"><span>COST</span><b>${fmt(bd.total)} ₫</b></div>
+    html += `<div class="neg-sub">Cost breakdown ban đầu</div>`;
+    const cats = [['Nhân sự', bd.nhanSu], ['Thiết bị', bd.thietBi], ['Logistic', bd.logistic], ['Post production', bd.post]];
+    cats.forEach(([name, v]) => {
+      html += `<div class="os-item"><span>${name}</span><b>${fmt(v || 0)} ₫</b></div>`;
+    });
+    html += `<div class="os-item"><span>COST</span><b>${fmt(bd.total)} ₫</b></div>
       <div class="os-item"><span>Giá đề xuất / margin</span><b>${fmtM(os.proposed || 0)} / ${os.margin || '?'}%</b></div>`;
+    if (bd.items) {
+      const catNames = Object.fromEntries(CATS);
+      CATS.forEach(([cat]) => {
+        const arr = bd.items[cat] || [];
+        if (arr.length) {
+          html += `<div class="neg-line" style="margin-top:8px"><b>${esc(catNames[cat] || cat)}</b></div>
+            <ul class="os-list">${arr.map(it => `<li>${esc(it.label || '(hạng mục)')} — ${fmt(it.qty)} × ${fmt(it.price)} = ${fmt(it.qty * it.price)} ₫</li>`).join('')}</ul>`;
+        }
+      });
+    }
   }
   html += `<div class="modal-actions"><button class="btn ghost" data-act="modal-close">Đóng</button></div>`;
   openModal(html);
@@ -811,6 +883,7 @@ document.addEventListener('click', e => {
       const jt = S.settings.jobTypes.find(j => j.name === el.dataset.name);
       if (jt) {
         Object.assign(S.calc, { jobType: jt.name }, jt.preset);
+        S.calc.costs = generateCosts(S.calc, S.settings.rates);
         fillQuoteInputs(); refreshQuote();
       }
       break;
@@ -819,6 +892,19 @@ document.addEventListener('click', e => {
     case 'quote-to-project': modalFromQuote(); break;
     case 'neg-check': renderNeg(); break;
     case 'apply-cut': applyCut(el.dataset.cut); break;
+    case 'ci-add': {
+      const cat = el.dataset.cat;
+      if (!S.calc.costs[cat]) break;
+      S.calc.costs[cat].push({ id: uid(), label: '', qty: 1, price: S.settings.rates[DEFAULT_RATE_FOR_CAT[cat]] || 0 });
+      renderCostDetail(); refreshQuote();
+      break;
+    }
+    case 'ci-del': {
+      const { cat, id } = el.dataset;
+      S.calc.costs[cat] = (S.calc.costs[cat] || []).filter(x => x.id !== id);
+      renderCostDetail(); refreshQuote();
+      break;
+    }
 
     case 'new-project': modalNewProject(); break;
     case 'create-project': doCreateProject(); break;
@@ -1126,7 +1212,8 @@ document.addEventListener('change', e => {
 
 /* quote inputs: live */
 document.addEventListener('input', e => {
-  const id = e.target.id || '';
+  const el = e.target;
+  const id = el.id || '';
   if (id.startsWith('c_') || id.startsWith('r_')) {
     readQuoteInputs();
     refreshQuote();
@@ -1137,8 +1224,27 @@ document.addEventListener('input', e => {
     S.settings.minMargin = clamp(num($('#s_min').value) || 30, 1, 95);
     S.settings.floorDiscount = clamp(num($('#s_floor').value) || 10, 0, 50);
     save();
+  } else if (el.classList && el.classList.contains('it-label')) {
+    setCostItem(el, it => { it.label = el.value; });
+  } else if (el.classList && el.classList.contains('it-qty')) {
+    setCostItem(el, it => { it.qty = Math.max(0, num(el.value)); });
+  } else if (el.classList && el.classList.contains('it-price')) {
+    setCostItem(el, it => { it.price = parseMoney(el.value); });
   }
 });
+
+// cập nhật 1 dòng chi phí từ input + refresh số tiền/subtotal mà không rebuild (giữ focus khi gõ)
+function setCostItem(el, apply) {
+  const it = (S.calc.costs[el.dataset.cat] || []).find(x => x.id === el.dataset.id);
+  if (!it) return;
+  apply(it);
+  const row = el.closest('.item-row');
+  if (row) row.querySelector('.it-amt').textContent = fmt(it.qty * it.price);
+  const catBlock = el.closest('.cat');
+  if (catBlock) catBlock.querySelector('.cat-sub').textContent = fmt(
+    S.calc.costs[el.dataset.cat].reduce((s, x) => s + x.qty * x.price, 0));
+  refreshQuote();
+}
 
 /* money inputs: format lại khi rời ô */
 document.addEventListener('focusout', e => {

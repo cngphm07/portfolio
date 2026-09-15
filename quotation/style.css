@@ -160,6 +160,30 @@ input::placeholder{color:var(--g3)}
 }
 .rates[open] summary{margin-bottom:.35rem}
 
+/* ---------- chi phí chi tiết (line items) ---------- */
+.cats{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.cat{border:1px dashed #1c1c1c;padding:.75rem .9rem .9rem}
+.cat-head{display:flex;justify-content:space-between;align-items:baseline;gap:.6rem;margin-bottom:.45rem}
+.cat-name{font-size:.58rem;letter-spacing:.26em;color:var(--g1);text-transform:uppercase}
+.cat-sub{font-family:var(--font-m);font-weight:500;font-size:.95rem;font-variant-numeric:tabular-nums}
+.cat-cols{
+  display:grid;grid-template-columns:1fr 44px 104px 104px 22px;gap:5px;
+  font-size:.48rem;letter-spacing:.12em;color:var(--g3);
+  padding-bottom:.25rem;border-bottom:1px solid #161616;
+}
+.cat-cols span:nth-child(2),.cat-cols span:nth-child(3),.cat-cols span:nth-child(4){text-align:right}
+.item-row{
+  display:grid;grid-template-columns:1fr 44px 104px 104px 22px;gap:5px;align-items:center;
+  padding:.3rem 0;border-bottom:1px dashed #141414;
+}
+.item-row .it-label{padding:.35rem .5rem;font-size:.76rem;min-width:0}
+.item-row .it-qty{padding:.35rem 2px;font-family:var(--font-m);font-size:.74rem;text-align:center}
+.item-row .it-price{padding:.35rem .4rem;font-size:.72rem}
+.it-amt{
+  font-family:var(--font-m);font-size:.72rem;text-align:right;
+  color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+
 /* ---------- chi phí / kết quả ---------- */
 .costline{display:flex;justify-content:space-between;align-items:baseline;padding:.48rem 0;border-bottom:1px dashed #161616}
 .costline span{color:var(--g1);font-size:.8rem}
@@ -369,7 +393,7 @@ b.bad{color:#000;background:var(--ink);padding:0 .35rem}
 
 /* ---------- responsive ---------- */
 @media (max-width:860px){
-  .q-grid,.dgrid,.set-grid{grid-template-columns:1fr}
+  .q-grid,.dgrid,.set-grid,.cats{grid-template-columns:1fr}
   main{padding:1.2rem 1.25rem 0}
   .topbar{flex-wrap:wrap;gap:.8rem}
   .tc{display:none}
