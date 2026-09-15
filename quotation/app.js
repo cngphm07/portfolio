@@ -115,19 +115,49 @@ function syncAutoCosts() {
 // đảm bảo calc.costs luôn đúng shape; dữ liệu cũ (trước auto-sync) được sinh lại 1 lần
 function ensureCalcCosts(st) {
   const c = st.calc;
-  if (!c.costs || !c.costs.nhanSu || c.costsVersion !== 3) {
-    c.costs = generateCosts(c, st.settings.rates);
-    c.costsVersion = 3;
+  if (!c.costs || !c.costs.nhanSu || c.costsVersion !== 5) {
+    c.costs = c.archMode ? generateArchCosts(c.arch) : generateCosts(c, st.settings.rates);
+    c.costsVersion = 5;
     return;
   }
   CATS.forEach(([cat]) => {
     if (!Array.isArray(c.costs[cat])) c.costs[cat] = [];
     c.costs[cat] = c.costs[cat].filter(it => it && typeof it === 'object').map(it => ({
-      id: it.id || uid(), label: String(it.label || ''), qty: num(it.qty), price: num(it.price), auto: it.auto || undefined,
+      id: it.id || uid(), label: String(it.label || ''), qty: num(it.qty), price: num(it.price),
+      min: it.min || undefined, auto: it.auto || undefined,
     }));
   });
 }
 const DEFAULT_RATE_FOR_CAT = { nhanSu: 'personnel', thietBi: 'camera', logistic: 'travel', post: 'minute' };
+
+/* ---- công thức Architecture: phòng × 600K (min 5tr) + máy thêm 3,5tr + phỏng vấn 2,5tr ---- */
+const ARCH = { perRoom: 600000, minBase: 5000000, extraCam: 3500000, interview: 2500000 };
+// thành tiền của 1 dòng (hỗ trợ mức tối thiểu min)
+const itemAmount = it => (it && it.min) ? Math.max(it.qty * it.price, it.min) : (it ? it.qty * it.price : 0);
+
+function generateArchCosts(a) {
+  const items = { nhanSu: [], thietBi: [], logistic: [], post: [] };
+  items.nhanSu.push({ id: uid(), label: `Quay kiến trúc (${a.rooms} phòng, min 5tr)`, qty: Math.max(0, num(a.rooms)), price: ARCH.perRoom, min: ARCH.minBase, auto: 'archBase' });
+  if (a.cams > 0) items.thietBi.push({ id: uid(), label: `Máy quay thêm (${a.cams} máy)`, qty: a.cams, price: ARCH.extraCam, auto: 'archCams' });
+  if (a.interview) items.nhanSu.push({ id: uid(), label: 'Phỏng vấn', qty: 1, price: ARCH.interview, auto: 'archInterview' });
+  if (a.extra > 0) items.logistic.push({ id: uid(), label: 'Phụ thu khác', qty: 1, price: a.extra, auto: 'archExtra' });
+  return items;
+}
+// đồng bộ các dòng AUTO của công thức kiến trúc theo panel nhập
+function syncArchCosts() {
+  const a = S.calc.arch;
+  const upsert = (cat, key, keep, fields) => {
+    const arr = S.calc.costs[cat];
+    const idx = arr.findIndex(it => it.auto === key);
+    if (!keep) { if (idx !== -1) arr.splice(idx, 1); return; }
+    if (idx === -1) arr.push(Object.assign({ id: uid(), auto: key }, fields));
+    else Object.assign(arr[idx], fields);
+  };
+  upsert('nhanSu', 'archBase', a.rooms > 0, { label: `Quay kiến trúc (${a.rooms} phòng, min 5tr)`, qty: Math.max(0, num(a.rooms)), price: ARCH.perRoom, min: ARCH.minBase });
+  upsert('thietBi', 'archCams', a.cams > 0, { label: `Máy quay thêm (${a.cams} máy)`, qty: a.cams, price: ARCH.extraCam });
+  upsert('nhanSu', 'archInterview', a.interview, { label: 'Phỏng vấn', qty: 1, price: ARCH.interview });
+  upsert('logistic', 'archExtra', a.extra > 0, { label: 'Phụ thu khác', qty: 1, price: a.extra });
+}
 
 /* ================= state ================= */
 const LS_KEY = 'oddpig_baogia_v1';
@@ -150,17 +180,19 @@ const DEFAULT_STATE = () => ({
       { name: 'TVC',                preset: { days: 2, cameras: 3, sound: true,  drone: true,  minutes: 1,  shorts: 5 } },
       { name: 'Social Content',     preset: { days: 1, cameras: 1, sound: false, drone: false, minutes: 3,  shorts: 30 } },
       { name: 'Marketing Campaign', preset: { days: 3, cameras: 3, sound: true,  drone: true,  minutes: 10, shorts: 30 } },
-      { name: 'Architecture',       preset: { days: 2, cameras: 3, sound: true,  drone: true,  minutes: 5,  shorts: 20 } },
+      { name: 'Architecture',       preset: { days: 2, cameras: 3, sound: true,  drone: true,  minutes: 5,  shorts: 20 }, formula: 'arch' },
       { name: 'House Tour',         preset: { days: 1, cameras: 2, sound: true,  drone: true,  minutes: 8,  shorts: 15 } },
       { name: 'Interview',          preset: { days: 1, cameras: 2, sound: true,  drone: false, minutes: 10, shorts: 10 } }
     ],
-    jobTypesVersion: 2,
+    jobTypesVersion: 3,
     sheet: { url: '', token: '' }
   },
   calc: {
     jobType: 'Architecture',
     days: 2, cameras: 3, sound: true, drone: true, minutes: 5, shorts: 20,
-    margin: 40, offerRaw: ''
+    margin: 40, offerRaw: '',
+    archMode: true,
+    arch: { rooms: 8, cams: 0, interview: false, extra: 0 }
   },
   projects: [],
   ui: { view: 'quote', currentProject: null }
@@ -179,7 +211,14 @@ function migrate(st) {
     d.settings.jobTypes.forEach(j => { if (!have.has(j.name)) st.settings.jobTypes.push(j); });
     st.settings.jobTypesVersion = 2;
   }
+  if (st.settings.jobTypesVersion < 3) {
+    const archJt = st.settings.jobTypes.find(j => j.name === 'Architecture');
+    if (archJt) archJt.formula = 'arch';
+    st.settings.jobTypesVersion = 3;
+  }
   st.calc = Object.assign({}, d.calc, st.calc || {});
+  if (!st.calc.arch) st.calc.arch = { rooms: 8, cams: 0, interview: false, extra: 0 };
+  if (typeof st.calc.archMode !== 'boolean') st.calc.archMode = st.calc.jobType === 'Architecture';
   st.ui = Object.assign({}, d.ui, st.ui || {});
   if (!Array.isArray(st.projects)) st.projects = [];
   ensureCalcCosts(st);
@@ -257,7 +296,7 @@ function seedSample() {
 /* ================= calculator ================= */
 function computeQuote() {
   const c = S.calc;
-  const sum = cat => (c.costs[cat] || []).reduce((s, it) => s + (num(it.qty) * num(it.price)), 0);
+  const sum = cat => (c.costs[cat] || []).reduce((s, it) => s + itemAmount(it), 0);
   const nhanSu = sum('nhanSu'), thietBi = sum('thietBi'), logistic = sum('logistic'), post = sum('post');
   const cost = nhanSu + thietBi + logistic + post;
   const proposed = cost / (1 - c.margin / 100);
@@ -300,6 +339,15 @@ function fillQuoteInputs() {
   $('#r_short').value = fmt(r.short);
   $('#n_offer').value = c.offerRaw || '';
   $$('#jobChips .chip').forEach(ch => ch.classList.toggle('active', ch.dataset.name === c.jobType));
+  // chế độ công thức kiến trúc: ẩn QUAY/DỰNG + đơn giá, hiện panel riêng
+  $('#archPanel').hidden = !c.archMode;
+  $('#specSections').hidden = !!c.archMode;
+  $('#ratesPanel').hidden = !!c.archMode;
+  $('#a_rooms').value = c.arch.rooms;
+  $('#a_cams').value = c.arch.cams;
+  $('#a_interview').checked = c.arch.interview;
+  $('#a_extra').value = c.arch.extra ? fmt(c.arch.extra) : '';
+  $('#a_days').value = c.days;
   renderCostDetail();
 }
 
@@ -323,9 +371,12 @@ function buildSuggestions(q, offer) {
   const list = [];
   CATS.forEach(([cat, catName]) => {
     (S.calc.costs[cat] || []).forEach(it => {
-      const amt = it.qty * it.price;
+      const amt = itemAmount(it);
       if (amt > 0) list.push({ key: `del:${cat}:${it.id}`, label: `Bỏ "${it.label || 'hạng mục'}" (${catName})`, save: amt });
-      if (it.qty > 1) list.push({ key: `cut:${cat}:${it.id}`, label: `Bớt 1 × "${it.label || 'hạng mục'}"`, save: it.price });
+      if (it.qty > 1) {
+        const save = amt - itemAmount(Object.assign({}, it, { qty: it.qty - 1 }));
+        if (save > 0) list.push({ key: `cut:${cat}:${it.id}`, label: `Bớt 1 × "${it.label || 'hạng mục'}"`, save });
+      }
     });
   });
   if (!list.length) return '<div class="neg-line">Chưa có hạng mục nào để cắt — thêm dòng ở phần Chi phí chi tiết.</div>';
@@ -392,7 +443,7 @@ function quoteText(q) {
   const pad = (label, val) => label + ' '.repeat(Math.max(1, 15 - label.length)) + val;
   const sec = (name, items) => [
     `— ${name.toUpperCase()}`,
-    ...items.map(it => `  ${it.label || '(hạng mục)'}: ${fmt(it.qty)} x ${fmt(it.price)} = ${fmt(it.qty * it.price)}`),
+    ...items.map(it => `  ${it.label || '(hạng mục)'}: ${fmt(it.qty)} x ${fmt(it.price)} = ${fmt(itemAmount(it))}`),
   ];
   return [
     `LOẠI JOB: ${c.jobType || '—'}`,
@@ -487,7 +538,7 @@ function renderCostDetail() {
   if (!host) return;
   host.innerHTML = CATS.map(([cat, name]) => {
     const items = S.calc.costs[cat] || [];
-    const sub = items.reduce((s, it) => s + it.qty * it.price, 0);
+    const sub = items.reduce((s, it) => s + itemAmount(it), 0);
     return `<div class="cat">
       <div class="cat-head"><span class="cat-name mono">${name}</span><b class="cat-sub mono">${fmt(sub)}</b></div>
       <div class="cat-cols mono"><span>HẠNG MỤC</span><span>SL</span><span>ĐƠN GIÁ</span><span>THÀNH TIỀN</span><span></span></div>
@@ -495,7 +546,7 @@ function renderCostDetail() {
         <input class="it-label ${it.auto ? 'it-auto' : ''}" data-act="ci-label" data-cat="${cat}" data-id="${it.id}" value="${esc(it.label)}" placeholder="Hạng mục..." ${it.auto ? `title="AUTO — đồng bộ với thông số Quay/Dựng và đơn giá mặc định"` : ''}>
         <input class="it-qty" type="number" min="0" step="any" data-act="ci-qty" data-cat="${cat}" data-id="${it.id}" value="${it.qty}">
         <input class="it-price money" data-act="ci-price" data-cat="${cat}" data-id="${it.id}" value="${it.price ? fmt(it.price) : ''}" placeholder="0">
-        <span class="it-amt">${fmt(it.qty * it.price)}</span>
+        <span class="it-amt">${fmt(itemAmount(it))}</span>
         <button class="icon" data-act="ci-del" data-cat="${cat}" data-id="${it.id}" title="Xóa dòng">✕</button>
       </div>`).join('')}
       <button class="btn sm" data-act="ci-add" data-cat="${cat}" style="margin-top:.55rem">+ Dòng</button>
@@ -807,7 +858,7 @@ function modalOriginal(p) {
         const arr = bd.items[cat] || [];
         if (arr.length) {
           html += `<div class="neg-line" style="margin-top:8px"><b>${esc(catNames[cat] || cat)}</b></div>
-            <ul class="os-list">${arr.map(it => `<li>${esc(it.label || '(hạng mục)')} — ${fmt(it.qty)} × ${fmt(it.price)} = ${fmt(it.qty * it.price)} ₫</li>`).join('')}</ul>`;
+            <ul class="os-list">${arr.map(it => `<li>${esc(it.label || '(hạng mục)')} — ${fmt(it.qty)} × ${fmt(it.price)} = ${fmt(itemAmount(it))} ₫</li>`).join('')}</ul>`;
         }
       });
     }
@@ -910,7 +961,8 @@ document.addEventListener('click', e => {
       const jt = S.settings.jobTypes.find(j => j.name === el.dataset.name);
       if (jt) {
         Object.assign(S.calc, { jobType: jt.name }, jt.preset);
-        S.calc.costs = generateCosts(S.calc, S.settings.rates);
+        S.calc.archMode = jt.formula === 'arch';
+        S.calc.costs = S.calc.archMode ? generateArchCosts(S.calc.arch) : generateCosts(S.calc, S.settings.rates);
         fillQuoteInputs(); refreshQuote();
       }
       break;
@@ -1258,6 +1310,19 @@ document.addEventListener('input', e => {
     S.settings.minMargin = clamp(num($('#s_min').value) || 30, 1, 95);
     S.settings.floorDiscount = clamp(num($('#s_floor').value) || 10, 0, 50);
     save();
+  } else if (id === 'a_rooms' || id === 'a_cams' || id === 'a_extra' || id === 'a_interview') {
+    // panel công thức kiến trúc
+    const a = S.calc.arch;
+    if (id === 'a_rooms') a.rooms = Math.max(0, num(el.value));
+    if (id === 'a_cams') a.cams = Math.max(0, Math.round(num(el.value)));
+    if (id === 'a_extra') a.extra = parseMoney(el.value);
+    if (id === 'a_interview') a.interview = el.checked;
+    syncArchCosts();
+    renderCostDetail();
+    refreshQuote();
+  } else if (id === 'a_days') {
+    S.calc.days = Math.max(0, num(el.value));
+    refreshQuote();
   } else if (el.classList && el.classList.contains('it-label')) {
     setCostItem(el, it => { it.label = el.value; });
   } else if (el.classList && el.classList.contains('it-qty')) {
@@ -1274,12 +1339,13 @@ function setCostItem(el, apply) {
   if (!it) return;
   apply(it);
   delete it.auto;
+  delete it.min;
   el.classList.remove('it-auto');
   const row = el.closest('.item-row');
-  if (row) row.querySelector('.it-amt').textContent = fmt(it.qty * it.price);
+  if (row) row.querySelector('.it-amt').textContent = fmt(itemAmount(it));
   const catBlock = el.closest('.cat');
   if (catBlock) catBlock.querySelector('.cat-sub').textContent = fmt(
-    S.calc.costs[el.dataset.cat].reduce((s, x) => s + x.qty * x.price, 0));
+    S.calc.costs[el.dataset.cat].reduce((s, x) => s + itemAmount(x), 0));
   refreshQuote();
 }
 

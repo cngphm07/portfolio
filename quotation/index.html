@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
 
@@ -41,6 +41,18 @@
         <div id="jobChips" class="chips"></div>
         <div class="hint mono">PRESET NHANH — ĐIỀN SẴN SỐ LIỆU, CHỈNH TỰ DO</div>
 
+        <!-- công thức riêng cho kiến trúc (chỉ hiện khi chọn preset có công thức) -->
+        <div id="archPanel" hidden>
+          <div class="sec-head"><span class="sec-num mono">02</span><span class="sec-rule"></span><span class="sec-title mono">CÔNG THỨC KIẾN TRÚC</span></div>
+          <div class="hint mono" style="margin:0 0 .3rem">PHÒNG × 600K (TỐI THIỂU 5TR) · MÁY THÊM +3,5TR/MÁY · PHỎNG VẤN +2,5TR</div>
+          <div class="frow"><label>Số phòng</label><input id="a_rooms" type="number" min="0" step="1"></div>
+          <div class="frow"><label>Máy quay thêm</label><input id="a_cams" type="number" min="0" step="1"></div>
+          <div class="frow"><label>Có phỏng vấn</label><label class="switch"><input id="a_interview" type="checkbox"><i></i></label></div>
+          <div class="frow"><label>Phụ thu khác (tự nhập)</label><input id="a_extra" class="money" inputmode="numeric" placeholder="0"></div>
+          <div class="frow"><label>Số ngày quay (cho dự án)</label><input id="a_days" type="number" min="0" step="1"></div>
+        </div>
+
+        <div id="specSections">
         <div class="sec-head"><span class="sec-num mono">02</span><span class="sec-rule"></span><span class="sec-title mono">QUAY</span></div>
         <div class="hint mono" style="margin:0 0 .3rem">ĐIỀN NHANH — CÁC DÒNG AUTO Ở CHI PHÍ CHI TIẾT TỰ CẬP NHẬT THEO</div>
         <div class="frow"><label>Số ngày</label><input id="c_days" type="number" min="0" step="1"></div>
@@ -51,8 +63,9 @@
         <div class="sec-head"><span class="sec-num mono">03</span><span class="sec-rule"></span><span class="sec-title mono">DỰNG</span></div>
         <div class="frow"><label>Video dài (phút)</label><input id="c_minutes" type="number" min="0" step="0.5"></div>
         <div class="frow"><label>Video short (số lượng)</label><input id="c_shorts" type="number" min="0" step="1"></div>
+        </div>
 
-        <details class="rates">
+        <details class="rates" id="ratesPanel">
           <summary>ĐƠN GIÁ MẶC ĐỊNH — DÙNG KHI SINH PRESET &amp; THÊM DÒNG · GÕ "2TR" = 2,000,000</summary>
           <div class="frow"><label>Nhân sự / ngày</label><input id="r_personnel" class="money" inputmode="numeric"></div>
           <div class="frow"><label>Camera / ngày / máy</label><input id="r_camera" class="money" inputmode="numeric"></div>
@@ -125,6 +138,6 @@
 <div id="modal" class="modal" hidden><div class="modal-panel" id="modalPanel"></div></div>
 <div id="toast" class="toast" hidden></div>
 
-<script src="app.js"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
