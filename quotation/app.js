@@ -81,7 +81,7 @@ function generateCosts(spec, rates) {
   const items = {
     nhanSu: [it('Nhân sự quay (ekip)', spec.days, rates.personnel, 'personnel')],
     thietBi: [it(`Camera (${spec.cameras} máy)`, spec.days, spec.cameras * rates.camera, 'camera')],
-    logistic: [it('Di chuyển', spec.days, rates.travel, 'travel')],
+    logistic: [], // di chuyển nhập ở ô riêng
     post: [
       it(`Dựng video dài (${spec.minutes} phút)`, 1, spec.minutes * rates.minute, 'minutes'),
       it('Dựng short', spec.shorts, rates.short, 'shorts'),
@@ -100,7 +100,6 @@ function syncAutoCosts() {
   upd('thietBi', 'camera', { label: `Camera (${c.cameras} máy)`, qty: c.days, price: c.cameras * r.camera });
   upd('thietBi', 'sound', { label: 'Âm thanh', qty: c.days, price: r.sound });
   upd('thietBi', 'drone', { label: 'Flycam', qty: c.days, price: r.drone });
-  upd('logistic', 'travel', { label: 'Di chuyển', qty: c.days, price: r.travel });
   upd('post', 'minutes', { label: `Dựng video dài (${c.minutes} phút)`, qty: 1, price: c.minutes * r.minute });
   upd('post', 'shorts', { label: 'Dựng short', qty: c.shorts, price: r.short });
   const toggle = (key, label, on, price) => {
@@ -115,9 +114,9 @@ function syncAutoCosts() {
 // đảm bảo calc.costs luôn đúng shape; dữ liệu cũ (trước auto-sync) được sinh lại 1 lần
 function ensureCalcCosts(st) {
   const c = st.calc;
-  if (!c.costs || !c.costs.nhanSu || c.costsVersion !== 5) {
+  if (!c.costs || !c.costs.nhanSu || c.costsVersion !== 6) {
     c.costs = c.archMode ? generateArchCosts(c.arch) : generateCosts(c, st.settings.rates);
-    c.costsVersion = 5;
+    c.costsVersion = 6;
     return;
   }
   CATS.forEach(([cat]) => {
@@ -192,7 +191,8 @@ const DEFAULT_STATE = () => ({
     days: 2, cameras: 3, sound: true, drone: true, minutes: 5, shorts: 20,
     margin: 40, offerRaw: '',
     archMode: true,
-    arch: { rooms: 8, cams: 0, interview: false, extra: 0 }
+    arch: { rooms: 8, cams: 0, interview: false, extra: 0 },
+    discount: 0, invoice: false, move: 0, stay: 0
   },
   projects: [],
   ui: { view: 'quote', currentProject: null }
@@ -298,11 +298,15 @@ function computeQuote() {
   const c = S.calc;
   const sum = cat => (c.costs[cat] || []).reduce((s, it) => s + itemAmount(it), 0);
   const nhanSu = sum('nhanSu'), thietBi = sum('thietBi'), logistic = sum('logistic'), post = sum('post');
-  const cost = nhanSu + thietBi + logistic + post;
+  const move = num(c.move), stay = num(c.stay);
+  const cost = nhanSu + thietBi + logistic + post + move + stay;
   const proposed = cost / (1 - c.margin / 100);
+  const afterDiscount = proposed * (1 - (c.discount || 0) / 100);
+  const vat = c.invoice ? afterDiscount * 0.2 : 0;
+  const total = afterDiscount + vat;
   const floor = proposed * (1 - S.settings.floorDiscount / 100);
   const floorMargin = floor > 0 ? (floor - cost) / floor * 100 : 0;
-  return { nhanSu, thietBi, logistic, post, cost, proposed, floor, floorMargin };
+  return { nhanSu, thietBi, logistic, post, move, stay, cost, proposed, afterDiscount, vat, total, floor, floorMargin };
 }
 
 function readQuoteInputs() {
@@ -315,6 +319,10 @@ function readQuoteInputs() {
   c.minutes = Math.max(0, num($('#c_minutes').value));
   c.shorts = Math.max(0, num($('#c_shorts').value));
   c.margin = clamp(num($('#c_margin').value) || S.settings.margin, 1, 95);
+  c.discount = clamp(num($('#c_discount').value), 0, 90);
+  c.invoice = $('#c_invoice').checked;
+  c.move = parseMoney($('#c_move').value);
+  c.stay = parseMoney($('#c_stay').value);
   // đơn giá chỉnh trực tiếp trong calculator
   const r = S.settings.rates;
   r.personnel = parseMoney($('#r_personnel').value);
@@ -348,6 +356,10 @@ function fillQuoteInputs() {
   $('#a_interview').checked = c.arch.interview;
   $('#a_extra').value = c.arch.extra ? fmt(c.arch.extra) : '';
   $('#a_days').value = c.days;
+  $('#c_discount').value = c.discount || 0;
+  $('#c_invoice').checked = !!c.invoice;
+  $('#c_move').value = c.move ? fmt(c.move) : '';
+  $('#c_stay').value = c.stay ? fmt(c.stay) : '';
   renderCostDetail();
 }
 
@@ -363,6 +375,13 @@ function refreshQuote() {
   $('#o_floor').textContent = fmtM(q.floor);
   $('#o_floorFull').textContent = fmt(q.floor) + ' ₫';
   $('#o_floorMargin').textContent = `· margin ${q.floorMargin.toFixed(1)}%`;
+  $('#o_afterDisc').textContent = fmtM(q.afterDiscount);
+  $('#o_afterDiscFull').textContent = fmt(q.afterDiscount) + ' ₫';
+  $('#o_vat').textContent = c.invoice ? '+' + fmtM(q.vat) : '0';
+  $('#o_vatFull').textContent = c.invoice ? 'đã cộng VAT 20%' : 'không xuất hoá đơn';
+  $('#o_vatNote').textContent = c.invoice ? '+20%' : '— tắt';
+  $('#o_total').textContent = fmtM(q.total);
+  $('#o_totalFull').textContent = fmt(q.total) + ' ₫';
   renderNeg();
   save();
 }
@@ -459,7 +478,11 @@ function quoteText(q) {
     pad('COST:', fmt(q.cost)),
     pad('MARGIN:', c.margin + '%'),
     pad('GIÁ BÁN ĐỀ XUẤT:', fmt(q.proposed) + ` (${fmtM(q.proposed)})`),
-    pad('GIÁ SÀN:', fmt(q.floor) + ` (${fmtM(q.floor)})`)
+    pad('GIÁ SÀN:', fmt(q.floor) + ` (${fmtM(q.floor)})`),
+    pad('GIẢM GIÁ:', (c.discount || 0) + '%'),
+    pad('SAU GIẢM GIÁ:', fmt(q.afterDiscount) + ` (${fmtM(q.afterDiscount)})`),
+    pad('HOÁ ĐƠN:', c.invoice ? 'CÓ (+VAT 20%)' : 'KHÔNG'),
+    pad('TỔNG TIỀN:', fmt(q.total) + ` (${fmtM(q.total)})`),
   ].join('\n');
 }
 
@@ -783,8 +806,8 @@ function modalFromQuote() {
   openModal(`<h3>Tạo dự án từ báo giá</h3>
     <div class="frow"><label>Tên dự án *</label><input id="m_name" class="widein" value="${esc(c.jobType + ' — ' + ddmm)}"></div>
     <div class="frow"><label>Khách hàng</label><input id="m_client" class="widein"></div>
-    <div class="frow"><label>Giá chốt hợp đồng</label><input id="m_price" class="money" value="${fmt(Math.round(q.proposed))}"></div>
-    <div class="neg-line">Giá đề xuất: <b>${fmtM(q.proposed)}</b> · Giá sàn: <b>${fmtM(q.floor)}</b> — có thể sửa giá chốt.</div>
+    <div class="frow"><label>Giá chốt hợp đồng</label><input id="m_price" class="money" value="${fmt(Math.round(q.total))}"></div>
+    <div class="neg-line">Tổng thanh toán (sau giảm giá${q.vat ? ' + VAT 20%' : ''}): <b>${fmtM(q.total)}</b> · Giá đề xuất gốc: <b>${fmtM(q.proposed)}</b> · Giá sàn: <b>${fmtM(q.floor)}</b> — có thể sửa giá chốt.</div>
     <div class="modal-actions">
       <button class="btn ghost" data-act="modal-close">Hủy</button>
       <button class="btn primary" data-act="create-from-quote">Tạo dự án</button>
@@ -1300,7 +1323,7 @@ document.addEventListener('input', e => {
     syncAutoCosts();
     renderCostDetail();
     refreshQuote();
-  } else if (id === 'c_job' || id === 'c_margin') {
+  } else if (id === 'c_job' || id === 'c_margin' || id === 'c_discount' || id === 'c_move' || id === 'c_stay' || id === 'c_invoice') {
     readQuoteInputs();
     refreshQuote();
   } else if (id === 'n_offer') {
