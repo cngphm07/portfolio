@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuong Pham Quoc — Filmmaker &amp; Videographer</title>
+<meta name="description" content="Cuong Pham Quoc — filmmaker &amp; videographer based in Ho Chi Minh City, Vietnam. TVC, documentary, architecture film, corporate and music video.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+
+<!-- preloader -->
+<div class="preloader" id="preloader" aria-hidden="true">
+  <div class="pre-half pre-top"></div>
+  <div class="pre-half pre-bot"></div>
+  <div class="pre-core">
+    <p class="pre-tc mono" id="preTc">LOADING REEL — TC 00:00:00:00</p>
+    <p class="pre-count display"><span id="preCount">000</span></p>
+    <div class="pre-bar"><span id="preBar"></span></div>
+    <p class="pre-foot mono">CNGPHM — PORTFOLIO V2</p>
+  </div>
+</div>
+
+<!-- custom cursor -->
+<div class="cursor" id="cursor" aria-hidden="true">
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-ring" id="cursorRing"><span class="cursor-label mono" id="cursorLabel"></span></div>
+</div>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header id="siteHeader">
+  <a class="logo display" href="#top">CNG<em>PHM</em></a>
+  <nav class="mono">
+    <a href="#about">About</a>
+    <a href="#work">Works</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <p class="tc mono" id="tcClock" aria-hidden="true">TC 00:00:00:00</p>
+</header>
+
+<!-- hero -->
+<section class="hero" id="top">
+  <canvas id="heroCanvas" aria-hidden="true"></canvas>
+  <div class="hero-frame" aria-hidden="true">
+    <span class="hf hf-tl"></span><span class="hf hf-tr"></span>
+    <span class="hf hf-bl"></span><span class="hf hf-br"></span>
+    <span class="hero-side mono">REEL — 2026</span>
+    <span class="hero-side-r mono">24 FPS · MONO</span>
+  </div>
+
+  <div class="hero-content">
+    <h1 class="sr-only">Filmmaker &amp; Videographer — Cuong Pham Quoc, based in Vietnam</h1>
+    <p class="hero-kicker mono" id="heroKicker">CUONG PHAM QUOC — REEL 2026</p>
+    <p class="hero-sub display" id="heroSub"><span class="sub-fill">FILMMAKER </span>&amp; Videographer</p>
+    <p class="hero-loc mono" id="heroLoc">BASED IN VIETNAM — HO CHI MINH CITY</p>
+    <div class="hero-meta" id="heroMeta">
+      <div><b class="display"><span data-count="252">0</span></b><span class="mono">SELECTED FILMS</span></div>
+      <div><b class="display"><span data-count="10" data-suffix="+">0</span></b><span class="mono">YEARS OF CRAFT</span></div>
+      <div><b class="display"><span data-count="13">0</span></b><span class="mono">FIELDS OF WORK</span></div>
+    </div>
+  </div>
+
+  <a class="hero-scroll mono" href="#about" id="heroScroll" aria-label="Scroll to about">
+    SCROLL<span class="hs-line"></span>
+  </a>
+</section>
+
+<!-- marquee -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track" id="marqueeTrack"></div>
+</div>
+
+<!-- about -->
+<section class="about" id="about">
+  <div class="sec-head">
+    <span class="sec-num mono">01</span>
+    <span class="sec-rule"></span>
+    <span class="sec-title mono">ABOUT ME</span>
+  </div>
+  <p class="about-lead" id="aboutLead">
+    I'm <b>Cuong Pham Quoc</b> — a filmmaker &amp; media producer with nearly a decade
+    in video production, from pre-production planning to shooting and post.
+    Skilled in editing, color grading and special effects, working across documentary,
+    architecture, TV commercials and music videos with international brands.
+  </p>
+  <div class="brands mono" id="brandsRow" aria-label="Brands worked with">
+    <span>GOOGLE</span><span>HONDA</span><span>LAZADA</span><span>SHOPEE</span><span>PEPSICO</span><span>UNILEVER</span>
+  </div>
+  <div class="about-contact" id="aboutContact">
+    <a href="mailto:cuongphamworks@gmail.com">cuongphamworks@gmail.com</a>
+    <a href="tel:+84971807891">+84 97 180 7891</a>
+    <span class="zalo mono">ZALO</span>
+    <a href="tel:+84336167122">+84 336 167 122</a>
+  </div>
+</section>
+
+<!-- work -->
+<div class="filters-wrap" id="work">
+  <div class="filters" id="filters"></div>
+  <div class="filters sub-filters" id="subFilters" style="display:none"></div>
+</div>
+
+<main>
+  <div class="sec-head in-main">
+    <span class="sec-num mono">02</span>
+    <span class="sec-rule"></span>
+    <span class="sec-title mono">SELECTED WORKS</span>
+    <span class="sec-count mono" id="secCount"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="empty-note mono" id="emptyNote">NO FILMS IN THIS CATEGORY.</div>
+</main>
+
+<!-- footer / contact -->
+<footer id="contact">
+  <div class="sec-head">
+    <span class="sec-num mono">03</span>
+    <span class="sec-rule"></span>
+    <span class="sec-title mono">CONTACT</span>
+  </div>
+  <h2 class="footer-h display" id="footerH">
+    Let's make<br>something <a class="footer-mail" href="mailto:cuongphamworks@gmail.com" data-magnetic>together</a>
+  </h2>
+  <div class="foot-grid mono">
+    <div class="foot-col">
+      <span class="foot-label">EMAIL</span>
+      <a href="mailto:cuongphamworks@gmail.com">cuongphamworks@gmail.com</a>
+    </div>
+    <div class="foot-col">
+      <span class="foot-label">PHONE — ZALO</span>
+      <a href="tel:+84971807891">+84 97 180 7891</a>
+      <a href="tel:+84336167122">+84 336 167 122</a>
+    </div>
+    <div class="foot-col">
+      <span class="foot-label">STUDIO</span>
+      <span>Cuong Pham Quoc</span>
+      <span>Ho Chi Minh City, Vietnam</span>
+    </div>
+  </div>
+  <div class="foot-base mono">
+    <span>© 2026 — ALL RIGHTS RESERVED</span>
+    <span>MONOCHROME EDITION — V2</span>
+    <a href="#top" data-cursor="TOP ↑">BACK TO TOP ↑</a>
+  </div>
+</footer>
+
+<!-- lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Video player">
+  <button class="lb-close" id="lbClose" aria-label="Close (Esc)">✕</button>
+  <button class="lb-nav lb-prev" id="lbPrev" aria-label="Previous (←)">←</button>
+  <button class="lb-nav lb-next" id="lbNext" aria-label="Next (→)">→</button>
+  <div class="lb-stage" id="lbStage">
+    <iframe id="lbFrame" frameborder="0" allow="autoplay; fullscreen" allowfullscreen title="Video"></iframe>
+    <div class="lb-bar mono"><span class="lb-rec" aria-hidden="true"></span><span id="lbTitle"></span><span id="lbIdx"></span></div>
+  </div>
+</div>
+
+<script src="/data.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/gsap@3/dist/SplitText.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
+<script defer src="js/hero.js"></script>
+<script defer src="js/motion.js"></script>
+<script defer src="js/gallery.js"></script>
+<script defer src="js/main.js"></script>
+</body>
+</html>

@@ -44,6 +44,13 @@ const server = http.createServer((req, res) => {
   let file = req.url.split("?")[0];
   if (file === "/") file = "/index.html";
   const fp = path.join(__dirname, path.normalize(file));
+  if (fp.startsWith(__dirname) && fs.existsSync(fp) && fs.statSync(fp).isDirectory()) {
+    const idx = path.join(fp, "index.html"); // /new/ -> /new/index.html, same as GitHub Pages
+    if (fs.existsSync(idx)) {
+      res.writeHead(200, { "Content-Type": MIME[".html"] });
+      return fs.createReadStream(idx).pipe(res);
+    }
+  }
   if (!fp.startsWith(__dirname) || !fs.existsSync(fp) || fs.statSync(fp).isDirectory()) {
     res.writeHead(404);
     return res.end("Not found");
