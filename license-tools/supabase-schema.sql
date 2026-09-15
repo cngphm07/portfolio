@@ -21,6 +21,10 @@ create index if not exists accounts_user_id_idx on public.accounts(user_id);
 
 alter table public.accounts enable row level security;
 
+-- Quyền truy cập cho role authenticated (RLS vẫn chặn: mỗi user chỉ thấy data của mình)
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on table public.accounts to authenticated;
+
 drop policy if exists "own_rows_only" on public.accounts;
 create policy "own_rows_only"
   on public.accounts for all
