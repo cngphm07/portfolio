@@ -75,29 +75,55 @@ const CATS = [
   ['post', 'Post production'],
 ];
 // sinh các dòng chi phí mặc định từ thông số job + đơn giá mặc định
+// auto = key đồng bộ: sửa thông số QUAY/DỰNG hoặc đơn giá mặc định → dòng này tự cập nhật
 function generateCosts(spec, rates) {
-  const it = (label, qty, price) => ({ id: uid(), label, qty: Math.max(0, num(qty)), price: Math.max(0, num(price)) });
+  const it = (label, qty, price, auto) => ({ id: uid(), label, qty: Math.max(0, num(qty)), price: Math.max(0, num(price)), auto });
   const items = {
-    nhanSu: [it('Nhân sự quay (ekip)', spec.days, rates.personnel)],
-    thietBi: [it(`Camera (${spec.cameras} máy)`, spec.days, spec.cameras * rates.camera)],
-    logistic: [it('Di chuyển', spec.days, rates.travel)],
+    nhanSu: [it('Nhân sự quay (ekip)', spec.days, rates.personnel, 'personnel')],
+    thietBi: [it(`Camera (${spec.cameras} máy)`, spec.days, spec.cameras * rates.camera, 'camera')],
+    logistic: [it('Di chuyển', spec.days, rates.travel, 'travel')],
     post: [
-      it(`Dựng video dài (${spec.minutes} phút)`, 1, spec.minutes * rates.minute),
-      it('Dựng short', spec.shorts, rates.short),
+      it(`Dựng video dài (${spec.minutes} phút)`, 1, spec.minutes * rates.minute, 'minutes'),
+      it('Dựng short', spec.shorts, rates.short, 'shorts'),
     ],
   };
-  if (spec.sound) items.thietBi.push(it('Âm thanh', spec.days, rates.sound));
-  if (spec.drone) items.thietBi.push(it('Flycam', spec.days, rates.drone));
+  if (spec.sound) items.thietBi.push(it('Âm thanh', spec.days, rates.sound, 'sound'));
+  if (spec.drone) items.thietBi.push(it('Flycam', spec.days, rates.drone, 'drone'));
   return items;
 }
-// đảm bảo calc.costs luôn đúng shape (kể cả dữ liệu cũ từ localStorage/import)
+// đồng bộ các dòng AUTO theo thông số QUAY/DỰNG + đơn giá mặc định (bỏ qua dòng đã sửa tay)
+function syncAutoCosts() {
+  const c = S.calc, r = S.settings.rates;
+  const find = (cat, key) => (c.costs[cat] || []).find(it => it.auto === key);
+  const upd = (cat, key, patch) => { const it = find(cat, key); if (it) Object.assign(it, patch); };
+  upd('nhanSu', 'personnel', { label: 'Nhân sự quay (ekip)', qty: c.days, price: r.personnel });
+  upd('thietBi', 'camera', { label: `Camera (${c.cameras} máy)`, qty: c.days, price: c.cameras * r.camera });
+  upd('thietBi', 'sound', { label: 'Âm thanh', qty: c.days, price: r.sound });
+  upd('thietBi', 'drone', { label: 'Flycam', qty: c.days, price: r.drone });
+  upd('logistic', 'travel', { label: 'Di chuyển', qty: c.days, price: r.travel });
+  upd('post', 'minutes', { label: `Dựng video dài (${c.minutes} phút)`, qty: 1, price: c.minutes * r.minute });
+  upd('post', 'shorts', { label: 'Dựng short', qty: c.shorts, price: r.short });
+  const toggle = (key, label, on, price) => {
+    const arr = c.costs.thietBi;
+    const idx = arr.findIndex(it => it.auto === key);
+    if (on && idx === -1) arr.push({ id: uid(), label, qty: c.days, price, auto: key });
+    if (!on && idx !== -1) arr.splice(idx, 1);
+  };
+  toggle('sound', 'Âm thanh', c.sound, r.sound);
+  toggle('drone', 'Flycam', c.drone, r.drone);
+}
+// đảm bảo calc.costs luôn đúng shape; dữ liệu cũ (trước auto-sync) được sinh lại 1 lần
 function ensureCalcCosts(st) {
   const c = st.calc;
-  if (!c.costs || !c.costs.nhanSu) c.costs = generateCosts(c, st.settings.rates);
+  if (!c.costs || !c.costs.nhanSu || c.costsVersion !== 3) {
+    c.costs = generateCosts(c, st.settings.rates);
+    c.costsVersion = 3;
+    return;
+  }
   CATS.forEach(([cat]) => {
     if (!Array.isArray(c.costs[cat])) c.costs[cat] = [];
     c.costs[cat] = c.costs[cat].filter(it => it && typeof it === 'object').map(it => ({
-      id: it.id || uid(), label: String(it.label || ''), qty: num(it.qty), price: num(it.price),
+      id: it.id || uid(), label: String(it.label || ''), qty: num(it.qty), price: num(it.price), auto: it.auto || undefined,
     }));
   });
 }
@@ -354,6 +380,7 @@ function applyCut(key) {
     S.calc.costs[cat] = arr.filter(x => x.id !== id);
   } else {
     it.qty = Math.max(0, it.qty - 1);
+    delete it.auto; // cắt tay bằng gợi ý cũng tắt auto
   }
   renderCostDetail();
   refreshQuote();
@@ -465,7 +492,7 @@ function renderCostDetail() {
       <div class="cat-head"><span class="cat-name mono">${name}</span><b class="cat-sub mono">${fmt(sub)}</b></div>
       <div class="cat-cols mono"><span>HẠNG MỤC</span><span>SL</span><span>ĐƠN GIÁ</span><span>THÀNH TIỀN</span><span></span></div>
       ${items.map(it => `<div class="item-row">
-        <input class="it-label" data-act="ci-label" data-cat="${cat}" data-id="${it.id}" value="${esc(it.label)}" placeholder="Hạng mục...">
+        <input class="it-label ${it.auto ? 'it-auto' : ''}" data-act="ci-label" data-cat="${cat}" data-id="${it.id}" value="${esc(it.label)}" placeholder="Hạng mục..." ${it.auto ? `title="AUTO — đồng bộ với thông số Quay/Dựng và đơn giá mặc định"` : ''}>
         <input class="it-qty" type="number" min="0" step="any" data-act="ci-qty" data-cat="${cat}" data-id="${it.id}" value="${it.qty}">
         <input class="it-price money" data-act="ci-price" data-cat="${cat}" data-id="${it.id}" value="${it.price ? fmt(it.price) : ''}" placeholder="0">
         <span class="it-amt">${fmt(it.qty * it.price)}</span>
@@ -1214,7 +1241,14 @@ document.addEventListener('change', e => {
 document.addEventListener('input', e => {
   const el = e.target;
   const id = el.id || '';
-  if (id.startsWith('c_') || id.startsWith('r_')) {
+  const specIds = ['c_days', 'c_cameras', 'c_sound', 'c_drone', 'c_minutes', 'c_shorts'];
+  if (specIds.includes(id) || id.startsWith('r_')) {
+    // thông số QUAY/DỰNG hoặc đơn giá mặc định thay đổi → dòng AUTO tự cập nhật
+    readQuoteInputs();
+    syncAutoCosts();
+    renderCostDetail();
+    refreshQuote();
+  } else if (id === 'c_job' || id === 'c_margin') {
     readQuoteInputs();
     refreshQuote();
   } else if (id === 'n_offer') {
@@ -1234,10 +1268,13 @@ document.addEventListener('input', e => {
 });
 
 // cập nhật 1 dòng chi phí từ input + refresh số tiền/subtotal mà không rebuild (giữ focus khi gõ)
+// sửa tay dòng nào thì dòng đó tắt auto (không bị đồng bộ ghi đè)
 function setCostItem(el, apply) {
   const it = (S.calc.costs[el.dataset.cat] || []).find(x => x.id === el.dataset.id);
   if (!it) return;
   apply(it);
+  delete it.auto;
+  el.classList.remove('it-auto');
   const row = el.closest('.item-row');
   if (row) row.querySelector('.it-amt').textContent = fmt(it.qty * it.price);
   const catBlock = el.closest('.cat');

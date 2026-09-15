@@ -177,6 +177,7 @@ input::placeholder{color:var(--g3)}
   padding:.3rem 0;border-bottom:1px dashed #141414;
 }
 .item-row .it-label{padding:.35rem .5rem;font-size:.76rem;min-width:0}
+.item-row .it-label.it-auto{border-bottom:1px dashed var(--line2);border-radius:0}
 .item-row .it-qty{padding:.35rem 2px;font-family:var(--font-m);font-size:.74rem;text-align:center}
 .item-row .it-price{padding:.35rem .4rem;font-size:.72rem}
 .it-amt{
