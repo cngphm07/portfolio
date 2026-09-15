@@ -43,7 +43,7 @@ var VERT = [
   '    sin(t*0.55 + aSeed.z*6.2831) + 0.6*sin(t*1.13 + aSeed.w*6.2831),',
   '    cos(t*0.47 + aSeed.w*6.2831) + 0.6*cos(t*0.91 + aSeed.x*6.2831)',
   '  ) * 0.30;',
-  '  vec2 jitter = vec2(sin(t*2.1 + aSeed.x*61.0), cos(t*1.7 + aSeed.y*53.0)) * 0.0075;',
+  '  vec2 jitter = vec2(sin(t*2.1 + aSeed.x*61.0), cos(t*1.7 + aSeed.y*53.0)) * 0.0045;',
   '  vec2 pos = mix(scatter*1.15 + drift, aTarget + jitter, uMorph);',
   '  pos.y += uScroll * (0.35 + 0.55*hash(aSeed.z*11.1));',
   '  pos.x *= 1.0 + uScroll*0.4;',
@@ -53,10 +53,10 @@ var VERT = [
   '  pos += (d/(sqrt(dist2)+0.001)) * push * 0.38;',
   '  pos += vec2(-d.y, d.x) * push * 0.22;',
   '  gl_Position = vec4(pos, 0.0, 1.0);',
-  '  float depth = 0.45 + 0.55*hash(aSeed.w*9.7);',
-  '  gl_PointSize = mix(1.1, 2.1, uMorph) * depth * uDPR * (1.0 + 0.7*push);',
-  '  float tw = 0.75 + 0.25*sin(t*(1.5 + hash(aSeed.x*3.3)*2.0) + aSeed.y*40.0);',
-  '  vAlpha = mix(0.20, 0.72, hash(aSeed.z*5.31)) * depth * tw * (0.55 + 0.45*uMorph);',
+  '  float depth = 0.62 + 0.38*hash(aSeed.w*9.7);',
+  '  gl_PointSize = mix(1.2, 2.7, uMorph) * depth * uDPR * (1.0 + 0.7*push);',
+  '  float tw = 0.86 + 0.14*sin(t*(1.5 + hash(aSeed.x*3.3)*2.0) + aSeed.y*40.0);',
+  '  vAlpha = mix(0.38, 1.0, hash(aSeed.z*5.31)) * mix(0.55, 1.0, depth) * tw * (0.35 + 0.65*uMorph);',
   '}'
 ].join('\n');
 
@@ -89,7 +89,7 @@ if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){ fallback(); return; }
 gl.useProgram(prog);
 
 var isMobile = window.matchMedia('(max-width: 760px)').matches || !window.matchMedia('(pointer: fine)').matches;
-var COUNT = isMobile ? 26000 : 62000;
+var COUNT = isMobile ? 30000 : 70000;
 var dpr = Math.min(window.devicePixelRatio || 1, 1.75);
 
 /* ---------- buffers ---------- */
@@ -165,7 +165,7 @@ function sampleText(){
   for(var py = 0; py < SH; py += step){
     for(var px = 0; px < SW; px += step){
       if(img[(py * SW + px) * 4 + 3] > 128){
-        pts.push(px + Math.random() * 1.6 - 0.8, py + Math.random() * 1.6 - 0.8);
+        pts.push(px + Math.random() * 1.0 - 0.5, py + Math.random() * 1.0 - 0.5);
       }
     }
   }
@@ -175,10 +175,10 @@ function sampleText(){
 function fillTargets(){
   if(!points || !points.length) return;
   var maxW = Math.min(W * 0.92, 1500);
-  var maxH = H * 0.44;
+  var maxH = H * 0.46;
   var s = Math.min(maxW / SW, maxH / SH);
   var ox = (W - SW * s) / 2;
-  var oy = (H - SH * s) / 2 - H * 0.06;
+  var oy = (H - SH * s) / 2 - H * 0.09;
   var n = points.length / 2;
   for(var i = 0; i < COUNT; i++){
     var k = (i % n) * 2;
