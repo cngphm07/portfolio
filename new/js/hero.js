@@ -55,9 +55,10 @@ var VERT = [
   '  pos += vec2(-d.y, d.x) * push * 0.22;',
   '  gl_Position = vec4(pos, 0.0, 1.0);',
   '  float depth = 0.62 + 0.38*hash(aSeed.w*9.7);',
-  '  gl_PointSize = mix(1.0, 3.0, uMorph) * (0.8 + 0.2*depth) * uDPR * (1.0 + 0.7*push);',
+  '  float orb = step(0.93, hash(aSeed.x*7.7));',
+  '  gl_PointSize = (mix(2.4, 3.8, uMorph) * (0.75 + 0.5*depth) + orb * 5.0 * uMorph) * uDPR * (1.0 + 0.7*push);',
   '  float tw = 0.92 + 0.08*sin(t*(1.5 + hash(aSeed.x*3.3)*2.0) + aSeed.y*40.0);',
-  '  vAlpha = mix(0.72, 1.0, hash(aSeed.z*5.31)) * tw * (0.35 + 0.65*uMorph);',
+  '  vAlpha = mix(0.55, 1.0, hash(aSeed.z*5.31)) * tw * (0.35 + 0.65*uMorph);',
   '  vTint = step(0.93, hash(aSeed.w*3.7)) * 0.9;',
   '}'
 ].join('\n');
@@ -68,9 +69,10 @@ var FRAG = [
   'varying float vTint;',
   'void main(){',
   '  float d = length(gl_PointCoord - vec2(0.5));',
-  '  float a = smoothstep(0.5, 0.24, d);',
+  '  float core = smoothstep(0.26, 0.04, d);',
+  '  float halo = smoothstep(0.5, 0.14, d);',
   '  vec3 col = mix(vec3(1.0), vec3(0.788, 0.949, 0.294), vTint);',
-  '  gl_FragColor = vec4(col, a * vAlpha);',
+  '  gl_FragColor = vec4(col, (core + halo * 0.4) * vAlpha);',
   '}'
 ].join('\n');
 
@@ -93,7 +95,8 @@ if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){ fallback(); return; }
 gl.useProgram(prog);
 
 var isMobile = window.matchMedia('(max-width: 760px)').matches || !window.matchMedia('(pointer: fine)').matches;
-var COUNT = isMobile ? 36000 : 92000;
+var COUNT = isMobile ? 30000 : 60000; // buffer cap; actual draw count = sampled points
+var drawCount = 0;
 var dpr = Math.min(window.devicePixelRatio || 1, 1.75);
 
 /* ---------- buffers ---------- */
@@ -169,11 +172,11 @@ function sampleText(){
   });
   var img;
   try{ img = x.getImageData(0, 0, SW, SH).data; }catch(e){ return null; }
-  var step = 2, pts = [];
+  var step = 5, pts = [];
   for(var py = 0; py < SH; py += step){
     for(var px = 0; px < SW; px += step){
       if(img[(py * SW + px) * 4 + 3] > 128){
-        pts.push(px + Math.random() * 2.2 - 1.1, py + Math.random() * 2.2 - 1.1);
+        pts.push(px + Math.random() * 2.0 - 1.0, py + Math.random() * 2.0 - 1.0);
       }
     }
   }
@@ -194,8 +197,9 @@ function fillTargets(){
   var ox = (W - SW * s) / 2;
   var oy = H * 0.05; // lockup anchored to the upper area, clear of the name block below
   var n = points.length / 2;
-  for(var i = 0; i < COUNT; i++){
-    var k = (i % n) * 2;
+  drawCount = Math.min(n, COUNT);
+  for(var i = 0; i < drawCount; i++){
+    var k = i * 2; // one unique sample point per particle: LED dot-matrix look
     var px = ox + points[k] * s;
     var py = oy + points[k + 1] * s;
     targets[i * 2]     = (px / W) * 2 - 1;
@@ -252,7 +256,7 @@ function tick(now){
   gl.uniform2f(U.uMouse, mouse.x, mouse.y);
   gl.uniform1f(U.uForce, mouse.force * (1 - scroll));
   gl.uniform1f(U.uDPR, dpr);
-  gl.drawArrays(gl.POINTS, 0, COUNT);
+  gl.drawArrays(gl.POINTS, 0, drawCount);
 
   var op = Math.max(0, 1 - scroll * 1.2);
   var cur = parseFloat(canvas.style.opacity || '1');
