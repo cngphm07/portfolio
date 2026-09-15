@@ -44,7 +44,7 @@ var VERT = [
   '    sin(t*0.55 + aSeed.z*6.2831) + 0.6*sin(t*1.13 + aSeed.w*6.2831),',
   '    cos(t*0.47 + aSeed.w*6.2831) + 0.6*cos(t*0.91 + aSeed.x*6.2831)',
   '  ) * 0.30;',
-  '  vec2 jitter = vec2(sin(t*2.1 + aSeed.x*61.0), cos(t*1.7 + aSeed.y*53.0)) * 0.0045;',
+  '  vec2 jitter = vec2(sin(t*2.1 + aSeed.x*61.0), cos(t*1.7 + aSeed.y*53.0)) * 0.0035;',
   '  vec2 pos = mix(scatter*1.15 + drift, aTarget + jitter, uMorph);',
   '  pos.y += uScroll * (0.35 + 0.55*hash(aSeed.z*11.1));',
   '  pos.x *= 1.0 + uScroll*0.4;',
@@ -55,9 +55,9 @@ var VERT = [
   '  pos += vec2(-d.y, d.x) * push * 0.22;',
   '  gl_Position = vec4(pos, 0.0, 1.0);',
   '  float depth = 0.62 + 0.38*hash(aSeed.w*9.7);',
-  '  gl_PointSize = mix(1.2, 2.7, uMorph) * depth * uDPR * (1.0 + 0.7*push);',
-  '  float tw = 0.86 + 0.14*sin(t*(1.5 + hash(aSeed.x*3.3)*2.0) + aSeed.y*40.0);',
-  '  vAlpha = mix(0.38, 1.0, hash(aSeed.z*5.31)) * mix(0.55, 1.0, depth) * tw * (0.35 + 0.65*uMorph);',
+  '  gl_PointSize = mix(1.0, 3.0, uMorph) * (0.8 + 0.2*depth) * uDPR * (1.0 + 0.7*push);',
+  '  float tw = 0.92 + 0.08*sin(t*(1.5 + hash(aSeed.x*3.3)*2.0) + aSeed.y*40.0);',
+  '  vAlpha = mix(0.72, 1.0, hash(aSeed.z*5.31)) * tw * (0.35 + 0.65*uMorph);',
   '  vTint = step(0.93, hash(aSeed.w*3.7)) * 0.9;',
   '}'
 ].join('\n');
@@ -68,7 +68,7 @@ var FRAG = [
   'varying float vTint;',
   'void main(){',
   '  float d = length(gl_PointCoord - vec2(0.5));',
-  '  float a = smoothstep(0.5, 0.06, d);',
+  '  float a = smoothstep(0.5, 0.24, d);',
   '  vec3 col = mix(vec3(1.0), vec3(0.788, 0.949, 0.294), vTint);',
   '  gl_FragColor = vec4(col, a * vAlpha);',
   '}'
@@ -93,7 +93,7 @@ if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){ fallback(); return; }
 gl.useProgram(prog);
 
 var isMobile = window.matchMedia('(max-width: 760px)').matches || !window.matchMedia('(pointer: fine)').matches;
-var COUNT = isMobile ? 34000 : 76000;
+var COUNT = isMobile ? 36000 : 92000;
 var dpr = Math.min(window.devicePixelRatio || 1, 1.75);
 
 /* ---------- buffers ---------- */
@@ -147,7 +147,7 @@ function resize(){
 }
 
 function sampleText(){
-  var SW = 1400, SH = 440;
+  var SW = 1400, SH = 400;
   var c = document.createElement('canvas');
   c.width = SW; c.height = SH;
   var x = c.getContext('2d', { willReadFrequently: true });
@@ -156,15 +156,16 @@ function sampleText(){
   x.textAlign = 'center';
   x.textBaseline = 'middle';
   if('fontStretch' in x){ try{ x.fontStretch = 'expanded'; }catch(e){} }
-  // both lines fitted to the same width -> poster lockup
-  var lines = [['FILMMAKER', 150], ['& VIDEOGRAPHER', 330]];
+  // poster lockup: line 1 full width, line 2 at 76% width for hierarchy
+  var full = SW - 40;
+  var lines = [['FILMMAKER', full, 140], ['& VIDEOGRAPHER', full * 0.76, 300]];
   lines.forEach(function(ln){
     var fs = 300;
     x.font = '900 ' + fs + 'px Archivo, sans-serif';
     var w = x.measureText(ln[0]).width;
-    fs = Math.floor(fs * (SW - 40) / w);
+    fs = Math.floor(fs * ln[1] / w);
     x.font = '900 ' + fs + 'px Archivo, sans-serif';
-    x.fillText(ln[0], SW / 2, ln[1]);
+    x.fillText(ln[0], SW / 2, ln[2]);
   });
   var img;
   try{ img = x.getImageData(0, 0, SW, SH).data; }catch(e){ return null; }
@@ -172,9 +173,15 @@ function sampleText(){
   for(var py = 0; py < SH; py += step){
     for(var px = 0; px < SW; px += step){
       if(img[(py * SW + px) * 4 + 3] > 128){
-        pts.push(px + Math.random() * 1.0 - 0.5, py + Math.random() * 1.0 - 0.5);
+        pts.push(px + Math.random() * 2.2 - 1.1, py + Math.random() * 2.2 - 1.1);
       }
     }
+  }
+  // shuffle so the modulo assignment spreads evenly across the glyph
+  for(var i = pts.length / 2 - 1; i > 0; i--){
+    var j = Math.floor(Math.random() * (i + 1));
+    var tx = pts[i * 2]; pts[i * 2] = pts[j * 2]; pts[j * 2] = tx;
+    var ty = pts[i * 2 + 1]; pts[i * 2 + 1] = pts[j * 2 + 1]; pts[j * 2 + 1] = ty;
   }
   return pts;
 }
