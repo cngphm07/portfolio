@@ -379,6 +379,41 @@ b.bad{color:#000;background:var(--ink);padding:0 .35rem}
 .chg>span:last-child{color:var(--ink);font-size:.8rem}
 .chg b{color:var(--ink);font-family:var(--font-m)}
 
+/* ---------- user chip ---------- */
+.userchip{display:flex;align-items:center;gap:.6rem;font-size:.6rem;color:var(--g1);white-space:nowrap;margin:0}
+.userchip #userEmail{color:var(--ink)}
+
+/* ---------- auth gate ---------- */
+.auth-wrap{
+  position:fixed;inset:0;z-index:1100;
+  background:rgba(3,3,3,.97);
+  display:flex;align-items:center;justify-content:center;
+  padding:1.5rem;
+}
+.auth-card{
+  width:min(400px,94vw);
+  background:var(--surface);border:1px solid var(--line2);
+  padding:2rem 1.8rem 1.6rem;position:relative;
+}
+.auth-card::before,.auth-card::after{
+  content:'';position:absolute;width:12px;height:12px;
+}
+.auth-card::before{top:6px;right:6px;border-top:1px solid var(--ink);border-right:1px solid var(--ink)}
+.auth-card::after{bottom:6px;left:6px;border-bottom:1px solid var(--ink);border-left:1px solid var(--ink)}
+.auth-eyebrow{font-size:.56rem;color:var(--g2);letter-spacing:.32em;margin-bottom:.9rem}
+.auth-title{font-size:clamp(1.6rem,4vw,2.1rem);margin-bottom:.6rem}
+.auth-sub{font-size:.8rem;color:var(--g1);margin-bottom:1.4rem}
+.auth-card label{display:block;font-size:.62rem;color:var(--g2);letter-spacing:.14em;margin-bottom:.9rem;font-family:var(--font-m);text-transform:uppercase}
+.auth-card input{
+  display:block;width:100%;margin-top:.35rem;
+  background:transparent;border:1px solid var(--line);border-radius:0;
+  color:var(--ink);padding:.65rem .7rem;font-size:.9rem;font-family:var(--font-b);letter-spacing:0;text-transform:none;
+}
+.auth-card input:focus{outline:none;border-color:var(--line2);background:rgba(255,255,255,.03)}
+.form-err{color:var(--ink);background:rgba(255,255,255,.06);border:1px solid var(--line2);padding:.5rem .7rem;font-size:.66rem;margin:.2rem 0 .8rem;letter-spacing:.04em}
+.btn.big{width:100%;padding:.8rem 1rem;font-size:.68rem;margin-top:.2rem}
+.auth-foot{font-size:.5rem;color:var(--g3);letter-spacing:.16em;margin:1.1rem 0 0;line-height:1.7}
+
 /* ---------- toast ---------- */
 .toast{
   position:fixed;bottom:26px;left:50%;transform:translateX(-50%);
