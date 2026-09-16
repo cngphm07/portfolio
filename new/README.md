@@ -7,7 +7,7 @@ Preview: `https://oddpig.io.vn/new/` (deploy tự động theo `deploy.yml` hi�
 - Không build step, deploy thẳng file tĩnh như v1.
 - Dùng chung `data.js` do CI sync từ Google Drive — load bằng đường dẫn tuyệt đối `/data.js` nên chạy đúng ở cả `/new/` và root.
 - Thư viện qua CDN: GSAP 3 + ScrollTrigger + SplitText, Lenis 1.x. Nếu CDN chặn, site vẫn mở đầy đủ (không animation).
-- Hero: particle field WebGL1 tự viết (`js/hero.js`) — hạt bụi tụ thành chữ FILMMAKER, né chuột, tan ra khi cuộn. Không WebGL / giảm-motion → fallback static.
+- Hero: WebGL scene tự viết (`js/hero.js`) — chữ DOM căn trái sắc nét + minh họa **globe plexus holographic** bên phải (640 node cầu fibonacci, ~1.9k cạnh nearest-neighbour, 4 vòng quỹ đạo nghiêng), nền silk streams + dust; xoay chậm, nghiêng theo chuột. Không WebGL / reduced-motion → bỏ canvas, chữ vẫn hiển thị.
 
 ## Files
 ```
