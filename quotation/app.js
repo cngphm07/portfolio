@@ -304,9 +304,16 @@ function computeQuote() {
   const afterDiscount = proposed * (1 - (c.discount || 0) / 100);
   const vat = c.invoice ? afterDiscount * 0.2 : 0;
   const total = afterDiscount + vat;
+  // tiền vốn (công thức kiến trúc): giá cơ bản + máy quay phụ + di chuyển + lưu trú
+  const archBaseIt = c.archMode ? ((c.costs.nhanSu || []).find(it => it.auto === 'archBase') || null) : null;
+  const archCamsIt = c.archMode ? ((c.costs.thietBi || []).find(it => it.auto === 'archCams') || null) : null;
+  const archBase = itemAmount(archBaseIt);
+  const archCams = itemAmount(archCamsIt);
+  const von = archBase + archCams + move + stay;
+  const profit = total - von;
   const floor = proposed * (1 - S.settings.floorDiscount / 100);
   const floorMargin = floor > 0 ? (floor - cost) / floor * 100 : 0;
-  return { nhanSu, thietBi, logistic, post, move, stay, cost, proposed, afterDiscount, vat, total, floor, floorMargin };
+  return { nhanSu, thietBi, logistic, post, move, stay, cost, proposed, afterDiscount, vat, total, archBase, archCams, von, profit, floor, floorMargin };
 }
 
 function readQuoteInputs() {
@@ -351,6 +358,7 @@ function fillQuoteInputs() {
   $('#archPanel').hidden = !c.archMode;
   $('#specSections').hidden = !!c.archMode;
   $('#ratesPanel').hidden = !!c.archMode;
+  $('#vonBlock').hidden = !c.archMode;
   $('#a_rooms').value = c.arch.rooms;
   $('#a_cams').value = c.arch.cams;
   $('#a_interview').checked = c.arch.interview;
@@ -382,6 +390,14 @@ function refreshQuote() {
   $('#o_vatNote').textContent = c.invoice ? '+20%' : '— tắt';
   $('#o_total').textContent = fmtM(q.total);
   $('#o_totalFull').textContent = fmt(q.total) + ' ₫';
+  $('#o_base').textContent = fmtM(q.cost);
+  $('#o_baseFull').textContent = fmt(q.cost) + ' ₫';
+  $('#o_von').textContent = fmtM(q.von);
+  $('#o_vonFull').textContent = fmt(q.von) + ' ₫';
+  const pEl = $('#o_profit');
+  pEl.textContent = (q.profit >= 0 ? '+' : '') + fmtM(q.profit);
+  pEl.className = q.profit >= 0 ? 'good' : 'bad';
+  $('#o_profitFull').textContent = fmt(q.profit) + ' ₫';
   renderNeg();
   save();
 }
@@ -483,6 +499,11 @@ function quoteText(q) {
     pad('SAU GIẢM GIÁ:', fmt(q.afterDiscount) + ` (${fmtM(q.afterDiscount)})`),
     pad('HOÁ ĐƠN:', c.invoice ? 'CÓ (+VAT 20%)' : 'KHÔNG'),
     pad('TỔNG TIỀN:', fmt(q.total) + ` (${fmtM(q.total)})`),
+    ...(c.archMode ? [
+      pad('TỔNG CƠ BẢN:', fmt(q.cost) + ` (${fmtM(q.cost)})`),
+      pad('TIỀN VỐN:', fmt(q.von) + ` (${fmtM(q.von)})`),
+      pad('LỢI NHUẬN:', fmt(q.profit) + ` (${fmtM(q.profit)})`),
+    ] : []),
   ].join('\n');
 }
 
@@ -1334,7 +1355,8 @@ document.addEventListener('input', e => {
     S.settings.floorDiscount = clamp(num($('#s_floor').value) || 10, 0, 50);
     save();
   } else if (id === 'a_rooms' || id === 'a_cams' || id === 'a_extra' || id === 'a_interview') {
-    // panel công thức kiến trúc
+    // panel công thức kiến trúc — chỉ có tác dụng ở chế độ kiến trúc
+    if (!S.calc.archMode) return;
     const a = S.calc.arch;
     if (id === 'a_rooms') a.rooms = Math.max(0, num(el.value));
     if (id === 'a_cams') a.cams = Math.max(0, Math.round(num(el.value)));
