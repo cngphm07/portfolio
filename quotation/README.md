@@ -15,14 +15,26 @@ node -e "const http=require('http'),fs=require('fs'),path=require('path');const 
 ## 3 tab chính
 
 ### 🧾 Báo giá (Calculator)
-- **Loại job**: ô điền **tự do** — gõ gì cũng được (TVC, Social, Marketing Campaign, TVC 30s...). Bên dưới có **preset nhanh** để điền sẵn số liệu, chọn xong chỉnh tự do.
-- **Quay**: số ngày, số camera, bật/tắt âm thanh & flycam.
-- **Dựng**: tổng phút video dài + số short.
-- **Đơn giá**: mở panel "⚙️ Đơn giá" để chỉnh đơn giá từng loại (gõ nhanh `2tr` = 2,000,000; `500k` = 500,000).
-- **Kết quả**: COST → GIÁ BÁN ĐỀ XUẤT (cost ÷ (1 − margin)) → GIÁ SÀN (giá đề xuất × 0.9).
-- **🔴 Khách trả giá**: nhập giá khách trả (vd `15tr`) → tool báo margin còn bao nhiêu, cảnh báo nếu dưới 30%, và **đề xuất giảm scope** (bỏ flycam, bớt ngày quay, bớt short...) — mỗi gợi ý có nút **Áp dụng** để thử ngay.
-- **📋 Copy bảng báo giá**: copy dạng text gọn để gửi Zalo/email.
-- **➕ Tạo dự án từ báo giá**: chuyển báo giá thành dự án, giữ nguyên breakdown làm Original Scope.
+Trang chia 3 tầng: **Báo giá + chi phí chi tiết** → **Giảm giá & hoá đơn** → **Internal tracking**.
+
+- **Loại job**: ô điền **tự do** (TVC, Social, Marketing Campaign...). Preset nhanh điền sẵn số liệu + dòng chi phí.
+- **Công thức kiến trúc** (preset Architecture): số phòng × 600K **tối thiểu 5tr**, máy quay thêm +3,5tr/máy, phỏng vấn +2,5tr, phụ thu khác tự nhập.
+- **Chi phí chi tiết**: 4 hạng mục (Nhân sự / Thiết bị / Logistic / Post production), mỗi hạng mục thêm dòng tùy ý: **số lượng × đơn giá = thành tiền**. Dòng AUTO đồng bộ với thông số & đơn giá; sửa tay sẽ tắt auto.
+- **Giá bán**: COST → margin → GIÁ BÁN ĐỀ XUẤT.
+- **🔴 Khách trả giá**: nhập giá khách trả → margin còn bao nhiêu, cảnh báo nếu dưới mức tối thiểu, gợi ý **giảm scope theo từng dòng** (nút Áp dụng).
+- **📋 Copy bảng báo giá**: copy text gọn gửi Zalo/email.
+
+### 💸 Giảm giá & Hoá đơn
+- **Di chuyển / Lưu trú**: tự nhập, tự cộng vào COST (trống = 0).
+- **Giảm giá %**: trừ vào giá đề xuất (trống = không giảm).
+- **Xuất hoá đơn**: bật = cộng **20%** trên giá sau giảm; tắt = bỏ qua.
+- Kết thúc bằng **TỔNG TIỀN** — số tiền khách thanh toán.
+
+### 🔒 INTERNAL TRACKING (nội bộ — không gửi khách)
+- **Giá sàn** (tham chiếu đàm phán).
+- **Tổng tiền cơ bản** (chưa margin) — chế độ kiến trúc.
+- **Tiền vốn** = giá cơ bản + máy quay phụ + di chuyển + lưu trú — chế độ kiến trúc.
+- **Lợi nhuận** = Tổng tiền − Tiền vốn, kèm % trên tổng tiền.
 
 ### 📁 Dự án (Project Manager)
 Mỗi dự án có:
@@ -61,11 +73,17 @@ Dữ liệu nằm trong **localStorage của trình duyệt** trên máy bạn �
 
 ## Công thức
 ```
-Cost        = Nhân sự + Thiết bị + Di chuyển + Dựng
-Giá bán     = Cost ÷ (1 − Margin)        // margin tính trên giá bán
-Giá sàn     = Giá bán × (1 − 10%)
-Margin thực = (Giá chốt − Cost) ÷ Giá chốt
+Cost        = Σ dòng chi phí + Di chuyển + Lưu trú
+Giá bán     = Cost ÷ (1 − Margin)          // margin tính trên giá bán
+Sau giảm giá = Giá bán × (1 − Giảm giá%)
+TỔNG TIỀN   = Sau giảm giá × 1.2           // nếu xuất hoá đơn
+Tiền vốn    = Giá cơ bản + máy quay phụ + di chuyển + lưu trú  (Architecture)
+Lợi nhuận   = Tổng tiền − Tiền vốn
+Giá sàn     = Giá bán × (1 − 10%)          // tham chiếu nội bộ
 ```
+
+## 🔐 Đăng nhập
+Production dùng **Supabase Auth chung với /license-tools** — đăng nhập 1 nơi là 2 trang cùng nhận session. Local (`localhost`, `file://`) bỏ qua đăng nhập để phát triển offline.
 
 ## Dự án mẫu
 Lần đầu mở sẽ có sẵn dự án **ABC Showroom** (hợp đồng 32M, 4 ngày cam kết + Day 5 EXTRA, extra interview +2M...) để xem cách Original Scope & Change Log hoạt động. Có thể xóa bất kỳ lúc nào.

@@ -775,6 +775,7 @@ function createProject(opts) {
       deliverables: opts.deliverables.slice(),
       fromQuote: !!opts.fromQuote,
       breakdown: opts.breakdown || null,
+      quote: opts.quote || null,
       proposed: opts.proposed || null,
       floor: opts.floor || null,
       margin: opts.margin || null,
@@ -856,6 +857,7 @@ function doCreateFromQuote() {
     fromQuote: true,
     breakdown: { nhanSu: q.nhanSu, thietBi: q.thietBi, logistic: q.logistic, post: q.post, total: q.cost, items: JSON.parse(JSON.stringify(S.calc.costs)) },
     proposed: q.proposed, floor: q.floor, margin: c.margin,
+    quote: { move: q.move, stay: q.stay, discount: c.discount || 0, invoice: !!c.invoice, vat: q.vat, afterDiscount: q.afterDiscount, total: q.total, von: q.von, profit: q.profit, archMode: !!c.archMode },
     config: { days: c.days, cameras: c.cameras, sound: c.sound, drone: c.drone, minutes: c.minutes, shorts: c.shorts }
   });
   closeModal();
@@ -906,6 +908,19 @@ function modalOriginal(p) {
             <ul class="os-list">${arr.map(it => `<li>${esc(it.label || '(hạng mục)')} — ${fmt(it.qty)} × ${fmt(it.price)} = ${fmt(itemAmount(it))} ₫</li>`).join('')}</ul>`;
         }
       });
+    }
+  }
+  if (os.quote) {
+    const qt = os.quote;
+    html += `<div class="neg-sub">Giảm giá &amp; hoá đơn lúc chốt</div>
+      <div class="os-item"><span>Di chuyển / lưu trú</span><b>${fmt(qt.move || 0)} / ${fmt(qt.stay || 0)} ₫</b></div>
+      <div class="os-item"><span>Giảm giá</span><b>${qt.discount || 0}%</b></div>
+      <div class="os-item"><span>Hoá đơn</span><b style="font-family:inherit;font-weight:500">${qt.invoice ? 'CÓ (+VAT 20%)' : 'KHÔNG'}</b></div>
+      <div class="os-item"><span>Sau giảm giá</span><b>${fmt(qt.afterDiscount || 0)} ₫</b></div>
+      <div class="os-item"><span>TỔNG TIỀN</span><b>${fmt(qt.total || 0)} ₫</b></div>`;
+    if (qt.archMode) {
+      html += `<div class="os-item"><span>TIỀN VỐN</span><b>${fmt(qt.von || 0)} ₫</b></div>
+        <div class="os-item"><span>LỢI NHUẬN</span><b>${fmt(qt.profit || 0)} ₫</b></div>`;
     }
   }
   html += `<div class="modal-actions"><button class="btn ghost" data-act="modal-close">Đóng</button></div>`;
