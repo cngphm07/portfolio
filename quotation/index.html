@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
 
@@ -89,11 +89,10 @@
 
         <div class="divider"></div>
 
-        <div class="sec-head"><span class="sec-num mono">05</span><span class="sec-rule"></span><span class="sec-title mono">KẾT QUẢ</span></div>
+        <div class="sec-head"><span class="sec-num mono">05</span><span class="sec-rule"></span><span class="sec-title mono">GIÁ BÁN</span></div>
         <div class="bigline dim"><span>COST</span><span class="val"><b id="o_cost"></b></span></div>
         <div class="frow marginrow"><label>Margin mong muốn</label><span class="inl"><input id="c_margin" type="number" min="1" max="95" step="1"> <em>%</em></span></div>
         <div class="bigline accent"><span>GIÁ BÁN ĐỀ XUẤT</span><span class="val"><b id="o_proposed"></b><small id="o_proposedFull"></small></span></div>
-        <div class="bigline"><span>GIÁ SÀN <em id="o_floorMargin" class="muted"></em></span><span class="val"><b id="o_floor"></b><small id="o_floorFull"></small></span></div>
 
         <div class="btnrow">
           <button class="btn" data-act="copy-quote">Copy bảng báo giá</button>
@@ -115,16 +114,20 @@
       <div class="bigline"><span>GIÁ SAU GIẢM GIÁ</span><span class="val"><b id="o_afterDisc"></b><small id="o_afterDiscFull"></small></span></div>
       <div class="bigline"><span>HOÁ ĐƠN <em id="o_vatNote" class="muted"></em></span><span class="val"><b id="o_vat"></b><small id="o_vatFull"></small></span></div>
       <div class="bigline accent"><span>TỔNG TIỀN</span><span class="val"><b id="o_total"></b><small id="o_totalFull"></small></span></div>
+    </div>
+
+    <div class="card internal">
+      <div class="sec-head"><span class="sec-num mono">08</span><span class="sec-rule"></span><span class="sec-title mono">INTERNAL TRACKING</span><span class="sec-count mono">NỘI BỘ — KHÔNG GỬI KHÁCH</span></div>
+      <div class="bigline"><span>GIÁ SÀN <em id="o_floorMargin" class="muted"></em></span><span class="val"><b id="o_floor"></b><small id="o_floorFull"></small></span></div>
       <div id="vonBlock" hidden>
-        <div class="divider"></div>
         <div class="bigline dim"><span>TỔNG TIỀN CƠ BẢN <em class="muted">· chưa margin</em></span><span class="val"><b id="o_base"></b><small id="o_baseFull"></small></span></div>
         <div class="bigline dim"><span>TIỀN VỐN <em class="muted">· cơ bản + máy phụ + di chuyển + lưu trú</em></span><span class="val"><b id="o_von"></b><small id="o_vonFull"></small></span></div>
-        <div class="bigline accent"><span>LỢI NHUẬN</span><span class="val"><b id="o_profit"></b><small id="o_profitFull"></small></span></div>
+        <div class="bigline accent"><span>LỢI NHUẬN</span><span class="val"><b id="o_profit" class="good"></b><small><span id="o_profitPct"></span> · <span id="o_profitFull"></span></small></span></div>
       </div>
     </div>
 
     <div class="card neg">
-      <div class="sec-head"><span class="sec-num mono">08</span><span class="sec-rule"></span><span class="sec-title mono">KHÁCH TRẢ GIÁ</span><span class="rec-dot" aria-hidden="true"></span></div>
+      <div class="sec-head"><span class="sec-num mono">09</span><span class="sec-rule"></span><span class="sec-title mono">KHÁCH TRẢ GIÁ</span><span class="rec-dot" aria-hidden="true"></span></div>
       <div class="frow">
         <label>Giá khách đề xuất</label>
         <span class="inl">
@@ -177,7 +180,7 @@
 </div>
 
 <script src="config.js"></script>
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 <script src="auth.js"></script>
 </body>
 </html>

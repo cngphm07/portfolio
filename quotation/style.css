@@ -414,6 +414,10 @@ b.bad{color:#000;background:var(--ink);padding:0 .35rem}
 .btn.big{width:100%;padding:.8rem 1rem;font-size:.68rem;margin-top:.2rem}
 .auth-foot{font-size:.5rem;color:var(--g3);letter-spacing:.16em;margin:1.1rem 0 0;line-height:1.7}
 
+/* internal tracking — viền nét đứt, tông trầm hơn */
+.card.internal{border-style:dashed;background:rgba(255,255,255,.012)}
+.card.internal::before,.card.internal::after{opacity:.45}
+
 /* ---------- toast ---------- */
 .toast{
   position:fixed;bottom:26px;left:50%;transform:translateX(-50%);

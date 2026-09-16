@@ -398,6 +398,7 @@ function refreshQuote() {
   pEl.textContent = (q.profit >= 0 ? '+' : '') + fmtM(q.profit);
   pEl.className = q.profit >= 0 ? 'good' : 'bad';
   $('#o_profitFull').textContent = fmt(q.profit) + ' ₫';
+  $('#o_profitPct').textContent = q.total > 0 ? (q.profit / q.total * 100).toFixed(1) + '% tổng tiền' : '—';
   renderNeg();
   save();
 }
