@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>link2drive — Privacy Policy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#060606; --surface:#0b0b0b; --ink:#f4f4f4; --g1:#b5b5b5; --g2:#6d6d6d;
+    --line:rgba(255,255,255,.10); --accent:#c9f24b;
+    --font-d:'Archivo',sans-serif; --font-m:'IBM Plex Mono',monospace; --font-b:'Inter',sans-serif;
+    --pad:clamp(1.25rem,4vw,3.5rem);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-weight:300;font-size:15px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:720px;margin:0 auto;padding:clamp(2.5rem,7vh,4.5rem) var(--pad)}
+  h1{font-family:var(--font-d);font-weight:900;font-stretch:112%;text-transform:uppercase;letter-spacing:-.01em;font-size:clamp(1.6rem,4vw,2.4rem);line-height:.95;margin-bottom:.6rem}
+  h1 em{font-style:normal;color:var(--accent)}
+  .date{font-family:var(--font-m);font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--g2);margin-bottom:2.5rem}
+  h2{font-family:var(--font-m);font-weight:400;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--g1);margin:2.2rem 0 .8rem}
+  p,li{color:var(--g1);line-height:1.8;margin-bottom:.7rem}
+  ul{padding-left:1.2rem}
+  a{color:var(--ink)}
+  .panel{background:var(--surface);border:1px solid var(--line);padding:1.4rem;margin-top:2.5rem}
+  footer{border-top:1px solid var(--line);margin-top:3rem;padding-top:1.4rem;font-family:var(--font-m);font-size:.54rem;letter-spacing:.2em;text-transform:uppercase;color:var(--g2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>LINK<em>2</em>DRIVE</h1>
+  <p class="date">Privacy Policy — Effective 17 September 2026</p>
+
+  <h2>Overview</h2>
+  <p>link2drive is a personal, self-hosted utility that transfers files from public Mega and 1fichier links to the user's own Google Drive. It runs locally on the user's machine. This page exists to describe how the app handles data when connecting to Google.</p>
+
+  <h2>What link2drive accesses</h2>
+  <ul>
+    <li><b>Google Drive — full scope.</b> The app requests the <code>https://www.googleapis.com/auth/drive</code> scope in order to create folders and upload files into your Google Drive on your behalf.</li>
+    <li><b>Download links you paste.</b> File names, sizes and contents of the Mega / 1fichier links you provide are streamed through your machine to Google Drive.</li>
+  </ul>
+
+  <h2>What link2drive does not do</h2>
+  <ul>
+    <li>It does not collect, store, or share any personal data.</li>
+    <li>It does not operate any analytics, advertising, or third-party trackers.</li>
+    <li>It does not sell or transfer data to any third party.</li>
+    <li>OAuth credentials and tokens stay on your own machine, in the app's local configuration files.</li>
+  </ul>
+
+  <h2>Data storage &amp; security</h2>
+  <p>All credentials (client ID/secret and refresh token) are stored in a local <code>.env</code> file on the machine running the app. No data leaves your machine except the OAuth handshake with Google and the file transfers you explicitly request.</p>
+
+  <h2>Contact</h2>
+  <p>This is a single-developer personal tool. For any question regarding this policy or the app, contact the site owner via <a href="https://oddpig.io.vn">oddpig.io.vn</a>.</p>
+
+  <div class="panel">
+    <p style="margin:0">Summary: link2drive uses Google OAuth solely to upload files to your own Drive. Nothing is collected, logged remotely, or shared.</p>
+  </div>
+
+  <footer>ODDPIG.TOOLS — LINK2DRIVE PRIVACY POLICY</footer>
+</div>
+</body>
+</html>
