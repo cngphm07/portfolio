@@ -151,11 +151,8 @@ function formatDateDisplay(ymd) {
   if (!ymd) return '';
   const d = new Date(ymd);
   if (isNaN(d.getTime())) return ymd;
-  const monthsEn = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  if (S.lang === 'en' || S.lang === 'both') {
-    return `${d.getDate()} ${monthsEn[d.getMonth()]} ${d.getFullYear()}`;
-  }
-  return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
 }
 
 function formatWorkPeriodDisplay(fromYmd, toYmd) {
@@ -167,21 +164,10 @@ function formatWorkPeriodDisplay(fromYmd, toYmd) {
   const d2 = new Date(toYmd);
   if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return `${fromYmd} - ${toYmd}`;
 
-  if (S.lang === 'vi') {
-    const pad = n => String(n).padStart(2, '0');
-    return `${pad(d1.getDate())}/${pad(d1.getMonth() + 1)}/${d1.getFullYear()} - ${pad(d2.getDate())}/${pad(d2.getMonth() + 1)}/${d2.getFullYear()}`;
-  }
-
-  const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
-  if (d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth()) {
-    return `${d1.getDate()} - ${d2.getDate()} ${monthsFull[d1.getMonth()]} ${d1.getFullYear()}`;
-  }
-  if (d1.getFullYear() === d2.getFullYear()) {
-    return `${d1.getDate()} ${monthsEn[d1.getMonth()]} - ${d2.getDate()} ${monthsEn[d2.getMonth()]} ${d1.getFullYear()}`;
-  }
-  return `${d1.getDate()} ${monthsEn[d1.getMonth()]} ${d1.getFullYear()} - ${d2.getDate()} ${monthsEn[d2.getMonth()]} ${d2.getFullYear()}`;
+  const pad = n => String(n).padStart(2, '0');
+  const str1 = `${pad(d1.getDate())}/${pad(d1.getMonth() + 1)}/${d1.getFullYear()}`;
+  const str2 = `${pad(d2.getDate())}/${pad(d2.getMonth() + 1)}/${d2.getFullYear()}`;
+  return `${str1} - ${str2}`;
 }
 
 function t(key) {
