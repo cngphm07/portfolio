@@ -24,8 +24,6 @@ const I18N = {
     amount: 'Amount',
     subtotal: 'Subtotal',
     tax: 'Tax',
-    referralSubtotal: 'Referral subtotal',
-    workFee: 'Work fee',
     totalDue: 'TOTAL DUE',
     paymentDetails: 'Payment Details',
     bank: 'Bank',
@@ -51,8 +49,6 @@ const I18N = {
     amount: 'Thành tiền',
     subtotal: 'Tạm tính',
     tax: 'Thuế VAT',
-    referralSubtotal: 'Tạm tính giới thiệu',
-    workFee: 'Phí công việc',
     totalDue: 'TỔNG CỘNG',
     paymentDetails: 'Thông tin thanh toán',
     bank: 'Ngân hàng',
@@ -78,8 +74,6 @@ const I18N = {
     amount: 'Amount / Thành tiền',
     subtotal: 'Subtotal / Tạm tính',
     tax: 'Tax / Thuế',
-    referralSubtotal: 'Referral subtotal / Tạm tính GT',
-    workFee: 'Work fee / Phí công việc',
     totalDue: 'TOTAL DUE / TỔNG CỘNG',
     paymentDetails: 'Payment Details / Thanh toán',
     bank: 'Bank / Ngân hàng',
@@ -549,10 +543,7 @@ function updateDocPreview() {
     if (summaryTbody) {
       let summaryHtml = '';
       if (isFreelancer) {
-        summaryHtml += `<tr><td>${t('referralSubtotal')}</td><td>${formatCurrency(subtotal)}</td></tr>`;
-        if (hasPending) {
-          summaryHtml += `<tr><td>${t('workFee')}</td><td>${t('toBeConfirmed')}</td></tr>`;
-        }
+        summaryHtml += `<tr><td>${t('subtotal')}</td><td>${formatCurrency(subtotal)}</td></tr>`;
         const finalTotal = hasPending ? t('toBeConfirmed') : formatCurrency(subtotal);
         summaryHtml += `<tr class="total-row"><td>${t('totalDue')}</td><td>${finalTotal}</td></tr>`;
         
@@ -729,7 +720,8 @@ window.copyInvoiceSummary = function() {
 
   lines.push('\n--- TỔNG KẾT ---');
   if (isFreelancer) {
-    lines.push(`${t('referralSubtotal')}: ${formatCurrency(subtotal)}`);
+    lines.push(`${t('subtotal')}: ${formatCurrency(subtotal)}`);
+    lines.push(`${t('totalDue')}: ${hasPending ? t('toBeConfirmed') : formatCurrency(subtotal)}`);
   } else {
     lines.push(`${t('subtotal')}: ${formatCurrency(subtotal)}`);
     if (data.taxPct > 0) lines.push(`${t('tax')} (${data.taxPct}%): ${formatCurrency(subtotal * data.taxPct / 100)}`);
