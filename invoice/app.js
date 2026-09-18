@@ -878,11 +878,317 @@ function initDatePickers() {
   }
 }
 
+/* ---------- Bank Database & Autocomplete Engine ---------- */
+const VIETNAM_BANKS = [
+  {
+    code: 'VPB',
+    short: 'VPBank',
+    full: 'VPBANK (Vietnam Prosperity Joint Stock Commercial Bank)',
+    vn: 'Ngân hàng TMCP Việt Nam Thịnh Vượng',
+    keywords: 'vpb vpbank việt nam thịnh vượng vietnam prosperity'
+  },
+  {
+    code: 'TCB',
+    short: 'Techcombank',
+    full: 'TECHCOMBANK (Vietnam Technological and Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Kỹ Thương Việt Nam',
+    keywords: 'tcb techcombank kỹ thương technological and commercial'
+  },
+  {
+    code: 'VCB',
+    short: 'Vietcombank',
+    full: 'VIETCOMBANK (Joint Stock Commercial Bank for Foreign Trade of Vietnam)',
+    vn: 'Ngân hàng TMCP Ngoại Thương Việt Nam',
+    keywords: 'vcb vietcombank ngoại thương foreign trade'
+  },
+  {
+    code: 'MB',
+    short: 'MBBank',
+    full: 'MBBANK (Military Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Quân Đội',
+    keywords: 'mb mbbank quân đội military commercial'
+  },
+  {
+    code: 'ACB',
+    short: 'ACB',
+    full: 'ACB (Asia Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Á Châu',
+    keywords: 'acb á châu asia commercial'
+  },
+  {
+    code: 'BIDV',
+    short: 'BIDV',
+    full: 'BIDV (Joint Stock Commercial Bank for Investment and Development of Vietnam)',
+    vn: 'Ngân hàng TMCP Đầu tư và Phát triển Việt Nam',
+    keywords: 'bidv đầu tư phát triển investment and development'
+  },
+  {
+    code: 'CTG',
+    short: 'VietinBank',
+    full: 'VIETINBANK (Vietnam Joint Stock Commercial Bank for Industry and Trade)',
+    vn: 'Ngân hàng TMCP Công Thương Việt Nam',
+    keywords: 'ctg vietinbank viettinbank công thương industry and trade'
+  },
+  {
+    code: 'TPB',
+    short: 'TPBank',
+    full: 'TPBANK (Tien Phong Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Tiên Phong',
+    keywords: 'tpb tpbank tiên phong tien phong'
+  },
+  {
+    code: 'STB',
+    short: 'Sacombank',
+    full: 'SACOMBANK (Saigon Thuong Tin Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Sài Gòn Thương Tín',
+    keywords: 'stb sacombank sài gòn thương tín saigon thuong tin'
+  },
+  {
+    code: 'VIB',
+    short: 'VIB',
+    full: 'VIB (Vietnam International Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Quốc Tế Việt Nam',
+    keywords: 'vib quốc tế international'
+  },
+  {
+    code: 'HDB',
+    short: 'HDBank',
+    full: 'HDBANK (Ho Chi Minh City Development Joint Stock Commercial Bank)',
+    vn: 'Ngân hàng TMCP Phát triển TP.HCM',
+    keywords: 'hdb hdbank phát triển tphcm ho chi minh city development'
+  },
+  {
+    code: 'MSB',
+    short: 'MSB',
+    full: 'MSB (Vietnam Maritime Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Hàng Hải Việt Nam',
+    keywords: 'msb maritime bank hàng hải'
+  },
+  {
+    code: 'SHB',
+    short: 'SHB',
+    full: 'SHB (Saigon - Hanoi Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Sài Gòn - Hà Nội',
+    keywords: 'shb sài gòn hà nội saigon hanoi'
+  },
+  {
+    code: 'SSB',
+    short: 'SeABank',
+    full: 'SEABANK (Southeast Asia Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Đông Nam Á',
+    keywords: 'ssb seabank đông nam á southeast asia'
+  },
+  {
+    code: 'OCB',
+    short: 'OCB',
+    full: 'OCB (Orient Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Phương Đông',
+    keywords: 'ocb phương đông orient commercial'
+  },
+  {
+    code: 'EIB',
+    short: 'Eximbank',
+    full: 'EXIMBANK (Vietnam Export Import Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Xuất Nhập Khẩu Việt Nam',
+    keywords: 'eib eximbank xuất nhập khẩu export import'
+  },
+  {
+    code: 'LPB',
+    short: 'LPBank',
+    full: 'LPBANK (Fortune Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Lộc Phát Việt Nam (LienVietPostBank)',
+    keywords: 'lpb lpbank lộc phát lienvietpostbank bưu điện'
+  },
+  {
+    code: 'VBA',
+    short: 'Agribank',
+    full: 'AGRIBANK (Vietnam Bank for Agriculture and Rural Development)',
+    vn: 'Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam',
+    keywords: 'vba agribank nông nghiệp nông thôn agriculture and rural'
+  },
+  {
+    code: 'BAB',
+    short: 'Bac A Bank',
+    full: 'BAC A BANK (Bac A Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Bắc Á',
+    keywords: 'bab bắc á bac a bank'
+  },
+  {
+    code: 'NAB',
+    short: 'Nam A Bank',
+    full: 'NAM A BANK (Nam A Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Nam Á',
+    keywords: 'nab nam á nam a bank'
+  },
+  {
+    code: 'PVC',
+    short: 'PVcomBank',
+    full: 'PVCOMBANK (Vietnam Public Joint Stock Commercial Bank)',
+    vn: 'Ngân hàng TMCP Đại Chúng Việt Nam',
+    keywords: 'pvc pvcombank đại chúng vietnam public'
+  },
+  {
+    code: 'VAB',
+    short: 'VietABank',
+    full: 'VIETABANK (Viet A Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Việt Á',
+    keywords: 'vab vietabank việt á viet a bank'
+  },
+  {
+    code: 'BVB',
+    short: 'BaoViet Bank',
+    full: 'BAOVIET BANK (Bao Viet Joint Stock Commercial Bank)',
+    vn: 'Ngân hàng TMCP Bảo Việt',
+    keywords: 'bvb baoviet bảo việt'
+  },
+  {
+    code: 'KLB',
+    short: 'KienlongBank',
+    full: 'KIENLONGBANK (Kien Long Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Kiên Long',
+    keywords: 'klb kienlongbank kiên long kien long'
+  },
+  {
+    code: 'SGB',
+    short: 'Saigonbank',
+    full: 'SAIGONBANK (Saigon Bank for Industry and Trade)',
+    vn: 'Ngân hàng TMCP Sài Gòn Công Thương',
+    keywords: 'sgb saigonbank sài gòn công thương'
+  },
+  {
+    code: 'NCB',
+    short: 'NCB',
+    full: 'NCB (National Citizen Commercial Joint Stock Bank)',
+    vn: 'Ngân hàng TMCP Quốc Dân',
+    keywords: 'ncb quốc dân national citizen'
+  },
+  {
+    code: 'SHBVN',
+    short: 'Shinhan Bank',
+    full: 'SHINHAN BANK (Shinhan Bank Vietnam)',
+    vn: 'Ngân hàng TNHH MTV Shinhan Việt Nam',
+    keywords: 'shinhan bank hàn quốc'
+  },
+  {
+    code: 'HSBC',
+    short: 'HSBC',
+    full: 'HSBC (HSBC Bank Vietnam)',
+    vn: 'Ngân hàng TNHH MTV HSBC Việt Nam',
+    keywords: 'hsbc hong kong shanghai'
+  },
+  {
+    code: 'SCB_INT',
+    short: 'Standard Chartered',
+    full: 'STANDARD CHARTERED (Standard Chartered Bank Vietnam)',
+    vn: 'Ngân hàng TNHH MTV Standard Chartered Việt Nam',
+    keywords: 'scb standard chartered'
+  },
+  {
+    code: 'UOB',
+    short: 'UOB',
+    full: 'UOB (United Overseas Bank Vietnam)',
+    vn: 'Ngân hàng United Overseas Bank Việt Nam',
+    keywords: 'uob united overseas'
+  },
+  {
+    code: 'WOO',
+    short: 'Woori Bank',
+    full: 'WOORI BANK (Woori Bank Vietnam)',
+    vn: 'Ngân hàng TNHH MTV Woori Việt Nam',
+    keywords: 'woori bank hàn quốc'
+  },
+  {
+    code: 'PBVN',
+    short: 'Public Bank',
+    full: 'PUBLIC BANK (Public Bank Vietnam)',
+    vn: 'Ngân hàng TNHH MTV Public Bank Việt Nam',
+    keywords: 'public bank malaysia'
+  },
+  {
+    code: 'CIMB',
+    short: 'CIMB Bank',
+    full: 'CIMB BANK (CIMB Bank Vietnam)',
+    vn: 'Ngân hàng TNHH MTV CIMB Việt Nam',
+    keywords: 'cimb bank malaysia'
+  },
+  {
+    code: 'HLBVN',
+    short: 'Hong Leong Bank',
+    full: 'HONG LEONG BANK (Hong Leong Bank Vietnam)',
+    vn: 'Ngân hàng TNHH MTV Hong Leong Việt Nam',
+    keywords: 'hong leong bank'
+  }
+];
+
+function searchBanks(query) {
+  if (!query || query.trim().length < 1) return [];
+  const q = query.toLowerCase().trim();
+  const strip = str => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const qNorm = strip(q);
+
+  return VIETNAM_BANKS.filter(b => {
+    return b.code.toLowerCase().includes(q) ||
+           b.short.toLowerCase().includes(q) ||
+           strip(b.short).includes(qNorm) ||
+           b.full.toLowerCase().includes(q) ||
+           strip(b.full).includes(qNorm) ||
+           strip(b.vn).includes(qNorm) ||
+           strip(b.keywords).includes(qNorm);
+  }).slice(0, 6);
+}
+
+function initBankAutocomplete(inputId, suggestBoxId) {
+  const input = $(`#${inputId}`);
+  const box = $(`#${suggestBoxId}`);
+  if (!input || !box) return;
+
+  function renderSuggestions() {
+    const val = input.value;
+    const matches = searchBanks(val);
+    if (matches.length === 0) {
+      box.hidden = true;
+      box.innerHTML = '';
+      return;
+    }
+
+    box.innerHTML = matches.map(b => `
+      <div class="bank-suggest-item" data-full="${esc(b.full)}">
+        <span class="bank-suggest-name">${esc(b.full)}</span>
+        <span class="bank-suggest-sub">${esc(b.vn)} · ${esc(b.code)}</span>
+      </div>
+    `).join('');
+    box.hidden = false;
+  }
+
+  input.addEventListener('input', renderSuggestions);
+  input.addEventListener('focus', () => {
+    if (input.value.trim().length >= 1) renderSuggestions();
+  });
+
+  box.addEventListener('click', e => {
+    const item = e.target.closest('.bank-suggest-item');
+    if (!item) return;
+    const full = item.dataset.full;
+    input.value = full;
+    box.hidden = true;
+    box.innerHTML = '';
+    syncAllInputsToStateAndPreview();
+  });
+
+  document.addEventListener('click', e => {
+    if (!input.contains(e.target) && !box.contains(e.target)) {
+      box.hidden = true;
+    }
+  });
+}
+
 /* ---------- Initialize Application ---------- */
 function init() {
   loadDraftFromStorage();
   initFormFields();
   initDatePickers();
+  initBankAutocomplete('f_bank', 'f_bank_suggestions');
+  initBankAutocomplete('s_bank', 's_bank_suggestions');
   bindEvents();
   syncAllInputsToStateAndPreview();
 
