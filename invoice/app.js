@@ -1,7 +1,7 @@
 'use strict';
 
 /* ============================================================
-   ODD PIG — INVOICE STUDIO JAVASCRIPT ENGINE
+   CNGPHM — INVOICE STUDIO JAVASCRIPT ENGINE
    ============================================================ */
 
 const $ = s => document.querySelector(s);
@@ -249,6 +249,29 @@ function initFormFields() {
   renderItemInputs('service');
 }
 
+// Collects whatever the user typed in line items before re-rendering
+function collectCurrentItemInputsFromDOM(tab) {
+  const wrap = $(`#${tab === 'freelancer' ? 'f' : 's'}_items_wrap`);
+  if (!wrap) return;
+  const rows = wrap.querySelectorAll('.item-row');
+  const data = tab === 'freelancer' ? S.f : S.s;
+  if (!data || !Array.isArray(data.items)) return;
+
+  rows.forEach(row => {
+    const descIn = row.querySelector('[data-act="desc"]');
+    const qtyIn = row.querySelector('[data-act="qty"]');
+    const rateIn = row.querySelector('[data-act="rate"]');
+    if (!descIn) return;
+    const id = parseInt(descIn.dataset.id, 10);
+    const item = data.items.find(it => it.id === id);
+    if (item) {
+      if (descIn) item.desc = descIn.value;
+      if (qtyIn) item.qty = qtyIn.value;
+      if (rateIn) item.rate = rateIn.value;
+    }
+  });
+}
+
 function renderItemInputs(tab) {
   const data = tab === 'freelancer' ? S.f : S.s;
   if (!data || !Array.isArray(data.items)) {
@@ -265,7 +288,7 @@ function renderItemInputs(tab) {
       <input type="text" placeholder="Mô tả công việc" value="${esc(item.desc)}" data-act="desc" data-tab="${tab}" data-id="${item.id}">
       <input type="text" placeholder="SL / Ngày" value="${esc(item.qty)}" data-act="qty" data-tab="${tab}" data-id="${item.id}" style="text-align:right">
       <input type="text" class="money-in" placeholder="Đơn giá" value="${esc(item.rate)}" data-act="rate" data-tab="${tab}" data-id="${item.id}">
-      <button type="button" class="item-del-btn" onclick="deleteItem('${tab}', ${item.id})" data-act="del-item" data-tab="${tab}" data-id="${item.id}" title="Xóa dòng">✕</button>
+      <button type="button" class="item-del-btn" onclick="deleteItem('${tab}', ${item.id})" title="Xóa dòng">✕</button>
     `;
     wrap.appendChild(row);
   });
@@ -275,21 +298,39 @@ window.addItem = function(tab) {
   const activeTab = tab || S.tab || 'freelancer';
   const data = activeTab === 'freelancer' ? S.f : S.s;
   if (!Array.isArray(data.items)) data.items = [];
+  
+  // Save whatever user typed into DOM before re-render
+  collectCurrentItemInputsFromDOM(activeTab);
+
+  const newId = ++nextItemId;
   data.items.push({
-    id: ++nextItemId,
+    id: newId,
     desc: '',
     qty: '1',
     rate: '0',
     isText: false,
     amount: 0
   });
+
   renderItemInputs(activeTab);
   syncAllInputsToStateAndPreview();
+
+  // Focus the new row's description input smoothly
+  setTimeout(() => {
+    const wrap = $(`#${activeTab === 'freelancer' ? 'f' : 's'}_items_wrap`);
+    if (wrap) {
+      const inputs = wrap.querySelectorAll('.item-row input[data-act="desc"]');
+      if (inputs.length > 0) {
+        inputs[inputs.length - 1].focus();
+      }
+    }
+  }, 20);
 };
 
 window.deleteItem = function(tab, id) {
   const data = tab === 'freelancer' ? S.f : S.s;
   if (!data || !Array.isArray(data.items)) return;
+  collectCurrentItemInputsFromDOM(tab);
   const idx = data.items.findIndex(it => it.id === id);
   if (idx > -1) {
     data.items.splice(idx, 1);
@@ -534,7 +575,7 @@ function updateDocPreview() {
 
 /* ---------- Event Handlers ---------- */
 function bindEvents() {
-  // Global input & change listener for real-time reactivity
+  // Real-time input synchronization
   document.addEventListener('input', e => {
     const t = e.target;
     if (t && t.dataset && t.dataset.act && t.dataset.tab) {
@@ -565,30 +606,6 @@ function bindEvents() {
   document.addEventListener('paste', () => {
     setTimeout(syncAllInputsToStateAndPreview, 10);
   });
-
-  // Buttons delegation
-  document.addEventListener('click', e => {
-    const btn = e.target.closest('[data-act], #btn_add_f_item, #btn_add_s_item');
-    if (!btn) return;
-    const act = btn.dataset.act || (btn.id === 'btn_add_f_item' ? 'add-f' : btn.id === 'btn_add_s_item' ? 'add-s' : null);
-    const tab = btn.dataset.tab;
-    const id = parseInt(btn.dataset.id, 10);
-
-    if (act === 'add-f' || (act === 'add-item' && tab === 'freelancer')) {
-      addItem('freelancer');
-    } else if (act === 'add-s' || (act === 'add-item' && tab === 'service')) {
-      addItem('service');
-    } else if (act === 'del-item' && tab && !isNaN(id)) {
-      deleteItem(tab, id);
-    }
-  });
-
-  // Action buttons
-  $('#btn_export_pdf')?.addEventListener('click', exportPDF);
-  $('#btn_print')?.addEventListener('click', () => window.print());
-  $('#btn_copy_summary')?.addEventListener('click', copyInvoiceSummary);
-  $('#btn_save_defaults')?.addEventListener('click', saveDefaultProfile);
-  $('#btn_load_defaults')?.addEventListener('click', loadDefaultProfile);
 }
 
 /* ---------- PDF Export Engine (html2pdf.js) ---------- */
