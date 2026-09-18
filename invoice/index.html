@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#060606">
+<meta name="description" content="Odd Pig Invoice Studio — Tạo hóa đơn freelancer và dịch vụ chuyên nghiệp, xuất PDF vector sắc nét">
+<title>Odd Pig — Invoice Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<!-- html2pdf bundle for crisp vector & full Vietnamese font support -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<!-- Topbar Navigation -->
+<header class="topbar">
+  <a class="logo-link" href="/">
+    <div class="logo display">ODD<em>PIG</em><span class="tools mono">INVOICE STUDIO</span></div>
+  </a>
+  
+  <nav class="tabs mono">
+    <button class="tab active" data-tab-switch="freelancer">FREELANCER</button>
+    <button class="tab" data-tab-switch="service">DỊCH VỤ / BÁN HÀNG</button>
+  </nav>
+
+  <p class="tc mono" id="tcClock" aria-hidden="true">TC 00:00:00:00</p>
+</header>
+
+<main>
+  <!-- View Header & Control Bar -->
+  <div class="view-head">
+    <div class="view-head-left">
+      <h1 class="display">INVOICE STUDIO</h1>
+      <span class="kicker mono">TẠO HÓA ĐƠN · XUẤT PDF VECTOR · 100% TIẾNG VIỆT</span>
+    </div>
+
+    <!-- Quick Controls: Lang, Currency, Presets -->
+    <div class="control-bar">
+      <!-- Language Selector -->
+      <div class="pill-group">
+        <button class="pill-opt" data-lang="vi">VI</button>
+        <button class="pill-opt active" data-lang="en">EN</button>
+        <button class="pill-opt" data-lang="both">SONG NGỮ</button>
+      </div>
+
+      <!-- Currency Selector -->
+      <div class="pill-group">
+        <button class="pill-opt active" data-currency="VND">VND</button>
+        <button class="pill-opt" data-currency="USD">USD</button>
+      </div>
+
+      <button class="btn sm ghost" id="btn_save_defaults">💾 LƯU MẶC ĐỊNH</button>
+      <button class="btn sm ghost" id="btn_load_defaults">📂 TẢI MẶC ĐỊNH</button>
+    </div>
+  </div>
+
+  <!-- Studio 2-Column Grid -->
+  <div class="studio-grid">
+    
+    <!-- LEFT: FORM EDITOR -->
+    <div class="form-col">
+      
+      <!-- ============ TAB FREELANCER ============ -->
+      <div id="view_freelancer" class="tab-view active">
+        
+        <!-- 01: Thông tin hoá đơn -->
+        <div class="card">
+          <div class="sec-head">
+            <span class="sec-num mono">01</span>
+            <span class="sec-rule"></span>
+            <span class="sec-title mono">THÔNG TIN HOÁ ĐƠN</span>
+          </div>
+          
+          <div class="fgrid-3">
+            <div class="fg">
+              <label>Số hóa đơn (Invoice #)</label>
+              <input id="f_invnum" value="INV-001">
+            </div>
+            <div class="fg">
+              <label>Ngày lập (Invoice Date)</label>
+              <input id="f_invdate" type="date">
+            </div>
+            <div class="fg">
+              <label>Thời gian làm (Work Period)</label>
+              <input id="f_workperiod" value="20 August 2026 - 24 August 2026">
+            </div>
+          </div>
+        </div>
+
+        <!-- 02: Người gửi (From) -->
+        <div class="card">
+          <div class="sec-head">
+            <span class="sec-num mono">02</span>
+            <span class="sec-rule"></span>
+            <span class="sec-title mono">NGƯỜI GỬI (FROM)</span>
+          </div>
+
+          <div class="fgrid-2">
+            <div class="fg">
+              <label>Họ và tên</label>
+              <input id="f_name" value="Nguyen Ngoc Thu Hang">
+            </div>
+            <div class="fg">
+              <label>Chức danh / Mô tả dịch vụ</label>
+              <input id="f_subtitle" value="Invoice for services and referrals">
+            </div>
+          </div>
+        </div>
+
+        <!-- 03: Khách hàng (Bill To) -->
+        <div class="card">
+          <div class="sec-head">
+            <span class="sec-num mono">03</span>
+            <span class="sec-rule"></span>
+            <span class="sec-title mono">KHÁCH HÀNG (BILL TO)</span>
+          </div>
+
+          <div class="fgrid-2">
+            <div class="fg">
+              <label>Tên khách hàng / Doanh nghiệp</label>
+              <input id="f_billto" value="The Speechless Communication Pty Ltd">
+            </div>
+            <div class="fg">
+              <label>Địa chỉ / Email (tùy chọn)</label>
+              <input id="f_billaddr" placeholder="vd: Sydney, Australia">
+            </div>
+          </div>
+        </div>
+
+        <!-- 04: Chi tiết công việc -->
+        <div class="card">
+          <div class="sec-head">
+            <span class="sec-num mono">04</span>
+            <span class="sec-rule"></span>
+            <span class="sec-title mono">CHI TIẾT CÔNG VIỆC & HOA HỒNG</span>
+          </div>
+
+          <div class="items-table-wrap">
+            <div class="items-head">
+              <span>MÔ TẢ CÔNG VIỆC</span>
+              <span>SL / NGÀY</span>
+              <span>ĐƠN GIÁ</span>
+              <span></span>
+            </div>
+            <div id="f_items_wrap"></div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn sm" id="btn_add_f_item">＋ THÊM DÒNG CÔNG VIỆC</button>
+          </div>
+        </div>
+
+        <!-- 05: Thông tin thanh toán -->
+        <div class="card">
+          <div class="sec-head">
+            <span class="sec-num mono">05</span>
+            <span class="sec-rule"></span>
+            <span class="sec-title mono">THÔNG TIN THANH TOÁN (BANK)</span>
+          </div>
+
+          <div class="fg">
+            <label>Ngân hàng & Chi nhánh</label>
+            <input id="f_bank" value="VPBANK (Vietnam Prosperity Joint Stock Commercial Bank)">
+          </div>
+
+          <div class="fgrid-2">
+            <div class="fg">
+              <label>Số tài khoản</label>
+              <input id="f_accnum" value="222007232">
+            </div>
+            <div class="fg">
+              <label>Tên chủ tài khoản</label>
+              <input id="f_accname" value="Nguyen Ngoc Thu Hang">
+            </div>
+          </div>
+        </div>
+
+        <!-- 06: Ghi chú -->
+        <div class="card">
+          <div class="sec-head">
+            <span class="sec-num mono">06</span>
+            <span class="sec-rule"></span>
+            <span class="sec-title mono">GHI CHÚ & LỜI CẢM ƠN</span>
+          </div>
+
+          <div class="fg">
+            <textarea id="f_notes">Thank you.
+3 days</textarea>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ============ TAB SERVICE ============ -->
+      <div id="view_service" class="tab-view" hidden>
+        
+        <!-- 01: Thông tin hoá đơn -->
+        <div class="card">
+          <div class="sec-head">
+            <span class="sec-num mono">01</span>
+            <span class="sec-rule"></span>
+            <span class="sec-title mono">THÔNG TIN HOÁ ĐƠN</span>
+          </div>
+          
+          <div class="fgrid-3">
+            <div class="fg">
+              <label>Số hóa đơn</label>
+              <input id="s_invnum" value="INV-001">
+            </div>
+            <div class="fg">
+              <label>Ngày lập</label>
+              <input id="s_invdate" type="date">
+            </div>
+            <div class="fg">
+              <label>Hạn thanh toán (Due Date)</label>
+              <input id="s_duedate" type="date">
+            </div>
+          </div>
+        </div>
+
+        <!-- 02: Đơn vị bán (From) -->
+        <div class="card">
+          <div class="sec-head">
+            <span class="sec-num mono">02</span>
+            <span class="sec-rule"></span>
+            <span class="sec-title mono">ĐƠN VỊ BÁN (FROM)</span>
+          </div>
+
+          <div class="fgrid-2">
+            <div class="fg">
+              <label>Tên cá nhân / Doanh nghiệp</label>
+              <input id="s_name" value="Nguyen Ngoc Thu Hang">
+            </div>
+            <div class="fg">
+              <label>Lĩnh vực / Tiêu đề dịch vụ</label>
+              <input id="s_subtitle" value="Invoice for media & production services">
+            </div>
+          </div>
+        </div>
+
+        <!-- 03: Khách hàng (Bill To) -->
+        <div class="card">
+          <div class="sec-head">
+            <span class="sec-num mono">03</span>
+            <span class="sec-rule"></span>
+            <span class="sec-title mono">KHÁCH HÀNG (BILL TO)</span>
+          </div>
+
+          <div class="fgrid-2">
+            <div class="fg">
+              <label>Tên khách hàng / Công ty</label>
+              <input id="s_billto" value="The Speechless Communication Pty Ltd">
+            </div>
+            <div class="fg">
+              <label>Địa chỉ khách hàng</label>
+              <input id="s_billaddr" placeholder="Địa chỉ chi tiết">
+            </div>
+          </div>
+        </div>
+
+        <!-- 04: Danh sách dịch vụ & Thuế -->
+        <div class="card">
+          <div class="sec-head">
+            <span class="sec-num mono">04</span>
+            <span class="sec-rule"></span>
+            <span class="sec-title mono">DANH SÁCH DỊCH VỤ & SẢN PHẨM</span>
+          </div>
+
+          <div class="items-table-wrap">
+            <div class="items-head">
+              <span>MÔ TẢ SẢN PHẨM / DỊCH VỤ</span>
+              <span>SỐ LƯỢNG</span>
+              <span>ĐƠN GIÁ</span>
+              <span></span>
+            </div>
+            <div id="s_items_wrap"></div>
+          </div>
+
+          <div class="fgrid-2" style="align-items:center; margin-top:10px">
+            <button class="btn sm" id="btn_add_s_item">＋ THÊM DÒNG DỊCH VỤ</button>
+            <div class="fg" style="margin-bottom:0">
+              <label>Thuế VAT (%)</label>
+              <input id="s_taxpct" type="number" min="0" max="100" value="0" style="max-width:120px">
+            </div>
+          </div>
+        </div>
+
+        <!-- 05: Thanh toán -->
+        <div class="card">
+          <div class="sec-head">
+            <span class="sec-num mono">05</span>
+            <span class="sec-rule"></span>
+            <span class="sec-title mono">THÔNG TIN THANH TOÁN (BANK)</span>
+          </div>
+
+          <div class="fg">
+            <label>Ngân hàng</label>
+            <input id="s_bank" value="VPBANK (Vietnam Prosperity Joint Stock Commercial Bank)">
+          </div>
+
+          <div class="fgrid-2">
+            <div class="fg">
+              <label>Số tài khoản</label>
+              <input id="s_accnum" value="222007232">
+            </div>
+            <div class="fg">
+              <label>Tên chủ tài khoản</label>
+              <input id="s_accname" value="Nguyen Ngoc Thu Hang">
+            </div>
+          </div>
+        </div>
+
+        <!-- 06: Ghi chú -->
+        <div class="card">
+          <div class="sec-head">
+            <span class="sec-num mono">06</span>
+            <span class="sec-rule"></span>
+            <span class="sec-title mono">GHI CHÚ & ĐIỀU KHOẢN</span>
+          </div>
+
+          <div class="fg">
+            <textarea id="s_notes">Payment is due within 14 days.
+Thank you for working with us!</textarea>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- RIGHT: LIVE PREVIEW & EXPORT ACTION PANEL -->
+    <div class="preview-panel">
+      
+      <!-- Top Floating Action Bar -->
+      <div class="preview-action-bar">
+        <div class="preview-total-badge">
+          <span class="lbl">TỔNG CỘNG (TOTAL DUE)</span>
+          <span class="val" id="badge_total">0 VND</span>
+        </div>
+
+        <div class="preview-buttons">
+          <button class="btn primary" id="btn_export_pdf">📥 XUẤT PDF</button>
+          <button class="btn sm" id="btn_print">🖨️ IN</button>
+          <button class="btn sm ghost" id="btn_copy_summary">📋 COPY TỔNG HỢP</button>
+        </div>
+      </div>
+
+      <!-- Live Vector Paper Preview Viewport -->
+      <div class="paper-viewport">
+        <div class="paper-sheet" id="invoice_paper">
+          
+          <!-- Top Header -->
+          <div>
+            <div class="doc-header">
+              <div class="doc-sender">
+                <div class="doc-sender-name" id="doc_sender_name">Nguyen Ngoc Thu Hang</div>
+                <div class="doc-sender-sub" id="doc_sender_sub">Invoice for services and referrals</div>
+              </div>
+              <div class="doc-title-block">
+                <div class="doc-title" id="doc_title">INVOICE</div>
+                <div class="doc-invoice-id" id="doc_inv_id">#INV-001</div>
+              </div>
+            </div>
+
+            <!-- Meta Information: Bill To on left, Dates on right -->
+            <div class="doc-meta">
+              <div class="doc-meta-left">
+                <div class="doc-billto-label" id="doc_billto_label">BILL TO</div>
+                <div class="doc-billto-name" id="doc_billto_name">The Speechless Communication Pty Ltd</div>
+                <div class="doc-billto-addr" id="doc_billto_addr" hidden></div>
+              </div>
+
+              <div class="doc-meta-right">
+                <div class="doc-meta-row">
+                  <span class="lbl" id="doc_date_label">Invoice Date:</span>
+                  <span class="val" id="doc_date_val">22 August 2026</span>
+                </div>
+                <div class="doc-meta-row" id="doc_period_row">
+                  <span class="lbl" id="doc_period_label">Work Period:</span>
+                  <span class="val" id="doc_period_val">20 August 2026 - 24 August 2026</span>
+                </div>
+                <div class="doc-meta-row" id="doc_due_row" hidden>
+                  <span class="lbl" id="doc_due_label">Due Date:</span>
+                  <span class="val" id="doc_due_val"></span>
+                </div>
+                <div class="doc-meta-row">
+                  <span class="lbl" id="doc_curr_label">Currency:</span>
+                  <span class="val" id="doc_curr_val">VND</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Line Items Table -->
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th id="doc_th_desc">DESCRIPTION</th>
+                  <th class="r" id="doc_th_qty" style="width:110px">QTY</th>
+                  <th class="r" id="doc_th_rate" style="width:120px">RATE</th>
+                  <th class="r" id="doc_th_amt" style="width:130px">AMOUNT</th>
+                </tr>
+              </thead>
+              <tbody id="doc_tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+
+            <!-- Summary Totals -->
+            <div class="doc-summary">
+              <table>
+                <tbody id="doc_summary_tbody">
+                  <!-- Dynamically calculated -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Payment Details Box -->
+            <div class="doc-payment" id="doc_payment_box">
+              <div class="doc-payment-title" id="doc_pay_title">PAYMENT DETAILS</div>
+              <div class="doc-pay-grid" id="doc_pay_grid">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="doc-notes" id="doc_notes"></div>
+          </div>
+
+          <!-- Footer line -->
+          <div class="doc-footer">
+            <span id="doc_foot_invnum">INV-001</span>
+            <span id="doc_foot_sender">Nguyen Ngoc Thu Hang</span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</main>
+
+<!-- Toast System -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
