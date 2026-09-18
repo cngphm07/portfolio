@@ -19,7 +19,7 @@
 
 <!-- Topbar Navigation -->
 <header class="topbar">
-  <a class="logo-link" href="/">
+  <a class="logo-link" href="#">
     <div class="logo display">ODD<em>PIG</em><span class="tools mono">INVOICE STUDIO</span></div>
   </a>
   
@@ -76,7 +76,7 @@
             <span class="sec-title mono">THÔNG TIN HOÁ ĐƠN</span>
           </div>
           
-          <div class="fgrid-3">
+          <div class="fgrid-2">
             <div class="fg">
               <label>Số hóa đơn (Invoice #)</label>
               <input id="f_invnum" value="INV-001">
@@ -85,9 +85,13 @@
               <label>Ngày lập (Invoice Date)</label>
               <input id="f_invdate" type="date">
             </div>
-            <div class="fg">
-              <label>Thời gian làm (Work Period)</label>
-              <input id="f_workperiod" value="20 August 2026 - 24 August 2026">
+          </div>
+
+          <div class="fg" style="margin-top:4px">
+            <label>Thời gian làm việc (Work Period)</label>
+            <div class="fgrid-date-range">
+              <input id="f_work_from" type="date" title="Từ ngày">
+              <input id="f_work_to" type="date" title="Đến ngày">
             </div>
           </div>
         </div>
@@ -103,11 +107,11 @@
           <div class="fgrid-2">
             <div class="fg">
               <label>Họ và tên</label>
-              <input id="f_name" value="Nguyen Ngoc Thu Hang">
+              <input id="f_name" value="Nguyen Van A">
             </div>
             <div class="fg">
               <label>Chức danh / Mô tả dịch vụ</label>
-              <input id="f_subtitle" value="Invoice for services and referrals">
+              <input id="f_subtitle" value="Freelance Video Editor & Colorist">
             </div>
           </div>
         </div>
@@ -127,7 +131,7 @@
             </div>
             <div class="fg">
               <label>Địa chỉ / Email (tùy chọn)</label>
-              <input id="f_billaddr" placeholder="vd: Sydney, Australia">
+              <input id="f_billaddr" placeholder="Sydney, NSW, Australia">
             </div>
           </div>
         </div>
@@ -137,7 +141,7 @@
           <div class="sec-head">
             <span class="sec-num mono">04</span>
             <span class="sec-rule"></span>
-            <span class="sec-title mono">CHI TIẾT CÔNG VIỆC & HOA HỒNG</span>
+            <span class="sec-title mono">CHI TIẾT CÔNG VIỆC & DỊCH VỤ</span>
           </div>
 
           <div class="items-table-wrap">
@@ -165,17 +169,17 @@
 
           <div class="fg">
             <label>Ngân hàng & Chi nhánh</label>
-            <input id="f_bank" value="VPBANK (Vietnam Prosperity Joint Stock Commercial Bank)">
+            <input id="f_bank" value="Techcombank (Vietnam Technological and Commercial Joint Stock Bank)">
           </div>
 
           <div class="fgrid-2">
             <div class="fg">
               <label>Số tài khoản</label>
-              <input id="f_accnum" value="222007232">
+              <input id="f_accnum" value="19030012345678">
             </div>
             <div class="fg">
               <label>Tên chủ tài khoản</label>
-              <input id="f_accname" value="Nguyen Ngoc Thu Hang">
+              <input id="f_accname" value="NGUYEN VAN A">
             </div>
           </div>
         </div>
@@ -189,7 +193,7 @@
           </div>
 
           <div class="fg">
-            <textarea id="f_notes">Thank you.
+            <textarea id="f_notes">Thank you for your business!
 3 days</textarea>
           </div>
         </div>
@@ -234,11 +238,11 @@
           <div class="fgrid-2">
             <div class="fg">
               <label>Tên cá nhân / Doanh nghiệp</label>
-              <input id="s_name" value="Nguyen Ngoc Thu Hang">
+              <input id="s_name" value="Odd Pig Studio">
             </div>
             <div class="fg">
               <label>Lĩnh vực / Tiêu đề dịch vụ</label>
-              <input id="s_subtitle" value="Invoice for media & production services">
+              <input id="s_subtitle" value="Media Production & Post-Production Studio">
             </div>
           </div>
         </div>
@@ -258,7 +262,7 @@
             </div>
             <div class="fg">
               <label>Địa chỉ khách hàng</label>
-              <input id="s_billaddr" placeholder="Địa chỉ chi tiết">
+              <input id="s_billaddr" placeholder="Sydney, NSW, Australia">
             </div>
           </div>
         </div>
@@ -300,17 +304,17 @@
 
           <div class="fg">
             <label>Ngân hàng</label>
-            <input id="s_bank" value="VPBANK (Vietnam Prosperity Joint Stock Commercial Bank)">
+            <input id="s_bank" value="Techcombank (Vietnam Technological and Commercial Joint Stock Bank)">
           </div>
 
           <div class="fgrid-2">
             <div class="fg">
               <label>Số tài khoản</label>
-              <input id="s_accnum" value="222007232">
+              <input id="s_accnum" value="19030012345678">
             </div>
             <div class="fg">
               <label>Tên chủ tài khoản</label>
-              <input id="s_accname" value="Nguyen Ngoc Thu Hang">
+              <input id="s_accname" value="ODD PIG STUDIO">
             </div>
           </div>
         </div>
@@ -358,8 +362,8 @@ Thank you for working with us!</textarea>
           <div>
             <div class="doc-header">
               <div class="doc-sender">
-                <div class="doc-sender-name" id="doc_sender_name">Nguyen Ngoc Thu Hang</div>
-                <div class="doc-sender-sub" id="doc_sender_sub">Invoice for services and referrals</div>
+                <div class="doc-sender-name" id="doc_sender_name">Nguyen Van A</div>
+                <div class="doc-sender-sub" id="doc_sender_sub">Freelance Video Editor & Colorist</div>
               </div>
               <div class="doc-title-block">
                 <div class="doc-title" id="doc_title">INVOICE</div>
@@ -382,7 +386,7 @@ Thank you for working with us!</textarea>
                 </div>
                 <div class="doc-meta-row" id="doc_period_row">
                   <span class="lbl" id="doc_period_label">Work Period:</span>
-                  <span class="val" id="doc_period_val">20 August 2026 - 24 August 2026</span>
+                  <span class="val" id="doc_period_val">20 - 24 August 2026</span>
                 </div>
                 <div class="doc-meta-row" id="doc_due_row" hidden>
                   <span class="lbl" id="doc_due_label">Due Date:</span>
@@ -400,9 +404,9 @@ Thank you for working with us!</textarea>
               <thead>
                 <tr>
                   <th id="doc_th_desc">DESCRIPTION</th>
-                  <th class="r" id="doc_th_qty" style="width:110px">QTY</th>
+                  <th class="r" id="doc_th_qty" style="width:105px">QTY</th>
                   <th class="r" id="doc_th_rate" style="width:120px">RATE</th>
-                  <th class="r" id="doc_th_amt" style="width:130px">AMOUNT</th>
+                  <th class="r" id="doc_th_amt" style="width:125px">AMOUNT</th>
                 </tr>
               </thead>
               <tbody id="doc_tbody">
@@ -434,7 +438,7 @@ Thank you for working with us!</textarea>
           <!-- Footer line -->
           <div class="doc-footer">
             <span id="doc_foot_invnum">INV-001</span>
-            <span id="doc_foot_sender">Nguyen Ngoc Thu Hang</span>
+            <span id="doc_foot_sender">Nguyen Van A</span>
           </div>
 
         </div>

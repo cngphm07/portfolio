@@ -93,52 +93,53 @@ const I18N = {
   }
 };
 
-/* ---------- Global State ---------- */
+/* ---------- Global State (Mock Default Data) ---------- */
 const S = {
   tab: 'freelancer', // 'freelancer' | 'service'
   lang: 'en',        // 'en' | 'vi' | 'both'
   currency: 'VND',   // 'VND' | 'USD'
   
-  // Freelancer form
+  // Freelancer form (mock info)
   f: {
     invNum: 'INV-001',
-    invDate: todayYmd(),
-    workPeriod: '20 August 2026 - 24 August 2026',
-    name: 'Nguyen Ngoc Thu Hang',
-    subtitle: 'Invoice for services and referrals',
-    email: '',
-    address: '',
+    invDate: '2026-08-22',
+    workFrom: '2026-08-20',
+    workTo: '2026-08-24',
+    name: 'Nguyen Van A',
+    subtitle: 'Freelance Video Editor & Colorist',
+    email: 'contact@example.com',
+    address: 'Ho Chi Minh City, Vietnam',
     billTo: 'The Speechless Communication Pty Ltd',
-    billAddr: '',
-    bank: 'VPBANK (Vietnam Prosperity Joint Stock Commercial Bank)',
-    accNum: '222007232',
-    accName: 'Nguyen Ngoc Thu Hang',
-    notes: 'Thank you.\n3 days',
+    billAddr: 'Sydney, NSW, Australia',
+    bank: 'Techcombank (Vietnam Technological and Commercial Joint Stock Bank)',
+    accNum: '19030012345678',
+    accName: 'NGUYEN VAN A',
+    notes: 'Thank you for your business!\n3 days',
     items: [
-      { id: 1, desc: 'Work: 20 Aug - 24 Aug 2026', qty: 'To be confirmed', rate: 'To be confirmed', isText: true, amount: 0 },
-      { id: 2, desc: 'Editor referral fee', qty: '2 referrals', rate: '2,250,000', isText: false, amount: 4500000 },
+      { id: 1, desc: 'Video Editing & Post-Production', qty: '3 days', rate: '2,500,000', isText: false, amount: 7500000 },
+      { id: 2, desc: 'Project Revisions & Final Delivery', qty: 'To be confirmed', rate: 'To be confirmed', isText: true, amount: 0 },
     ]
   },
 
-  // Service / Business form
+  // Service / Business form (mock info)
   s: {
     invNum: 'INV-001',
-    invDate: todayYmd(),
-    dueDate: todayYmd(),
-    name: 'Nguyen Ngoc Thu Hang',
-    subtitle: 'Invoice for media & production services',
+    invDate: '2026-08-22',
+    dueDate: '2026-09-05',
+    name: 'Odd Pig Studio',
+    subtitle: 'Media Production & Post-Production Studio',
     email: 'contact@oddpig.io.vn',
     address: 'Ho Chi Minh City, Vietnam',
     billTo: 'The Speechless Communication Pty Ltd',
-    billAddr: '',
+    billAddr: 'Sydney, NSW, Australia',
     taxPct: 0,
-    bank: 'VPBANK (Vietnam Prosperity Joint Stock Commercial Bank)',
-    accNum: '222007232',
-    accName: 'Nguyen Ngoc Thu Hang',
+    bank: 'Techcombank (Vietnam Technological and Commercial Joint Stock Bank)',
+    accNum: '19030012345678',
+    accName: 'ODD PIG STUDIO',
     notes: 'Payment is due within 14 days.\nThank you for working with us!',
     items: [
-      { id: 1, desc: 'Video Editing & Color Grading (3 reels)', qty: '3', rate: '2,500,000', isText: false, amount: 7500000 },
-      { id: 2, desc: 'Sound Design & Mastering', qty: '1', rate: '1,500,000', isText: false, amount: 1500000 },
+      { id: 1, desc: 'Commercial Video Editing (3 reels)', qty: '3', rate: '2,500,000', isText: false, amount: 7500000 },
+      { id: 2, desc: 'Sound Design & Audio Mastering', qty: '1', rate: '1,500,000', isText: false, amount: 1500000 },
     ]
   }
 };
@@ -146,11 +147,6 @@ const S = {
 let nextItemId = 100;
 
 /* ---------- Helper Functions ---------- */
-function todayYmd() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
 function formatDateDisplay(ymd) {
   if (!ymd) return '';
   const d = new Date(ymd);
@@ -162,11 +158,40 @@ function formatDateDisplay(ymd) {
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 }
 
+// Formats Work Period date range neatly without redundant text to prevent multi-line overflow
+function formatWorkPeriodDisplay(fromYmd, toYmd) {
+  if (!fromYmd && !toYmd) return '-';
+  if (fromYmd && !toYmd) return formatDateDisplay(fromYmd);
+  if (!fromYmd && toYmd) return formatDateDisplay(toYmd);
+
+  const d1 = new Date(fromYmd);
+  const d2 = new Date(toYmd);
+  if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return `${fromYmd} - ${toYmd}`;
+
+  if (S.lang === 'vi') {
+    const pad = n => String(n).padStart(2, '0');
+    return `${pad(d1.getDate())}/${pad(d1.getMonth() + 1)}/${d1.getFullYear()} - ${pad(d2.getDate())}/${pad(d2.getMonth() + 1)}/${d2.getFullYear()}`;
+  }
+
+  const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+  // Same month and year: e.g. "20 - 24 August 2026"
+  if (d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth()) {
+    return `${d1.getDate()} - ${d2.getDate()} ${monthsFull[d1.getMonth()]} ${d1.getFullYear()}`;
+  }
+  // Same year, different month: e.g. "20 Jul - 24 Aug 2026"
+  if (d1.getFullYear() === d2.getFullYear()) {
+    return `${d1.getDate()} ${monthsEn[d1.getMonth()]} - ${d2.getDate()} ${monthsEn[d2.getMonth()]} ${d1.getFullYear()}`;
+  }
+  // Different year: e.g. "20 Dec 2025 - 05 Jan 2026"
+  return `${d1.getDate()} ${monthsEn[d1.getMonth()]} ${d1.getFullYear()} - ${d2.getDate()} ${monthsEn[d2.getMonth()]} ${d2.getFullYear()}`;
+}
+
 function t(key) {
   return I18N[S.lang]?.[key] || I18N.en[key] || key;
 }
 
-// Parses numeric values or shorthand like 2tr, 2.5m, 500k, 2,250,000
 function parseMoney(val) {
   if (typeof val === 'number') return val;
   let str = String(val ?? '').trim().toLowerCase().replace(/[, ]/g, '');
@@ -214,7 +239,8 @@ function initFormFields() {
   // Freelancer fields
   $('#f_invnum').value = f.invNum;
   $('#f_invdate').value = f.invDate;
-  $('#f_workperiod').value = f.workPeriod;
+  $('#f_work_from').value = f.workFrom;
+  $('#f_work_to').value = f.workTo;
   $('#f_name').value = f.name;
   $('#f_subtitle').value = f.subtitle;
   $('#f_billto').value = f.billTo;
@@ -248,7 +274,7 @@ function renderItemInputs(tab) {
   if (!wrap) return;
 
   wrap.innerHTML = '';
-  data.items.forEach((item, index) => {
+  data.items.forEach(item => {
     const row = document.createElement('div');
     row.className = 'item-row';
     row.innerHTML = `
@@ -308,7 +334,7 @@ function updateDocPreview() {
   }
 
   // Meta Right
-  $('#doc_date_label').textContent = t('invoiceDate');
+  $('#doc_date_label').textContent = t('invoiceDate') + ':';
   $('#doc_date_val').textContent = formatDateDisplay(data.invDate) || '-';
 
   const periodRow = $('#doc_period_row');
@@ -317,16 +343,16 @@ function updateDocPreview() {
   if (isFreelancer) {
     periodRow.hidden = false;
     dueRow.hidden = true;
-    $('#doc_period_label').textContent = t('workPeriod');
-    $('#doc_period_val').textContent = data.workPeriod || '-';
+    $('#doc_period_label').textContent = t('workPeriod') + ':';
+    $('#doc_period_val').textContent = formatWorkPeriodDisplay(data.workFrom, data.workTo);
   } else {
     periodRow.hidden = true;
     dueRow.hidden = false;
-    $('#doc_due_label').textContent = t('dueDate');
+    $('#doc_due_label').textContent = t('dueDate') + ':';
     $('#doc_due_val').textContent = formatDateDisplay(data.dueDate) || '-';
   }
 
-  $('#doc_curr_label').textContent = t('currency');
+  $('#doc_curr_label').textContent = t('currency') + ':';
   $('#doc_curr_val').textContent = S.currency;
 
   // Table Headers
@@ -376,11 +402,12 @@ function updateDocPreview() {
 
   if (isFreelancer) {
     summaryHtml += `<tr><td>${t('referralSubtotal')}</td><td>${formatCurrency(subtotal)}</td></tr>`;
-    summaryHtml += `<tr><td>${t('workFee')}</td><td>${t('toBeConfirmed')}</td></tr>`;
+    if (hasPending) {
+      summaryHtml += `<tr><td>${t('workFee')}</td><td>${t('toBeConfirmed')}</td></tr>`;
+    }
     const finalTotal = hasPending ? t('toBeConfirmed') : formatCurrency(subtotal);
     summaryHtml += `<tr class="total-row"><td>${t('totalDue')}</td><td>${finalTotal}</td></tr>`;
     
-    // Update badge in action bar
     $('#badge_total').textContent = finalTotal;
   } else {
     const taxVal = (subtotal * (data.taxPct || 0)) / 100;
@@ -461,7 +488,8 @@ function bindEvents() {
 
   // Form field inputs (Freelancer)
   const mapF = {
-    f_invnum: 'invNum', f_invdate: 'invDate', f_workperiod: 'workPeriod',
+    f_invnum: 'invNum', f_invdate: 'invDate',
+    f_work_from: 'workFrom', f_work_to: 'workTo',
     f_name: 'name', f_subtitle: 'subtitle', f_billto: 'billTo', f_billaddr: 'billAddr',
     f_bank: 'bank', f_accnum: 'accNum', f_accname: 'accName', f_notes: 'notes'
   };
@@ -477,7 +505,7 @@ function bindEvents() {
   const mapS = {
     s_invnum: 'invNum', s_invdate: 'invDate', s_duedate: 'dueDate',
     s_name: 'name', s_subtitle: 'subtitle', s_billto: 'billTo', s_billaddr: 'billAddr',
-    s_taxpct: 'taxPct', f_bank: 'bank', s_accnum: 'accNum', s_accname: 'accName', s_notes: 'notes'
+    s_taxpct: 'taxPct', s_bank: 'bank', s_accnum: 'accNum', s_accname: 'accName', s_notes: 'notes'
   };
   Object.keys(mapS).forEach(id => {
     const el = $(`#${id}`);
@@ -548,11 +576,11 @@ function exportPDF() {
   showToast('⏳ ĐANG XUẤT PDF VECTOR...');
 
   const opt = {
-    margin: [6, 6, 6, 6], // mm
+    margin: [6, 6, 6, 6],
     filename: fileName,
     image: { type: 'jpeg', quality: 0.98 },
     html2canvas: {
-      scale: 2.5, // Crisp high-res rendering
+      scale: 2.5,
       useCORS: true,
       letterRendering: true,
       scrollY: 0,
@@ -583,7 +611,7 @@ function copyInvoiceSummary() {
   lines.push(`👤 ${t('from')}: ${data.name}`);
   lines.push(`🏢 ${t('billTo')}: ${data.billTo}`);
   lines.push(`📅 ${t('invoiceDate')}: ${formatDateDisplay(data.invDate)}`);
-  if (isFreelancer && data.workPeriod) lines.push(`⏱️ ${t('workPeriod')}: ${data.workPeriod}`);
+  if (isFreelancer) lines.push(`⏱️ ${t('workPeriod')}: ${formatWorkPeriodDisplay(data.workFrom, data.workTo)}`);
   if (!isFreelancer && data.dueDate) lines.push(`⏰ ${t('dueDate')}: ${formatDateDisplay(data.dueDate)}`);
   lines.push(`💰 ${t('currency')}: ${S.currency}`);
   lines.push('\n--- CHI TIẾT ---');
@@ -600,7 +628,6 @@ function copyInvoiceSummary() {
   lines.push('\n--- TỔNG KẾT ---');
   if (isFreelancer) {
     lines.push(`${t('referralSubtotal')}: ${formatCurrency(subtotal)}`);
-    lines.push(`${t('workFee')}: ${t('toBeConfirmed')}`);
   } else {
     lines.push(`${t('subtotal')}: ${formatCurrency(subtotal)}`);
     if (data.taxPct > 0) lines.push(`${t('tax')} (${data.taxPct}%): ${formatCurrency(subtotal * data.taxPct / 100)}`);
@@ -655,7 +682,6 @@ function loadDefaultProfile() {
     if (p.currency) S.currency = p.currency;
     if (p.lang) S.lang = p.lang;
 
-    // Sync UI elements
     $$('[data-currency]').forEach(b => b.classList.toggle('active', b.dataset.currency === S.currency));
     $$('[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === S.lang));
 
@@ -690,7 +716,6 @@ function loadDraftFromStorage() {
     if (d.f) S.f = d.f;
     if (d.s) S.s = d.s;
 
-    // Sync pill buttons
     $$('[data-tab-switch]').forEach(b => b.classList.toggle('active', b.dataset.tabSwitch === S.tab));
     $$('[data-currency]').forEach(b => b.classList.toggle('active', b.dataset.currency === S.currency));
     $$('[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === S.lang));
@@ -711,7 +736,7 @@ function showToast(msg) {
   toastTimeout = setTimeout(() => t.classList.remove('show'), 2600);
 }
 
-/* ---------- Timecode Clock (Odd Pig Signature) ---------- */
+/* ---------- Timecode Clock ---------- */
 function tickTC() {
   const el = $('#tcClock');
   if (!el) return;
@@ -727,7 +752,6 @@ function init() {
   bindEvents();
   updateDocPreview();
 
-  // Timecode loop
   setInterval(tickTC, 40);
   tickTC();
 }
