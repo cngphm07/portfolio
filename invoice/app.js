@@ -93,8 +93,8 @@ const I18N = {
   }
 };
 
-/* ---------- Global State (Mock Default Data) ---------- */
-const S = {
+/* ---------- Global State ---------- */
+window.S = {
   tab: 'freelancer', // 'freelancer' | 'service'
   lang: 'en',        // 'en' | 'vi' | 'both'
   currency: 'VND',   // 'VND' | 'USD'
@@ -158,7 +158,6 @@ function formatDateDisplay(ymd) {
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-// Formats Work Period date range neatly without redundant text to prevent multi-line overflow
 function formatWorkPeriodDisplay(fromYmd, toYmd) {
   if (!fromYmd && !toYmd) return '-';
   if (fromYmd && !toYmd) return formatDateDisplay(fromYmd);
@@ -176,15 +175,12 @@ function formatWorkPeriodDisplay(fromYmd, toYmd) {
   const monthsEn = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const monthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-  // Same month and year: e.g. "20 - 24 August 2026"
   if (d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth()) {
     return `${d1.getDate()} - ${d2.getDate()} ${monthsFull[d1.getMonth()]} ${d1.getFullYear()}`;
   }
-  // Same year, different month: e.g. "20 Jul - 24 Aug 2026"
   if (d1.getFullYear() === d2.getFullYear()) {
     return `${d1.getDate()} ${monthsEn[d1.getMonth()]} - ${d2.getDate()} ${monthsEn[d2.getMonth()]} ${d1.getFullYear()}`;
   }
-  // Different year: e.g. "20 Dec 2025 - 05 Jan 2026"
   return `${d1.getDate()} ${monthsEn[d1.getMonth()]} ${d1.getFullYear()} - ${d2.getDate()} ${monthsEn[d2.getMonth()]} ${d2.getFullYear()}`;
 }
 
@@ -237,32 +233,33 @@ function initFormFields() {
   const s = S.s;
 
   // Freelancer fields
-  $('#f_invnum').value = f.invNum;
-  $('#f_invdate').value = f.invDate;
-  $('#f_work_from').value = f.workFrom;
-  $('#f_work_to').value = f.workTo;
-  $('#f_name').value = f.name;
-  $('#f_subtitle').value = f.subtitle;
-  $('#f_billto').value = f.billTo;
-  $('#f_billaddr').value = f.billAddr;
-  $('#f_bank').value = f.bank;
-  $('#f_accnum').value = f.accNum;
-  $('#f_accname').value = f.accName;
-  $('#f_notes').value = f.notes;
+  const setVal = (id, val) => { const el = $(`#${id}`); if (el) el.value = val ?? ''; };
+  setVal('f_invnum', f.invNum);
+  setVal('f_invdate', f.invDate);
+  setVal('f_work_from', f.workFrom);
+  setVal('f_work_to', f.workTo);
+  setVal('f_name', f.name);
+  setVal('f_subtitle', f.subtitle);
+  setVal('f_billto', f.billTo);
+  setVal('f_billaddr', f.billAddr);
+  setVal('f_bank', f.bank);
+  setVal('f_accnum', f.accNum);
+  setVal('f_accname', f.accName);
+  setVal('f_notes', f.notes);
 
   // Service fields
-  $('#s_invnum').value = s.invNum;
-  $('#s_invdate').value = s.invDate;
-  $('#s_duedate').value = s.dueDate;
-  $('#s_name').value = s.name;
-  $('#s_subtitle').value = s.subtitle;
-  $('#s_billto').value = s.billTo;
-  $('#s_billaddr').value = s.billAddr;
-  $('#s_taxpct').value = s.taxPct;
-  $('#s_bank').value = s.bank;
-  $('#s_accnum').value = s.accNum;
-  $('#s_accname').value = s.accName;
-  $('#s_notes').value = s.notes;
+  setVal('s_invnum', s.invNum);
+  setVal('s_invdate', s.invDate);
+  setVal('s_duedate', s.dueDate);
+  setVal('s_name', s.name);
+  setVal('s_subtitle', s.subtitle);
+  setVal('s_billto', s.billTo);
+  setVal('s_billaddr', s.billAddr);
+  setVal('s_taxpct', s.taxPct);
+  setVal('s_bank', s.bank);
+  setVal('s_accnum', s.accNum);
+  setVal('s_accname', s.accName);
+  setVal('s_notes', s.notes);
 
   renderItemInputs('freelancer');
   renderItemInputs('service');
@@ -270,6 +267,9 @@ function initFormFields() {
 
 function renderItemInputs(tab) {
   const data = tab === 'freelancer' ? S.f : S.s;
+  if (!data || !Array.isArray(data.items)) {
+    if (data) data.items = [];
+  }
   const wrap = $(`#${tab === 'freelancer' ? 'f' : 's'}_items_wrap`);
   if (!wrap) return;
 
@@ -281,14 +281,16 @@ function renderItemInputs(tab) {
       <input type="text" placeholder="Mô tả công việc" value="${esc(item.desc)}" data-act="desc" data-tab="${tab}" data-id="${item.id}">
       <input type="text" placeholder="SL / Ngày" value="${esc(item.qty)}" data-act="qty" data-tab="${tab}" data-id="${item.id}" style="text-align:right">
       <input type="text" class="money-in" placeholder="Đơn giá" value="${esc(item.rate)}" data-act="rate" data-tab="${tab}" data-id="${item.id}">
-      <button class="item-del-btn" data-act="del-item" data-tab="${tab}" data-id="${item.id}" title="Xóa dòng">✕</button>
+      <button type="button" class="item-del-btn" onclick="deleteItem('${tab}', ${item.id})" data-act="del-item" data-tab="${tab}" data-id="${item.id}" title="Xóa dòng">✕</button>
     `;
     wrap.appendChild(row);
   });
 }
 
-function addItem(tab) {
-  const data = tab === 'freelancer' ? S.f : S.s;
+window.addItem = function(tab) {
+  const activeTab = tab || S.tab || 'freelancer';
+  const data = activeTab === 'freelancer' ? S.f : S.s;
+  if (!Array.isArray(data.items)) data.items = [];
   data.items.push({
     id: ++nextItemId,
     desc: '',
@@ -297,193 +299,231 @@ function addItem(tab) {
     isText: false,
     amount: 0
   });
-  renderItemInputs(tab);
+  renderItemInputs(activeTab);
   updateDocPreview();
-}
+};
 
-function deleteItem(tab, id) {
+window.deleteItem = function(tab, id) {
   const data = tab === 'freelancer' ? S.f : S.s;
+  if (!data || !Array.isArray(data.items)) return;
   const idx = data.items.findIndex(it => it.id === id);
   if (idx > -1) {
     data.items.splice(idx, 1);
     renderItemInputs(tab);
     updateDocPreview();
   }
-}
+};
+
+window.switchTab = function(tab) {
+  S.tab = tab;
+  $$('[data-tab-switch]').forEach(b => b.classList.toggle('active', b.dataset.tabSwitch === tab));
+  $('#view_freelancer')?.classList.toggle('active', tab === 'freelancer');
+  if ($('#view_freelancer')) $('#view_freelancer').hidden = (tab !== 'freelancer');
+  $('#view_service')?.classList.toggle('active', tab === 'service');
+  if ($('#view_service')) $('#view_service').hidden = (tab !== 'service');
+  updateDocPreview();
+};
+
+window.setLang = function(lang) {
+  S.lang = lang;
+  $$('[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  updateDocPreview();
+};
+
+window.setCurrency = function(curr) {
+  S.currency = curr;
+  $$('[data-currency]').forEach(b => b.classList.toggle('active', b.dataset.currency === curr));
+  updateDocPreview();
+};
 
 /* ---------- Calculations & Live Preview Update ---------- */
 function updateDocPreview() {
   const isFreelancer = S.tab === 'freelancer';
   const data = isFreelancer ? S.f : S.s;
+  if (!data) return;
 
   // Header
-  $('#doc_sender_name').textContent = data.name || 'Your Name';
-  $('#doc_sender_sub').textContent = data.subtitle || '';
-  $('#doc_title').textContent = t('invoice');
-  $('#doc_inv_id').textContent = data.invNum ? `#${data.invNum}` : '';
+  const senderNameEl = $('#doc_sender_name');
+  if (senderNameEl) senderNameEl.textContent = data.name || 'Your Name';
+  const senderSubEl = $('#doc_sender_sub');
+  if (senderSubEl) senderSubEl.textContent = data.subtitle || '';
+  const titleEl = $('#doc_title');
+  if (titleEl) titleEl.textContent = t('invoice');
+  const invIdEl = $('#doc_inv_id');
+  if (invIdEl) invIdEl.textContent = data.invNum ? `#${data.invNum}` : '';
 
   // Meta Left
-  $('#doc_billto_label').textContent = t('billTo');
-  $('#doc_billto_name').textContent = data.billTo || '-';
+  const billToLbl = $('#doc_billto_label');
+  if (billToLbl) billToLbl.textContent = t('billTo');
+  const billToName = $('#doc_billto_name');
+  if (billToName) billToName.textContent = data.billTo || '-';
   const addrEl = $('#doc_billto_addr');
-  if (data.billAddr) {
-    addrEl.textContent = data.billAddr;
-    addrEl.hidden = false;
-  } else {
-    addrEl.hidden = true;
+  if (addrEl) {
+    if (data.billAddr) {
+      addrEl.textContent = data.billAddr;
+      addrEl.hidden = false;
+    } else {
+      addrEl.hidden = true;
+    }
   }
 
   // Meta Right
-  $('#doc_date_label').textContent = t('invoiceDate') + ':';
-  $('#doc_date_val').textContent = formatDateDisplay(data.invDate) || '-';
+  const dateLbl = $('#doc_date_label');
+  if (dateLbl) dateLbl.textContent = t('invoiceDate') + ':';
+  const dateVal = $('#doc_date_val');
+  if (dateVal) dateVal.textContent = formatDateDisplay(data.invDate) || '-';
 
   const periodRow = $('#doc_period_row');
   const dueRow = $('#doc_due_row');
 
   if (isFreelancer) {
-    periodRow.hidden = false;
-    dueRow.hidden = true;
-    $('#doc_period_label').textContent = t('workPeriod') + ':';
-    $('#doc_period_val').textContent = formatWorkPeriodDisplay(data.workFrom, data.workTo);
+    if (periodRow) periodRow.hidden = false;
+    if (dueRow) dueRow.hidden = true;
+    const pLbl = $('#doc_period_label');
+    if (pLbl) pLbl.textContent = t('workPeriod') + ':';
+    const pVal = $('#doc_period_val');
+    if (pVal) pVal.textContent = formatWorkPeriodDisplay(data.workFrom, data.workTo);
   } else {
-    periodRow.hidden = true;
-    dueRow.hidden = false;
-    $('#doc_due_label').textContent = t('dueDate') + ':';
-    $('#doc_due_val').textContent = formatDateDisplay(data.dueDate) || '-';
+    if (periodRow) periodRow.hidden = true;
+    if (dueRow) dueRow.hidden = false;
+    const dLbl = $('#doc_due_label');
+    if (dLbl) dLbl.textContent = t('dueDate') + ':';
+    const dVal = $('#doc_due_val');
+    if (dVal) dVal.textContent = formatDateDisplay(data.dueDate) || '-';
   }
 
-  $('#doc_curr_label').textContent = t('currency') + ':';
-  $('#doc_curr_val').textContent = S.currency;
+  const currLbl = $('#doc_curr_label');
+  if (currLbl) currLbl.textContent = t('currency') + ':';
+  const currVal = $('#doc_curr_val');
+  if (currVal) currVal.textContent = S.currency;
 
   // Table Headers
-  $('#doc_th_desc').textContent = t('description');
-  $('#doc_th_qty').textContent = t('qty');
-  $('#doc_th_rate').textContent = isFreelancer ? t('rate') : t('unitPrice');
-  $('#doc_th_amt').textContent = t('amount');
+  const thDesc = $('#doc_th_desc'); if (thDesc) thDesc.textContent = t('description');
+  const thQty = $('#doc_th_qty'); if (thQty) thQty.textContent = t('qty');
+  const thRate = $('#doc_th_rate'); if (thRate) thRate.textContent = isFreelancer ? t('rate') : t('unitPrice');
+  const thAmt = $('#doc_th_amt'); if (thAmt) thAmt.textContent = t('amount');
 
   // Table Rows & Totals Calculation
   const tbody = $('#doc_tbody');
-  tbody.innerHTML = '';
+  if (tbody) {
+    tbody.innerHTML = '';
+    let subtotal = 0;
+    let hasPending = false;
 
-  let subtotal = 0;
-  let hasPending = false;
+    if (Array.isArray(data.items)) {
+      data.items.forEach(it => {
+        const qNum = parseQty(it.qty);
+        const rNum = parseMoney(it.rate);
 
-  data.items.forEach(it => {
-    const qNum = parseQty(it.qty);
-    const rNum = parseMoney(it.rate);
+        let rateDisplay = it.rate;
+        let amtDisplay = '';
 
-    let rateDisplay = it.rate;
-    let amtDisplay = '';
+        if (isNaN(qNum) || isNaN(rNum)) {
+          hasPending = true;
+          amtDisplay = t('toBeConfirmed');
+          if (isNaN(rNum)) rateDisplay = it.rate || t('toBeConfirmed');
+        } else {
+          it.amount = qNum * rNum;
+          subtotal += it.amount;
+          rateDisplay = formatCurrency(rNum);
+          amtDisplay = formatCurrency(it.amount);
+        }
 
-    if (isNaN(qNum) || isNaN(rNum)) {
-      hasPending = true;
-      amtDisplay = t('toBeConfirmed');
-      if (isNaN(rNum)) rateDisplay = it.rate || t('toBeConfirmed');
-    } else {
-      it.amount = qNum * rNum;
-      subtotal += it.amount;
-      rateDisplay = formatCurrency(rNum);
-      amtDisplay = formatCurrency(it.amount);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="desc-cell"><strong>${esc(it.desc) || '-'}</strong></td>
+          <td class="r">${esc(it.qty) || '-'}</td>
+          <td class="r">${rateDisplay}</td>
+          <td class="r amount-cell">${amtDisplay}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="desc-cell"><strong>${esc(it.desc) || '-'}</strong></td>
-      <td class="r">${esc(it.qty) || '-'}</td>
-      <td class="r">${rateDisplay}</td>
-      <td class="r amount-cell">${amtDisplay}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  // Summary calculation
-  const summaryTbody = $('#doc_summary_tbody');
-  let summaryHtml = '';
-
-  if (isFreelancer) {
-    summaryHtml += `<tr><td>${t('referralSubtotal')}</td><td>${formatCurrency(subtotal)}</td></tr>`;
-    if (hasPending) {
-      summaryHtml += `<tr><td>${t('workFee')}</td><td>${t('toBeConfirmed')}</td></tr>`;
+    const summaryTbody = $('#doc_summary_tbody');
+    if (summaryTbody) {
+      let summaryHtml = '';
+      if (isFreelancer) {
+        summaryHtml += `<tr><td>${t('referralSubtotal')}</td><td>${formatCurrency(subtotal)}</td></tr>`;
+        if (hasPending) {
+          summaryHtml += `<tr><td>${t('workFee')}</td><td>${t('toBeConfirmed')}</td></tr>`;
+        }
+        const finalTotal = hasPending ? t('toBeConfirmed') : formatCurrency(subtotal);
+        summaryHtml += `<tr class="total-row"><td>${t('totalDue')}</td><td>${finalTotal}</td></tr>`;
+        
+        const badge = $('#badge_total');
+        if (badge) badge.textContent = finalTotal;
+      } else {
+        const taxVal = (subtotal * (data.taxPct || 0)) / 100;
+        const finalTotal = subtotal + taxVal;
+        summaryHtml += `<tr><td>${t('subtotal')}</td><td>${formatCurrency(subtotal)}</td></tr>`;
+        if (data.taxPct > 0) {
+          summaryHtml += `<tr><td>${t('tax')} (${data.taxPct}%)</td><td>${formatCurrency(taxVal)}</td></tr>`;
+        }
+        summaryHtml += `<tr class="total-row"><td>${t('totalDue')}</td><td>${formatCurrency(finalTotal)}</td></tr>`;
+        
+        const badge = $('#badge_total');
+        if (badge) badge.textContent = formatCurrency(finalTotal);
+      }
+      summaryTbody.innerHTML = summaryHtml;
     }
-    const finalTotal = hasPending ? t('toBeConfirmed') : formatCurrency(subtotal);
-    summaryHtml += `<tr class="total-row"><td>${t('totalDue')}</td><td>${finalTotal}</td></tr>`;
-    
-    $('#badge_total').textContent = finalTotal;
-  } else {
-    const taxVal = (subtotal * (data.taxPct || 0)) / 100;
-    const finalTotal = subtotal + taxVal;
-    summaryHtml += `<tr><td>${t('subtotal')}</td><td>${formatCurrency(subtotal)}</td></tr>`;
-    if (data.taxPct > 0) {
-      summaryHtml += `<tr><td>${t('tax')} (${data.taxPct}%)</td><td>${formatCurrency(taxVal)}</td></tr>`;
-    }
-    summaryHtml += `<tr class="total-row"><td>${t('totalDue')}</td><td>${formatCurrency(finalTotal)}</td></tr>`;
-    
-    $('#badge_total').textContent = formatCurrency(finalTotal);
   }
-
-  summaryTbody.innerHTML = summaryHtml;
 
   // Payment Box
   const payBox = $('#doc_payment_box');
-  if (data.bank || data.accNum || data.accName) {
-    payBox.hidden = false;
-    $('#doc_pay_title').textContent = t('paymentDetails');
-    $('#doc_pay_grid').innerHTML = `
-      ${data.bank ? `<span class="lbl">${t('bank')}:</span><span class="val">${esc(data.bank)}</span>` : ''}
-      ${data.accNum ? `<span class="lbl">${t('accountNumber')}:</span><span class="val">${esc(data.accNum)}</span>` : ''}
-      ${data.accName ? `<span class="lbl">${t('accountName')}:</span><span class="val">${esc(data.accName)}</span>` : ''}
-    `;
-  } else {
-    payBox.hidden = true;
+  if (payBox) {
+    if (data.bank || data.accNum || data.accName) {
+      payBox.hidden = false;
+      const pTitle = $('#doc_pay_title');
+      if (pTitle) pTitle.textContent = t('paymentDetails');
+      const pGrid = $('#doc_pay_grid');
+      if (pGrid) {
+        pGrid.innerHTML = `
+          ${data.bank ? `<span class="lbl">${t('bank')}:</span><span class="val">${esc(data.bank)}</span>` : ''}
+          ${data.accNum ? `<span class="lbl">${t('accountNumber')}:</span><span class="val">${esc(data.accNum)}</span>` : ''}
+          ${data.accName ? `<span class="lbl">${t('accountName')}:</span><span class="val">${esc(data.accName)}</span>` : ''}
+        `;
+      }
+    } else {
+      payBox.hidden = true;
+    }
   }
 
   // Notes
   const notesEl = $('#doc_notes');
-  if (data.notes) {
-    notesEl.textContent = data.notes;
-    notesEl.hidden = false;
-  } else {
-    notesEl.hidden = true;
+  if (notesEl) {
+    if (data.notes) {
+      notesEl.textContent = data.notes;
+      notesEl.hidden = false;
+    } else {
+      notesEl.hidden = true;
+    }
   }
 
   // Footer
-  $('#doc_foot_invnum').textContent = data.invNum || '';
-  $('#doc_foot_sender').textContent = data.name || '';
+  const footInv = $('#doc_foot_invnum');
+  if (footInv) footInv.textContent = data.invNum || '';
+  const footSender = $('#doc_foot_sender');
+  if (footSender) footSender.textContent = data.name || '';
 
-  // Auto-persist draft
   saveDraftToStorage();
 }
 
 /* ---------- Event Handlers ---------- */
 function bindEvents() {
-  // Tabs (Freelancer vs Service)
+  // Tab switching
   $$('[data-tab-switch]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tab = btn.dataset.tabSwitch;
-      S.tab = tab;
-      $$('[data-tab-switch]').forEach(b => b.classList.toggle('active', b === btn));
-      $('#view_freelancer').classList.toggle('active', tab === 'freelancer');
-      $('#view_service').classList.toggle('active', tab === 'service');
-      updateDocPreview();
-    });
+    btn.addEventListener('click', () => switchTab(btn.dataset.tabSwitch));
   });
 
   // Language buttons
   $$('[data-lang]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      S.lang = btn.dataset.lang;
-      $$('[data-lang]').forEach(b => b.classList.toggle('active', b === btn));
-      updateDocPreview();
-    });
+    btn.addEventListener('click', () => setLang(btn.dataset.lang));
   });
 
   // Currency buttons
   $$('[data-currency]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      S.currency = btn.dataset.currency;
-      $$('[data-currency]').forEach(b => b.classList.toggle('active', b === btn));
-      updateDocPreview();
-    });
+    btn.addEventListener('click', () => setCurrency(btn.dataset.currency));
   });
 
   // Form field inputs (Freelancer)
@@ -495,10 +535,14 @@ function bindEvents() {
   };
   Object.keys(mapF).forEach(id => {
     const el = $(`#${id}`);
-    if (el) el.addEventListener('input', e => {
-      S.f[mapF[id]] = e.target.value;
-      updateDocPreview();
-    });
+    if (el) {
+      const handler = e => {
+        S.f[mapF[id]] = e.target.value;
+        updateDocPreview();
+      };
+      el.addEventListener('input', handler);
+      el.addEventListener('change', handler);
+    }
   });
 
   // Form field inputs (Service)
@@ -509,18 +553,22 @@ function bindEvents() {
   };
   Object.keys(mapS).forEach(id => {
     const el = $(`#${id}`);
-    if (el) el.addEventListener('input', e => {
-      if (id === 's_taxpct') S.s.taxPct = parseFloat(e.target.value) || 0;
-      else S.s[mapS[id]] = e.target.value;
-      updateDocPreview();
-    });
+    if (el) {
+      const handler = e => {
+        if (id === 's_taxpct') S.s.taxPct = parseFloat(e.target.value) || 0;
+        else S.s[mapS[id]] = e.target.value;
+        updateDocPreview();
+      };
+      el.addEventListener('input', handler);
+      el.addEventListener('change', handler);
+    }
   });
 
-  // Add Item buttons
+  // Add Item buttons direct attachment
   $('#btn_add_f_item')?.addEventListener('click', () => addItem('freelancer'));
   $('#btn_add_s_item')?.addEventListener('click', () => addItem('service'));
 
-  // Table input delegation
+  // Global click & input delegation
   document.addEventListener('input', e => {
     const t = e.target;
     const act = t.dataset.act;
@@ -529,6 +577,7 @@ function bindEvents() {
     if (!act || !tab || isNaN(id)) return;
 
     const data = tab === 'freelancer' ? S.f : S.s;
+    if (!data || !Array.isArray(data.items)) return;
     const item = data.items.find(it => it.id === id);
     if (!item) return;
 
@@ -540,30 +589,31 @@ function bindEvents() {
   });
 
   document.addEventListener('click', e => {
-    const btn = e.target.closest('[data-act]');
+    const btn = e.target.closest('[data-act], #btn_add_f_item, #btn_add_s_item');
     if (!btn) return;
-    const act = btn.dataset.act;
+    const act = btn.dataset.act || (btn.id === 'btn_add_f_item' ? 'add-f' : btn.id === 'btn_add_s_item' ? 'add-s' : null);
     const tab = btn.dataset.tab;
     const id = parseInt(btn.dataset.id, 10);
 
-    if (act === 'del-item' && tab && !isNaN(id)) {
+    if (act === 'add-f' || (act === 'add-item' && tab === 'freelancer')) {
+      addItem('freelancer');
+    } else if (act === 'add-s' || (act === 'add-item' && tab === 'service')) {
+      addItem('service');
+    } else if (act === 'del-item' && tab && !isNaN(id)) {
       deleteItem(tab, id);
     }
   });
 
-  // Export PDF
+  // Buttons
   $('#btn_export_pdf')?.addEventListener('click', exportPDF);
-  // Print
   $('#btn_print')?.addEventListener('click', () => window.print());
-  // Copy breakdown
   $('#btn_copy_summary')?.addEventListener('click', copyInvoiceSummary);
-  // Save profile / Load profile
   $('#btn_save_defaults')?.addEventListener('click', saveDefaultProfile);
   $('#btn_load_defaults')?.addEventListener('click', loadDefaultProfile);
 }
 
 /* ---------- PDF Export Engine (html2pdf.js) ---------- */
-function exportPDF() {
+window.exportPDF = function() {
   const paper = $('#invoice_paper');
   if (!paper) return;
 
@@ -599,10 +649,10 @@ function exportPDF() {
     console.error('PDF Export Error:', err);
     showToast('❌ LỖI XUẤT PDF. VUI LÒNG THỬ IN (PRINT)');
   });
-}
+};
 
 /* ---------- Copy Summary to Clipboard ---------- */
-function copyInvoiceSummary() {
+window.copyInvoiceSummary = function() {
   const isFreelancer = S.tab === 'freelancer';
   const data = isFreelancer ? S.f : S.s;
 
@@ -617,13 +667,15 @@ function copyInvoiceSummary() {
   lines.push('\n--- CHI TIẾT ---');
 
   let subtotal = 0;
-  data.items.forEach((it, i) => {
-    const qNum = parseQty(it.qty);
-    const rNum = parseMoney(it.rate);
-    const amtStr = (!isNaN(qNum) && !isNaN(rNum)) ? formatCurrency(qNum * rNum) : (it.rate || t('toBeConfirmed'));
-    if (!isNaN(qNum) && !isNaN(rNum)) subtotal += qNum * rNum;
-    lines.push(`${i + 1}. ${it.desc} | SL: ${it.qty} | Đơn giá: ${it.rate} => ${amtStr}`);
-  });
+  if (Array.isArray(data.items)) {
+    data.items.forEach((it, i) => {
+      const qNum = parseQty(it.qty);
+      const rNum = parseMoney(it.rate);
+      const amtStr = (!isNaN(qNum) && !isNaN(rNum)) ? formatCurrency(qNum * rNum) : (it.rate || t('toBeConfirmed'));
+      if (!isNaN(qNum) && !isNaN(rNum)) subtotal += qNum * rNum;
+      lines.push(`${i + 1}. ${it.desc} | SL: ${it.qty} | Đơn giá: ${it.rate} => ${amtStr}`);
+    });
+  }
 
   lines.push('\n--- TỔNG KẾT ---');
   if (isFreelancer) {
@@ -646,13 +698,13 @@ function copyInvoiceSummary() {
   }).catch(() => {
     showToast('⚠️ KHÔNG THỂ COPY VÀO CLIPBOARD');
   });
-}
+};
 
 /* ---------- LocalStorage Persistence ---------- */
 const STORAGE_KEY_PROFILE = 'oddpig_invoice_profile';
 const STORAGE_KEY_DRAFT = 'oddpig_invoice_draft';
 
-function saveDefaultProfile() {
+window.saveDefaultProfile = function() {
   const profile = {
     name: S.f.name,
     subtitle: S.f.subtitle,
@@ -664,9 +716,9 @@ function saveDefaultProfile() {
   };
   localStorage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(profile));
   showToast('💾 ĐÃ LƯU THÔNG TIN MẶC ĐỊNH');
-}
+};
 
-function loadDefaultProfile() {
+window.loadDefaultProfile = function() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY_PROFILE);
     if (!saved) {
@@ -691,7 +743,7 @@ function loadDefaultProfile() {
   } catch (e) {
     showToast('❌ LỖI ĐỌC DỮ LIỆU');
   }
-}
+};
 
 function saveDraftToStorage() {
   try {
@@ -721,7 +773,9 @@ function loadDraftFromStorage() {
     $$('[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === S.lang));
     
     $('#view_freelancer')?.classList.toggle('active', S.tab === 'freelancer');
+    if ($('#view_freelancer')) $('#view_freelancer').hidden = (S.tab !== 'freelancer');
     $('#view_service')?.classList.toggle('active', S.tab === 'service');
+    if ($('#view_service')) $('#view_service').hidden = (S.tab !== 'service');
   } catch (e) {}
 }
 
@@ -756,4 +810,8 @@ function init() {
   tickTC();
 }
 
-document.addEventListener('DOMContentLoaded', init);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

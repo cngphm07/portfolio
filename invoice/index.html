@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=2">
 <!-- html2pdf bundle for crisp vector & full Vietnamese font support -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -24,8 +24,8 @@
   </a>
   
   <nav class="tabs mono">
-    <button class="tab active" data-tab-switch="freelancer">FREELANCER</button>
-    <button class="tab" data-tab-switch="service">DỊCH VỤ / BÁN HÀNG</button>
+    <button type="button" class="tab active" data-tab-switch="freelancer" onclick="switchTab('freelancer')">FREELANCER</button>
+    <button type="button" class="tab" data-tab-switch="service" onclick="switchTab('service')">DỊCH VỤ / BÁN HÀNG</button>
   </nav>
 
   <p class="tc mono" id="tcClock" aria-hidden="true">TC 00:00:00:00</p>
@@ -43,19 +43,19 @@
     <div class="control-bar">
       <!-- Language Selector -->
       <div class="pill-group">
-        <button class="pill-opt" data-lang="vi">VI</button>
-        <button class="pill-opt active" data-lang="en">EN</button>
-        <button class="pill-opt" data-lang="both">SONG NGỮ</button>
+        <button type="button" class="pill-opt" data-lang="vi" onclick="setLang('vi')">VI</button>
+        <button type="button" class="pill-opt active" data-lang="en" onclick="setLang('en')">EN</button>
+        <button type="button" class="pill-opt" data-lang="both" onclick="setLang('both')">SONG NGỮ</button>
       </div>
 
       <!-- Currency Selector -->
       <div class="pill-group">
-        <button class="pill-opt active" data-currency="VND">VND</button>
-        <button class="pill-opt" data-currency="USD">USD</button>
+        <button type="button" class="pill-opt active" data-currency="VND" onclick="setCurrency('VND')">VND</button>
+        <button type="button" class="pill-opt" data-currency="USD" onclick="setCurrency('USD')">USD</button>
       </div>
 
-      <button class="btn sm ghost" id="btn_save_defaults">💾 LƯU MẶC ĐỊNH</button>
-      <button class="btn sm ghost" id="btn_load_defaults">📂 TẢI MẶC ĐỊNH</button>
+      <button type="button" class="btn sm ghost" id="btn_save_defaults" onclick="saveDefaultProfile()">💾 LƯU MẶC ĐỊNH</button>
+      <button type="button" class="btn sm ghost" id="btn_load_defaults" onclick="loadDefaultProfile()">📂 TẢI MẶC ĐỊNH</button>
     </div>
   </div>
 
@@ -155,7 +155,7 @@
           </div>
 
           <div class="btn-row">
-            <button class="btn sm" id="btn_add_f_item">＋ THÊM DÒNG CÔNG VIỆC</button>
+            <button type="button" class="btn sm" id="btn_add_f_item" onclick="addItem('freelancer')" data-act="add-f">＋ THÊM DÒNG CÔNG VIỆC</button>
           </div>
         </div>
 
@@ -286,7 +286,7 @@
           </div>
 
           <div class="fgrid-2" style="align-items:center; margin-top:10px">
-            <button class="btn sm" id="btn_add_s_item">＋ THÊM DÒNG DỊCH VỤ</button>
+            <button type="button" class="btn sm" id="btn_add_s_item" onclick="addItem('service')" data-act="add-s">＋ THÊM DÒNG DỊCH VỤ</button>
             <div class="fg" style="margin-bottom:0">
               <label>Thuế VAT (%)</label>
               <input id="s_taxpct" type="number" min="0" max="100" value="0" style="max-width:120px">
@@ -348,9 +348,9 @@ Thank you for working with us!</textarea>
         </div>
 
         <div class="preview-buttons">
-          <button class="btn primary" id="btn_export_pdf">📥 XUẤT PDF</button>
-          <button class="btn sm" id="btn_print">🖨️ IN</button>
-          <button class="btn sm ghost" id="btn_copy_summary">📋 COPY TỔNG HỢP</button>
+          <button type="button" class="btn primary" id="btn_export_pdf" onclick="exportPDF()">📥 XUẤT PDF</button>
+          <button type="button" class="btn sm" id="btn_print" onclick="window.print()">🖨️ IN</button>
+          <button type="button" class="btn sm ghost" id="btn_copy_summary" onclick="copyInvoiceSummary()">📋 COPY TỔNG HỢP</button>
         </div>
       </div>
 
@@ -452,6 +452,6 @@ Thank you for working with us!</textarea>
 <!-- Toast System -->
 <div class="toast" id="toast"></div>
 
-<script src="app.js"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>
