@@ -218,7 +218,6 @@ function initFormFields() {
   const f = S.f;
   const s = S.s;
 
-  // Freelancer fields
   const setVal = (id, val) => { const el = $(`#${id}`); if (el) el.value = val ?? ''; };
   setVal('f_invnum', f.invNum);
   setVal('f_invdate', f.invDate);
@@ -233,7 +232,6 @@ function initFormFields() {
   setVal('f_accname', f.accName);
   setVal('f_notes', f.notes);
 
-  // Service fields
   setVal('s_invnum', s.invNum);
   setVal('s_invdate', s.invDate);
   setVal('s_duedate', s.dueDate);
@@ -286,7 +284,7 @@ window.addItem = function(tab) {
     amount: 0
   });
   renderItemInputs(activeTab);
-  updateDocPreview();
+  syncAllInputsToStateAndPreview();
 };
 
 window.deleteItem = function(tab, id) {
@@ -296,33 +294,72 @@ window.deleteItem = function(tab, id) {
   if (idx > -1) {
     data.items.splice(idx, 1);
     renderItemInputs(tab);
-    updateDocPreview();
+    syncAllInputsToStateAndPreview();
   }
 };
 
 window.switchTab = function(tab) {
   S.tab = tab;
   $$('[data-tab-switch]').forEach(b => b.classList.toggle('active', b.dataset.tabSwitch === tab));
-  $('#view_freelancer')?.classList.toggle('active', tab === 'freelancer');
-  if ($('#view_freelancer')) $('#view_freelancer').hidden = (tab !== 'freelancer');
-  $('#view_service')?.classList.toggle('active', tab === 'service');
-  if ($('#view_service')) $('#view_service').hidden = (tab !== 'service');
-  updateDocPreview();
+  const viewF = $('#view_freelancer');
+  if (viewF) {
+    viewF.classList.toggle('active', tab === 'freelancer');
+    viewF.hidden = (tab !== 'freelancer');
+  }
+  const viewS = $('#view_service');
+  if (viewS) {
+    viewS.classList.toggle('active', tab === 'service');
+    viewS.hidden = (tab !== 'service');
+  }
+  syncAllInputsToStateAndPreview();
 };
 
 window.setLang = function(lang) {
   S.lang = lang;
   $$('[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
-  updateDocPreview();
+  syncAllInputsToStateAndPreview();
 };
 
 window.setCurrency = function(curr) {
   S.currency = curr;
   $$('[data-currency]').forEach(b => b.classList.toggle('active', b.dataset.currency === curr));
+  syncAllInputsToStateAndPreview();
+};
+
+/* ---------- Universal Live Sync Engine ---------- */
+window.syncAllInputsToStateAndPreview = function() {
+  // Read all Freelancer inputs
+  const fNum = $('#f_invnum'); if (fNum) S.f.invNum = fNum.value;
+  const fDate = $('#f_invdate'); if (fDate) S.f.invDate = fDate.value;
+  const fFrom = $('#f_work_from'); if (fFrom) S.f.workFrom = fFrom.value;
+  const fTo = $('#f_work_to'); if (fTo) S.f.workTo = fTo.value;
+  const fName = $('#f_name'); if (fName) S.f.name = fName.value;
+  const fSub = $('#f_subtitle'); if (fSub) S.f.subtitle = fSub.value;
+  const fBill = $('#f_billto'); if (fBill) S.f.billTo = fBill.value;
+  const fAddr = $('#f_billaddr'); if (fAddr) S.f.billAddr = fAddr.value;
+  const fBank = $('#f_bank'); if (fBank) S.f.bank = fBank.value;
+  const fAccN = $('#f_accnum'); if (fAccN) S.f.accNum = fAccN.value;
+  const fAccNm = $('#f_accname'); if (fAccNm) S.f.accName = fAccNm.value;
+  const fNotes = $('#f_notes'); if (fNotes) S.f.notes = fNotes.value;
+
+  // Read all Service inputs
+  const sNum = $('#s_invnum'); if (sNum) S.s.invNum = sNum.value;
+  const sDate = $('#s_invdate'); if (sDate) S.s.invDate = sDate.value;
+  const sDue = $('#s_duedate'); if (sDue) S.s.dueDate = sDue.value;
+  const sName = $('#s_name'); if (sName) S.s.name = sName.value;
+  const sSub = $('#s_subtitle'); if (sSub) S.s.subtitle = sSub.value;
+  const sBill = $('#s_billto'); if (sBill) S.s.billTo = sBill.value;
+  const sAddr = $('#s_billaddr'); if (sAddr) S.s.billAddr = sAddr.value;
+  const sTax = $('#s_taxpct'); if (sTax) S.s.taxPct = parseFloat(sTax.value) || 0;
+  const sBank = $('#s_bank'); if (sBank) S.s.bank = sBank.value;
+  const sAccN = $('#s_accnum'); if (sAccN) S.s.accNum = sAccN.value;
+  const sAccNm = $('#s_accname'); if (sAccNm) S.s.accName = sAccNm.value;
+  const sNotes = $('#s_notes'); if (sNotes) S.s.notes = sNotes.value;
+
   updateDocPreview();
 };
 
-/* ---------- Calculations & Live Preview Update ---------- */
+/* ---------- Render Preview to Paper Viewport ---------- */
 function updateDocPreview() {
   const isFreelancer = S.tab === 'freelancer';
   const data = isFreelancer ? S.f : S.s;
@@ -444,7 +481,7 @@ function updateDocPreview() {
         const finalTotal = subtotal + taxVal;
         summaryHtml += `<tr><td>${t('subtotal')}</td><td>${formatCurrency(subtotal)}</td></tr>`;
         if (data.taxPct > 0) {
-          summaryHtml += `<tr><td>${t('tax')} (${data.taxPct}%)</td><td>${formatCurrency(taxVal)}</td></tr>`;
+          summaryHtml += `<tr><td>${t('tax')} (${data.taxPct}%): ${formatCurrency(taxVal)}</td></tr>`;
         }
         summaryHtml += `<tr class="total-row"><td>${t('totalDue')}</td><td>${formatCurrency(finalTotal)}</td></tr>`;
         
@@ -497,83 +534,39 @@ function updateDocPreview() {
 
 /* ---------- Event Handlers ---------- */
 function bindEvents() {
-  // Tab switching
-  $$('[data-tab-switch]').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tabSwitch));
-  });
-
-  // Language buttons
-  $$('[data-lang]').forEach(btn => {
-    btn.addEventListener('click', () => setLang(btn.dataset.lang));
-  });
-
-  // Currency buttons
-  $$('[data-currency]').forEach(btn => {
-    btn.addEventListener('click', () => setCurrency(btn.dataset.currency));
-  });
-
-  // Form field inputs (Freelancer)
-  const mapF = {
-    f_invnum: 'invNum', f_invdate: 'invDate',
-    f_work_from: 'workFrom', f_work_to: 'workTo',
-    f_name: 'name', f_subtitle: 'subtitle', f_billto: 'billTo', f_billaddr: 'billAddr',
-    f_bank: 'bank', f_accnum: 'accNum', f_accname: 'accName', f_notes: 'notes'
-  };
-  Object.keys(mapF).forEach(id => {
-    const el = $(`#${id}`);
-    if (el) {
-      const handler = e => {
-        S.f[mapF[id]] = e.target.value;
-        updateDocPreview();
-      };
-      el.addEventListener('input', handler);
-      el.addEventListener('change', handler);
-    }
-  });
-
-  // Form field inputs (Service)
-  const mapS = {
-    s_invnum: 'invNum', s_invdate: 'invDate', s_duedate: 'dueDate',
-    s_name: 'name', s_subtitle: 'subtitle', s_billto: 'billTo', s_billaddr: 'billAddr',
-    s_taxpct: 'taxPct', s_bank: 'bank', s_accnum: 'accNum', s_accname: 'accName', s_notes: 'notes'
-  };
-  Object.keys(mapS).forEach(id => {
-    const el = $(`#${id}`);
-    if (el) {
-      const handler = e => {
-        if (id === 's_taxpct') S.s.taxPct = parseFloat(e.target.value) || 0;
-        else S.s[mapS[id]] = e.target.value;
-        updateDocPreview();
-      };
-      el.addEventListener('input', handler);
-      el.addEventListener('change', handler);
-    }
-  });
-
-  // Add Item buttons direct attachment
-  $('#btn_add_f_item')?.addEventListener('click', () => addItem('freelancer'));
-  $('#btn_add_s_item')?.addEventListener('click', () => addItem('service'));
-
-  // Global click & input delegation
+  // Global input & change listener for real-time reactivity
   document.addEventListener('input', e => {
     const t = e.target;
-    const act = t.dataset.act;
-    const tab = t.dataset.tab;
-    const id = parseInt(t.dataset.id, 10);
-    if (!act || !tab || isNaN(id)) return;
-
-    const data = tab === 'freelancer' ? S.f : S.s;
-    if (!data || !Array.isArray(data.items)) return;
-    const item = data.items.find(it => it.id === id);
-    if (!item) return;
-
-    if (act === 'desc') item.desc = t.value;
-    else if (act === 'qty') item.qty = t.value;
-    else if (act === 'rate') item.rate = t.value;
-
-    updateDocPreview();
+    if (t && t.dataset && t.dataset.act && t.dataset.tab) {
+      const act = t.dataset.act;
+      const tab = t.dataset.tab;
+      const id = parseInt(t.dataset.id, 10);
+      const data = tab === 'freelancer' ? S.f : S.s;
+      if (data && Array.isArray(data.items)) {
+        const item = data.items.find(it => it.id === id);
+        if (item) {
+          if (act === 'desc') item.desc = t.value;
+          else if (act === 'qty') item.qty = t.value;
+          else if (act === 'rate') item.rate = t.value;
+        }
+      }
+    }
+    syncAllInputsToStateAndPreview();
   });
 
+  document.addEventListener('change', () => {
+    syncAllInputsToStateAndPreview();
+  });
+
+  document.addEventListener('keyup', () => {
+    syncAllInputsToStateAndPreview();
+  });
+
+  document.addEventListener('paste', () => {
+    setTimeout(syncAllInputsToStateAndPreview, 10);
+  });
+
+  // Buttons delegation
   document.addEventListener('click', e => {
     const btn = e.target.closest('[data-act], #btn_add_f_item, #btn_add_s_item');
     if (!btn) return;
@@ -590,7 +583,7 @@ function bindEvents() {
     }
   });
 
-  // Buttons
+  // Action buttons
   $('#btn_export_pdf')?.addEventListener('click', exportPDF);
   $('#btn_print')?.addEventListener('click', () => window.print());
   $('#btn_copy_summary')?.addEventListener('click', copyInvoiceSummary);
@@ -724,7 +717,7 @@ window.loadDefaultProfile = function() {
     $$('[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === S.lang));
 
     initFormFields();
-    updateDocPreview();
+    syncAllInputsToStateAndPreview();
     showToast('📂 ĐÃ TẢI THÔNG TIN MẶC ĐỊNH');
   } catch (e) {
     showToast('❌ LỖI ĐỌC DỮ LIỆU');
@@ -758,10 +751,16 @@ function loadDraftFromStorage() {
     $$('[data-currency]').forEach(b => b.classList.toggle('active', b.dataset.currency === S.currency));
     $$('[data-lang]').forEach(b => b.classList.toggle('active', b.dataset.lang === S.lang));
     
-    $('#view_freelancer')?.classList.toggle('active', S.tab === 'freelancer');
-    if ($('#view_freelancer')) $('#view_freelancer').hidden = (S.tab !== 'freelancer');
-    $('#view_service')?.classList.toggle('active', S.tab === 'service');
-    if ($('#view_service')) $('#view_service').hidden = (S.tab !== 'service');
+    const viewF = $('#view_freelancer');
+    if (viewF) {
+      viewF.classList.toggle('active', S.tab === 'freelancer');
+      viewF.hidden = (S.tab !== 'freelancer');
+    }
+    const viewS = $('#view_service');
+    if (viewS) {
+      viewS.classList.toggle('active', S.tab === 'service');
+      viewS.hidden = (S.tab !== 'service');
+    }
   } catch (e) {}
 }
 
@@ -790,7 +789,7 @@ function init() {
   loadDraftFromStorage();
   initFormFields();
   bindEvents();
-  updateDocPreview();
+  syncAllInputsToStateAndPreview();
 
   setInterval(tickTC, 40);
   tickTC();
