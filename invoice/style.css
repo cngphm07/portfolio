@@ -590,6 +590,62 @@ textarea {
   margin-top: 0.8rem;
 }
 
+/* ---------- Flatpickr Dark Cinema Customization ---------- */
+.flatpickr-calendar {
+  background: #0b0b0b !important;
+  border: 1px solid var(--line2) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.9) !important;
+  border-radius: 0 !important;
+  font-family: var(--font-b) !important;
+  color: var(--ink) !important;
+}
+.flatpickr-months {
+  background: #060606 !important;
+  border-bottom: 1px solid var(--line) !important;
+  padding: 4px 0 !important;
+}
+.flatpickr-months .flatpickr-month {
+  color: var(--ink) !important;
+}
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+  font-family: var(--font-m) !important;
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+  color: var(--ink) !important;
+}
+span.flatpickr-weekday {
+  color: var(--g2) !important;
+  font-family: var(--font-m) !important;
+  font-size: 0.54rem !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+.flatpickr-day {
+  color: var(--g1) !important;
+  border-radius: 0 !important;
+  font-family: var(--font-m) !important;
+  font-size: 0.76rem !important;
+  transition: all 0.15s !important;
+}
+.flatpickr-day:hover, .flatpickr-day:focus {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+.flatpickr-day.today {
+  border-color: var(--line2) !important;
+}
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+  background: var(--ink) !important;
+  border-color: var(--ink) !important;
+  color: #000 !important;
+  font-weight: 600 !important;
+}
+.flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
+  color: var(--g3) !important;
+}
+
 /* ---------- PREVIEW PANEL (Sticky on Desktop) ---------- */
 .preview-panel {
   position: sticky;

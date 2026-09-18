@@ -102,9 +102,9 @@ window.S = {
   // Freelancer form
   f: {
     invNum: 'INV-001',
-    invDate: '2026-08-22',
-    workFrom: '2026-08-20',
-    workTo: '2026-08-24',
+    invDate: '22/08/2026',
+    workFrom: '20/08/2026',
+    workTo: '24/08/2026',
     name: 'Nguyen Van A',
     subtitle: 'Invoice for services and referrals',
     email: 'contact@example.com',
@@ -124,8 +124,8 @@ window.S = {
   // Service form
   s: {
     invNum: 'INV-001',
-    invDate: '2026-08-22',
-    dueDate: '2026-09-05',
+    invDate: '22/08/2026',
+    dueDate: '05/09/2026',
     name: 'CNGPHM Studio',
     subtitle: 'Media Production & Post-Production Studio',
     email: 'contact@oddpig.io.vn',
@@ -147,23 +147,37 @@ window.S = {
 let nextItemId = 100;
 
 /* ---------- Helper Functions ---------- */
-function formatDateDisplay(ymd) {
-  if (!ymd) return '';
-  const d = new Date(ymd);
-  if (isNaN(d.getTime())) return ymd;
+function parseDmy(str) {
+  if (!str) return null;
+  if (str instanceof Date) return str;
+  const parts = String(str).trim().split(/[\/\-.]/);
+  if (parts.length === 3) {
+    if (parts[0].length === 4) {
+      return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    }
+    return new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+  }
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function formatDateDisplay(dmy) {
+  if (!dmy) return '';
+  const d = parseDmy(dmy);
+  if (!d) return dmy;
   const pad = n => String(n).padStart(2, '0');
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
 }
 
 // Always strictly dd/mm/yyyy - dd/mm/yyyy
-function formatWorkPeriodDisplay(fromYmd, toYmd) {
-  if (!fromYmd && !toYmd) return '-';
-  if (fromYmd && !toYmd) return formatDateDisplay(fromYmd);
-  if (!fromYmd && toYmd) return formatDateDisplay(toYmd);
+function formatWorkPeriodDisplay(fromDmy, toDmy) {
+  if (!fromDmy && !toDmy) return '-';
+  if (fromDmy && !toDmy) return formatDateDisplay(fromDmy);
+  if (!fromDmy && toDmy) return formatDateDisplay(toDmy);
 
-  const d1 = new Date(fromYmd);
-  const d2 = new Date(toYmd);
-  if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return `${fromYmd} - ${toYmd}`;
+  const d1 = parseDmy(fromDmy);
+  const d2 = parseDmy(toDmy);
+  if (!d1 || !d2) return `${fromDmy} - ${toDmy}`;
 
   const pad = n => String(n).padStart(2, '0');
   const str1 = `${pad(d1.getDate())}/${pad(d1.getMonth() + 1)}/${d1.getFullYear()}`;
@@ -841,10 +855,34 @@ function tickTC() {
   el.textContent = `TC ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}:${p(Math.floor(d.getMilliseconds() / 40))}`;
 }
 
+/* ---------- Flatpickr Datepicker Initialization ---------- */
+let fpInstances = {};
+function initDatePickers() {
+  if (typeof flatpickr === 'function') {
+    const ids = ['f_invdate', 'f_work_from', 'f_work_to', 's_invdate', 's_duedate'];
+    ids.forEach(id => {
+      const el = $(`#${id}`);
+      if (el) {
+        if (fpInstances[id]) {
+          try { fpInstances[id].destroy(); } catch (e) {}
+        }
+        fpInstances[id] = flatpickr(el, {
+          dateFormat: 'd/m/Y',
+          allowInput: true,
+          disableMobile: false,
+          onChange: () => syncAllInputsToStateAndPreview(),
+          onClose: () => syncAllInputsToStateAndPreview()
+        });
+      }
+    });
+  }
+}
+
 /* ---------- Initialize Application ---------- */
 function init() {
   loadDraftFromStorage();
   initFormFields();
+  initDatePickers();
   bindEvents();
   syncAllInputsToStateAndPreview();
 
