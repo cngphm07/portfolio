@@ -855,6 +855,12 @@ function tickTC() {
   el.textContent = `TC ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}:${p(Math.floor(d.getMilliseconds() / 40))}`;
 }
 
+function todayDmy() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+}
+
 /* ---------- Flatpickr Datepicker Initialization ---------- */
 let fpInstances = {};
 function initDatePickers() {
@@ -870,6 +876,23 @@ function initDatePickers() {
           dateFormat: 'd/m/Y',
           allowInput: true,
           disableMobile: false,
+          onReady: function(selectedDates, dateStr, instance) {
+            if (!instance.calendarContainer.querySelector('.flatpickr-custom-footer')) {
+              const footer = document.createElement('div');
+              footer.className = 'flatpickr-custom-footer';
+              footer.innerHTML = `
+                <button type="button" class="fp-today-btn">● TODAY (${todayDmy()})</button>
+              `;
+              footer.querySelector('.fp-today-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                instance.setDate(new Date(), true);
+                instance.close();
+                syncAllInputsToStateAndPreview();
+              });
+              instance.calendarContainer.appendChild(footer);
+            }
+          },
           onChange: () => syncAllInputsToStateAndPreview(),
           onClose: () => syncAllInputsToStateAndPreview()
         });
