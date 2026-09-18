@@ -126,7 +126,7 @@ window.S = {
     invNum: 'INV-001',
     invDate: '2026-08-22',
     dueDate: '2026-09-05',
-    name: 'Odd Pig Studio',
+    name: 'CNGPHM Studio',
     subtitle: 'Media Production & Post-Production Studio',
     email: 'contact@oddpig.io.vn',
     address: 'Ho Chi Minh City, Vietnam',
@@ -135,7 +135,7 @@ window.S = {
     taxPct: 0,
     bank: 'Techcombank (Vietnam Technological and Commercial Joint Stock Bank)',
     accNum: '19030012345678',
-    accName: 'ODD PIG STUDIO',
+    accName: 'CNGPHM STUDIO',
     notes: 'Payment is due within 14 days.\nThank you for working with us!',
     items: [
       { id: 1, desc: 'Commercial Video Editing (3 reels)', qty: '3', rate: '2,500,000', isText: false, amount: 7500000 },
