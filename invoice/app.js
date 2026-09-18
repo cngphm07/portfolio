@@ -95,18 +95,18 @@ const I18N = {
 
 /* ---------- Global State ---------- */
 window.S = {
-  tab: 'freelancer', // 'freelancer' | 'service'
-  lang: 'en',        // 'en' | 'vi' | 'both'
-  currency: 'VND',   // 'VND' | 'USD'
+  tab: 'freelancer',
+  lang: 'en',
+  currency: 'VND',
   
-  // Freelancer form (mock info)
+  // Freelancer form
   f: {
     invNum: 'INV-001',
     invDate: '2026-08-22',
     workFrom: '2026-08-20',
     workTo: '2026-08-24',
     name: 'Nguyen Van A',
-    subtitle: 'Freelance Video Editor & Colorist',
+    subtitle: 'Invoice for services and referrals',
     email: 'contact@example.com',
     address: 'Ho Chi Minh City, Vietnam',
     billTo: 'The Speechless Communication Pty Ltd',
@@ -114,14 +114,14 @@ window.S = {
     bank: 'Techcombank (Vietnam Technological and Commercial Joint Stock Bank)',
     accNum: '19030012345678',
     accName: 'NGUYEN VAN A',
-    notes: 'Thank you for your business!\n3 days',
+    notes: 'Thank you.\n3 days',
     items: [
-      { id: 1, desc: 'Video Editing & Post-Production', qty: '3 days', rate: '2,500,000', isText: false, amount: 7500000 },
-      { id: 2, desc: 'Project Revisions & Final Delivery', qty: 'To be confirmed', rate: 'To be confirmed', isText: true, amount: 0 },
+      { id: 1, desc: 'Work: 20/08/2026 - 24/08/2026', qty: '3 days', rate: '', isTbc: true, amount: 0 },
+      { id: 2, desc: 'Editor referral fee', qty: '2 referrals', rate: '2,250,000', isTbc: false, amount: 4500000 },
     ]
   },
 
-  // Service / Business form (mock info)
+  // Service form
   s: {
     invNum: 'INV-001',
     invDate: '2026-08-22',
@@ -138,8 +138,8 @@ window.S = {
     accName: 'CNGPHM STUDIO',
     notes: 'Payment is due within 14 days.\nThank you for working with us!',
     items: [
-      { id: 1, desc: 'Commercial Video Editing (3 reels)', qty: '3', rate: '2,500,000', isText: false, amount: 7500000 },
-      { id: 2, desc: 'Sound Design & Audio Mastering', qty: '1', rate: '1,500,000', isText: false, amount: 1500000 },
+      { id: 1, desc: 'Commercial Video Editing (3 reels)', qty: '3', rate: '2,500,000', isTbc: false, amount: 7500000 },
+      { id: 2, desc: 'Sound Design & Audio Mastering', qty: '1', rate: '1,500,000', isTbc: false, amount: 1500000 },
     ]
   }
 };
@@ -155,6 +155,7 @@ function formatDateDisplay(ymd) {
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
 }
 
+// Always strictly dd/mm/yyyy - dd/mm/yyyy
 function formatWorkPeriodDisplay(fromYmd, toYmd) {
   if (!fromYmd && !toYmd) return '-';
   if (fromYmd && !toYmd) return formatDateDisplay(fromYmd);
@@ -261,13 +262,15 @@ function collectCurrentItemInputsFromDOM(tab) {
     const descIn = row.querySelector('[data-act="desc"]');
     const qtyIn = row.querySelector('[data-act="qty"]');
     const rateIn = row.querySelector('[data-act="rate"]');
+    const tbcIn = row.querySelector('[data-act="tbc"]');
     if (!descIn) return;
     const id = parseInt(descIn.dataset.id, 10);
     const item = data.items.find(it => it.id === id);
     if (item) {
       if (descIn) item.desc = descIn.value;
       if (qtyIn) item.qty = qtyIn.value;
-      if (rateIn) item.rate = rateIn.value;
+      if (tbcIn) item.isTbc = tbcIn.checked;
+      if (rateIn && !item.isTbc) item.rate = rateIn.value;
     }
   });
 }
@@ -282,17 +285,34 @@ function renderItemInputs(tab) {
 
   wrap.innerHTML = '';
   data.items.forEach(item => {
+    const isTbc = !!item.isTbc;
     const row = document.createElement('div');
     row.className = 'item-row';
     row.innerHTML = `
       <input type="text" placeholder="Mô tả công việc" value="${esc(item.desc)}" data-act="desc" data-tab="${tab}" data-id="${item.id}">
       <input type="text" placeholder="SL / Ngày" value="${esc(item.qty)}" data-act="qty" data-tab="${tab}" data-id="${item.id}" style="text-align:right">
-      <input type="text" class="money-in" placeholder="Đơn giá" value="${esc(item.rate)}" data-act="rate" data-tab="${tab}" data-id="${item.id}">
+      <input type="text" class="money-in" placeholder="${isTbc ? 'Chờ xác nhận' : 'Đơn giá'}" value="${isTbc ? '' : esc(item.rate)}" ${isTbc ? 'disabled' : ''} data-act="rate" data-tab="${tab}" data-id="${item.id}">
+      <label class="tbc-check" title="To be confirmed (Chờ xác nhận)">
+        <input type="checkbox" ${isTbc ? 'checked' : ''} onchange="toggleItemTbc('${tab}', ${item.id}, this.checked)" data-act="tbc" data-tab="${tab}" data-id="${item.id}">
+        <span>TBC</span>
+      </label>
       <button type="button" class="item-del-btn" onclick="deleteItem('${tab}', ${item.id})" title="Xóa dòng">✕</button>
     `;
     wrap.appendChild(row);
   });
 }
+
+window.toggleItemTbc = function(tab, id, checked) {
+  const data = tab === 'freelancer' ? S.f : S.s;
+  if (!data || !Array.isArray(data.items)) return;
+  collectCurrentItemInputsFromDOM(tab);
+  const item = data.items.find(it => it.id === id);
+  if (item) {
+    item.isTbc = checked;
+  }
+  renderItemInputs(tab);
+  syncAllInputsToStateAndPreview();
+};
 
 window.addItem = function(tab) {
   const activeTab = tab || S.tab || 'freelancer';
@@ -308,7 +328,7 @@ window.addItem = function(tab) {
     desc: '',
     qty: '1',
     rate: '0',
-    isText: false,
+    isTbc: false,
     amount: 0
   });
 
@@ -476,21 +496,28 @@ function updateDocPreview() {
 
     if (Array.isArray(data.items)) {
       data.items.forEach(it => {
-        const qNum = parseQty(it.qty);
-        const rNum = parseMoney(it.rate);
-
-        let rateDisplay = it.rate;
+        let rateDisplay = '';
         let amtDisplay = '';
 
-        if (isNaN(qNum) || isNaN(rNum)) {
+        if (it.isTbc) {
           hasPending = true;
+          it.amount = 0;
+          rateDisplay = t('toBeConfirmed');
           amtDisplay = t('toBeConfirmed');
-          if (isNaN(rNum)) rateDisplay = it.rate || t('toBeConfirmed');
         } else {
-          it.amount = qNum * rNum;
-          subtotal += it.amount;
-          rateDisplay = formatCurrency(rNum);
-          amtDisplay = formatCurrency(it.amount);
+          const qNum = parseQty(it.qty);
+          const rNum = parseMoney(it.rate);
+
+          if (isNaN(qNum) || isNaN(rNum)) {
+            hasPending = true;
+            amtDisplay = t('toBeConfirmed');
+            if (isNaN(rNum)) rateDisplay = it.rate || t('toBeConfirmed');
+          } else {
+            it.amount = qNum * rNum;
+            subtotal += it.amount;
+            rateDisplay = formatCurrency(rNum);
+            amtDisplay = formatCurrency(it.amount);
+          }
         }
 
         const tr = document.createElement('tr');
@@ -588,7 +615,7 @@ function bindEvents() {
         if (item) {
           if (act === 'desc') item.desc = t.value;
           else if (act === 'qty') item.qty = t.value;
-          else if (act === 'rate') item.rate = t.value;
+          else if (act === 'rate' && !item.isTbc) item.rate = t.value;
         }
       }
     }
@@ -665,11 +692,24 @@ window.copyInvoiceSummary = function() {
   let subtotal = 0;
   if (Array.isArray(data.items)) {
     data.items.forEach((it, i) => {
-      const qNum = parseQty(it.qty);
-      const rNum = parseMoney(it.rate);
-      const amtStr = (!isNaN(qNum) && !isNaN(rNum)) ? formatCurrency(qNum * rNum) : (it.rate || t('toBeConfirmed'));
-      if (!isNaN(qNum) && !isNaN(rNum)) subtotal += qNum * rNum;
-      lines.push(`${i + 1}. ${it.desc} | SL: ${it.qty} | Đơn giá: ${it.rate} => ${amtStr}`);
+      let amtStr = '';
+      let rateStr = '';
+      if (it.isTbc) {
+        rateStr = t('toBeConfirmed');
+        amtStr = t('toBeConfirmed');
+      } else {
+        const qNum = parseQty(it.qty);
+        const rNum = parseMoney(it.rate);
+        if (!isNaN(qNum) && !isNaN(rNum)) {
+          subtotal += qNum * rNum;
+          rateStr = formatCurrency(rNum);
+          amtStr = formatCurrency(qNum * rNum);
+        } else {
+          rateStr = it.rate || t('toBeConfirmed');
+          amtStr = t('toBeConfirmed');
+        }
+      }
+      lines.push(`${i + 1}. ${it.desc} | SL: ${it.qty} | Đơn giá: ${rateStr} => ${amtStr}`);
     });
   }
 

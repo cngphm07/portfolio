@@ -437,7 +437,7 @@ textarea {
 
 .items-head {
   display: grid;
-  grid-template-columns: 1fr 100px 110px 28px;
+  grid-template-columns: 1fr 85px 105px 44px 24px;
   gap: 6px;
   font-family: var(--font-m);
   font-size: 0.5rem;
@@ -449,13 +449,14 @@ textarea {
 }
 
 .items-head span:nth-child(2),
-.items-head span:nth-child(3) {
+.items-head span:nth-child(3),
+.items-head span:nth-child(4) {
   text-align: right;
 }
 
 .item-row {
   display: grid;
-  grid-template-columns: 1fr 100px 110px 28px;
+  grid-template-columns: 1fr 85px 105px 44px 24px;
   gap: 6px;
   align-items: center;
   padding: 0.4rem 0;
@@ -474,6 +475,37 @@ textarea {
 .item-row input.money-in {
   font-family: var(--font-m);
   text-align: right;
+}
+
+.item-row input:disabled {
+  opacity: 0.45;
+  background: rgba(255,255,255,0.02);
+  cursor: not-allowed;
+}
+
+.tbc-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  cursor: pointer;
+  font-family: var(--font-m);
+  font-size: 0.52rem;
+  color: var(--g2);
+  user-select: none;
+}
+
+.tbc-check input {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+
+.tbc-check input:checked + span {
+  color: var(--yellow);
+  font-weight: 600;
 }
 
 .item-del-btn {
