@@ -847,6 +847,16 @@ const PORTFOLIO_DATA = {
       "thumb": "https://drive.google.com/thumbnail?id=1uYAVQMuNaI_j-yp3YyUfI0KQcsO-a0tG&sz=w400"
     },
     {
+      "id": "1QdRFKYNNRKJTJoL_7tAGLviC3qPz4XO3",
+      "title": "260919 SGTR-MOMO V003 SHORT",
+      "thumb": "https://drive.google.com/thumbnail?id=1QdRFKYNNRKJTJoL_7tAGLviC3qPz4XO3&sz=w400"
+    },
+    {
+      "id": "1S6VttSLIOPwusqdq-5z95Cf0xiPxcLVu",
+      "title": "260919 SGTR-MOMO V008",
+      "thumb": "https://drive.google.com/thumbnail?id=1S6VttSLIOPwusqdq-5z95Cf0xiPxcLVu&sz=w400"
+    },
+    {
       "id": "1Eogc3xMuJgwUnmVd027oKze_WDuTI9PT",
       "title": "250315 3004TOURCHAUAU V003",
       "thumb": "https://drive.google.com/thumbnail?id=1Eogc3xMuJgwUnmVd027oKze_WDuTI9PT&sz=w400"
