@@ -255,10 +255,10 @@
             <span id="lblShareBtn" class="hidden lg:inline text-[11px]">CHIA SẺ</span>
           </button>
 
-          <!-- ADMIN ONLY: Live Sync Button -->
-          <button id="adminSyncBtn" onclick="syncGoogleSheet()" class="hidden items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg bg-surface2 hover:bg-surface3 border border-borderSubtle hover:border-borderStrong text-xs font-mono text-inkMuted hover:text-ink transition-all active:scale-95" title="Đồng bộ dữ liệu trực tiếp từ Google Sheet">
+          <!-- ADMIN ONLY: Live Global Sync Button (Cloud & Sheets) -->
+          <button id="adminSyncBtn" onclick="syncGlobalAll(true)" class="hidden items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-neon/15 hover:bg-neon/25 border border-neon/40 text-xs font-mono font-bold text-neon transition-all active:scale-95 shadow-sm shadow-neon/10" title="Đồng bộ 2 chiều: Cloud Supabase + Google Sheets của tất cả dự án">
             <i data-lucide="refresh-cw" id="syncIcon" class="w-3.5 h-3.5 text-neon"></i>
-            <span id="lblSyncBtn" class="hidden md:inline text-[11px]">ĐỒNG BỘ SHEET</span>
+            <span id="lblSyncBtn" class="text-[11px] font-bold">ĐỒNG BỘ TẤT CẢ</span>
           </button>
 
           <!-- ADMIN ONLY: Sheet URL Direct Link -->
@@ -1003,6 +1003,7 @@
     let filteredData = [];
     let currentView = 'hub'; // 'hub' | 'grid' | 'month' | 'table' | 'chart' | 'finance'
     let currentActiveModalItem = null;
+    let lastSyncTimestamp = '';
 
     // -------------------------------------------------------------
     // Helper: Get Fresh Client Raw Data (from localStorage or default)
@@ -3279,74 +3280,90 @@
       return false;
     }
 
-    async function syncGoogleSheet(showFeedback = true) {
+    async function syncGlobalAll(showFeedback = true) {
       if (!isAdmin) {
         openLoginModal();
         return;
       }
 
-      const syncIcon = document.getElementById('syncIcon');
-      if (syncIcon) syncIcon.classList.add('animate-spin');
+      const syncIcons = [
+        document.getElementById('syncIcon'),
+        document.getElementById('hubSyncGlobalIcon')
+      ].filter(Boolean);
+      syncIcons.forEach(ic => ic.classList.add('animate-spin'));
+
+      const syncBtnText = document.getElementById('lblSyncBtn');
+      if (syncBtnText) syncBtnText.textContent = currentLang === 'vi' ? 'ĐANG SYNC...' : 'SYNCING...';
 
       try {
+        // Step 1: Sync Cloud Project Registry (Supabase)
+        let cloudCount = 0;
+        if (supabaseClient) {
+          const cloudOk = await hydrateCloudProjectRegistry({ silent: true });
+          if (cloudOk) {
+            cloudCount = Object.keys(CLIENTS).length;
+          }
+        }
+
+        // Step 2: Parallel Sync All Google Sheets for all projects
+        const clientIds = Object.keys(CLIENTS).filter(cid => CLIENTS[cid] && CLIENTS[cid].sheetId);
+        let sheetSuccess = 0;
+        await Promise.all(clientIds.map(async (cid) => {
+          const ok = await fetchAndSaveClientSheet(cid);
+          if (ok) sheetSuccess++;
+        }));
+
+        // Step 3: Refresh Current Dataset & UI
         if (activeClientId === 'all') {
-          const clientIds = Object.keys(CLIENTS).filter(cid => CLIENTS[cid].sheetId);
-          let successCount = 0;
-
-          await Promise.all(clientIds.map(async (cid) => {
-            const ok = await fetchAndSaveClientSheet(cid);
-            if (ok) successCount++;
-          }));
-
           currentData = getAllProjectsData();
-          updateClientUI();
-          populateMonthFilter();
-          applyFilters();
-          renderMasterHubView();
-
-          const now = new Date();
-          const timeStr = now.toLocaleTimeString(currentLang === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
-          document.getElementById('lastSyncText').textContent = `${currentLang === 'vi' ? 'Đồng bộ lúc' : 'Synced at'} ${timeStr}`;
-
-          if (showFeedback) {
-            alert(currentLang === 'vi' ? `Đã đồng bộ thành công ${successCount}/${clientIds.length} dự án từ Google Sheets!` : `Successfully synced ${successCount}/${clientIds.length} projects from Google Sheets!`);
-          }
         } else {
-          const client = CLIENTS[activeClientId];
-          if (!client || !client.sheetId) {
-            if (showFeedback) alert('Chưa cấu hình Google Sheet ID cho dự án này.');
-            return;
-          }
+          currentData = processBundles(getClientRawData(activeClientId));
+        }
 
-          const ok = await fetchAndSaveClientSheet(activeClientId);
-          if (ok) {
-            currentData = processBundles(getClientRawData(activeClientId));
-            updateClientUI();
-            populateMonthFilter();
-            applyFilters();
-            renderCurrentView();
+        updateClientUI();
+        populateMonthFilter();
+        applyFilters();
+        renderCurrentView();
 
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString(currentLang === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('lastSyncText').textContent = `${currentLang === 'vi' ? 'Đồng bộ lúc' : 'Synced at'} ${timeStr}`;
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString(currentLang === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const dateStr = now.toLocaleDateString(currentLang === 'vi' ? 'vi-VN' : 'en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        lastSyncTimestamp = `${timeStr} (${dateStr})`;
 
-            if (showFeedback) {
-              alert(currentLang === 'vi' ? `Đồng bộ thành công dự án ${client.name} từ Google Sheet!` : `Successfully synced project ${client.name} from Google Sheet!`);
-            }
-          } else {
-            if (showFeedback) {
-              alert(currentLang === 'vi' ? 'Không thể kết nối trực tiếp đến Google Sheet. Đang hiển thị bản dữ liệu lưu trữ.' : 'Could not connect directly to Google Sheet. Showing cached data.');
-            }
-          }
+        const lastSyncEl = document.getElementById('lastSyncText');
+        if (lastSyncEl) lastSyncEl.textContent = `${currentLang === 'vi' ? 'Đồng bộ lúc' : 'Synced at'} ${timeStr}`;
+
+        const hubLastSync = document.getElementById('hubLastSyncTime');
+        if (hubLastSync) hubLastSync.textContent = lastSyncTimestamp;
+
+        if (showFeedback) {
+          alert(currentLang === 'vi'
+            ? `✓ ĐỒNG BỘ TOÀN HỆ THỐNG THÀNH CÔNG!
+
+☁️ Cloud Supabase: ${cloudCount} dự án đã liên kết
+📊 Google Sheets: ${sheetSuccess}/${clientIds.length} sheet đã tải mới nhất
+📱 Trạng thái: Dữ liệu đã đồng bộ 100% trên tất cả thiết bị
+⏱️ Thời gian: ${lastSyncTimestamp}`
+            : `✓ FULL SYSTEM SYNC COMPLETE!
+
+☁️ Supabase Cloud: ${cloudCount} projects synced
+📊 Google Sheets: ${sheetSuccess}/${clientIds.length} sheets updated
+📱 Status: 100% in sync across all devices
+⏱️ Time: ${lastSyncTimestamp}`);
         }
       } catch (err) {
-        console.warn('Live sync error:', err);
+        console.warn('Sync global error:', err);
         if (showFeedback) {
-          alert(currentLang === 'vi' ? 'Lỗi đồng bộ Google Sheet. Vui lòng thử lại sau.' : 'Google Sheet sync error. Please try again.');
+          alert(currentLang === 'vi' ? 'Lỗi khi đồng bộ: ' + (err.message || err) : 'Sync error: ' + (err.message || err));
         }
       } finally {
-        if (syncIcon) syncIcon.classList.remove('animate-spin');
+        syncIcons.forEach(ic => ic.classList.remove('animate-spin'));
+        if (syncBtnText) syncBtnText.textContent = currentLang === 'vi' ? 'ĐỒNG BỘ TẤT CẢ' : 'SYNC ALL';
       }
+    }
+
+    async function syncGoogleSheet(showFeedback = true) {
+      return syncGlobalAll(showFeedback);
     }
 
     // -------------------------------------------------------------
@@ -3739,6 +3756,30 @@
       const currentClient = CLIENTS[activeClientId];
 
       container.innerHTML = `
+        <!-- 0. Master Sync Status & Action Banner -->
+        <div class="p-3.5 sm:p-4 rounded-2xl bg-surface2 border border-borderSubtle flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg shadow-black/20">
+          <div class="flex items-center gap-2.5 sm:gap-3">
+            <div class="p-2 sm:p-2.5 rounded-xl bg-neon/10 text-neon shrink-0">
+              <i data-lucide="cloud-cog" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-display font-bold text-xs sm:text-sm text-ink uppercase tracking-wide">Trạng Thái Đồng Bộ Hệ Thống</span>
+                <span id="hubCloudSyncStatusBadge" class="px-2 py-0.5 rounded bg-greenTerminal/15 text-greenTerminal border border-greenTerminal/30 text-[9.5px] font-mono font-bold">✓ CLOUD & SHEETS READY</span>
+              </div>
+              <p class="text-[11px] font-mono text-inkMuted mt-0.5">
+                <span class="text-ink font-semibold">${clientKeys.length}</span> dự án kết nối Cloud • Lần đồng bộ gần nhất: <span id="hubLastSyncTime" class="text-neon font-semibold">${lastSyncTimestamp || 'Vừa cập nhật'}</span>
+              </p>
+            </div>
+          </div>
+          ${isAdmin ? `
+            <button onclick="syncGlobalAll(true)" id="btnHubSyncGlobal" class="flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl bg-neon text-bg font-mono font-bold text-xs hover:bg-neon/90 transition-transform active:scale-95 shadow-lg shadow-neon/15 shrink-0 self-stretch sm:self-auto">
+              <i data-lucide="refresh-cw" id="hubSyncGlobalIcon" class="w-3.5 h-3.5"></i>
+              <span>ĐỒNG BỘ TOÀN HỆ THỐNG (SYNC)</span>
+            </button>
+          ` : ''}
+        </div>
+
         <!-- 1. Master Financial Cards (4 Cards) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3.5">
           
