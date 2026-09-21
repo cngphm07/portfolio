@@ -309,15 +309,15 @@
         <div>
           <h2 class="font-display font-black text-lg sm:text-xl text-ink tracking-tight">CNGPHM · TRACKING PORTAL</h2>
           <p class="font-mono text-xs text-inkMuted mt-1.5 leading-relaxed">
-            Đăng nhập tài khoản quản trị viên (Supabase Auth) để xem toàn bộ dự án hoặc truy cập bằng liên kết chia sẻ riêng.
+            Đăng nhập tài khoản quản trị viên để xem toàn bộ dự án hoặc truy cập bằng liên kết chia sẻ riêng.
           </p>
         </div>
 
-        <!-- Clean Login Form on Gateway (Strict Supabase Auth) -->
+        <!-- Clean Login Form on Gateway -->
         <form id="gatewayLoginForm" onsubmit="submitGatewayLogin(event)" class="space-y-3.5 text-left pt-2">
           <div>
-            <label class="block font-mono text-[10.5px] text-inkDim uppercase mb-1">Email Tài Khoản</label>
-            <input type="email" id="gwEmailInput" placeholder="Nhập email Supabase..." required class="w-full px-3.5 py-2.5 rounded-xl bg-surface2 border border-borderSubtle text-ink focus:outline-none focus:border-neon font-sans text-xs">
+            <label class="block font-mono text-[10.5px] text-inkDim uppercase mb-1">Email</label>
+            <input type="email" id="gwEmailInput" placeholder="Nhập email..." required class="w-full px-3.5 py-2.5 rounded-xl bg-surface2 border border-borderSubtle text-ink focus:outline-none focus:border-neon font-sans text-xs">
           </div>
 
           <div>
@@ -805,7 +805,7 @@
           <div class="p-1.5 rounded-lg bg-neon/10 text-neon">
             <i data-lucide="lock" class="w-4 h-4"></i>
           </div>
-          <h3 id="lblLoginModalTitle" class="font-display font-bold text-base text-ink">ĐĂNG NHẬP SUPABASE</h3>
+          <h3 id="lblLoginModalTitle" class="font-display font-bold text-base text-ink">ĐĂNG NHẬP</h3>
         </div>
         <button onclick="closeLoginModal()" class="p-1.5 rounded-lg bg-surface2 hover:bg-surface3 text-inkMuted hover:text-ink">
           <i data-lucide="x" class="w-4 h-4"></i>
@@ -814,8 +814,8 @@
 
       <form id="adminLoginForm" onsubmit="submitAdminLogin(event)" class="space-y-3.5">
         <div>
-          <label id="lblLoginEmail" class="block font-mono text-[10.5px] text-inkDim uppercase mb-1">Email Quản Trị</label>
-          <input type="email" id="adminEmailInput" placeholder="Nhập email Supabase..." required class="w-full px-3.5 py-2.5 rounded-xl bg-surface2 border border-borderSubtle text-ink focus:outline-none focus:border-neon font-sans text-xs">
+          <label id="lblLoginEmail" class="block font-mono text-[10.5px] text-inkDim uppercase mb-1">Email</label>
+          <input type="email" id="adminEmailInput" placeholder="Nhập email..." required class="w-full px-3.5 py-2.5 rounded-xl bg-surface2 border border-borderSubtle text-ink focus:outline-none focus:border-neon font-sans text-xs">
         </div>
 
         <div>
@@ -1156,8 +1156,8 @@
       const sLower = s.toLowerCase();
 
       const isFreeOnly = (sLower.includes('hỗ trợ') || sLower.includes('free') || sLower.includes('làm chữ') || sLower === '0đ' || sLower === '0d') &&
-                         !sLower.includes('chưa') && !sLower.includes('chờ') && !sLower.includes('nợ');
-      if (isFreeOnly && !s.match(/\d{3,}/)) return 0;
+                         !sLower.includes('chưa') && !sLower.includes('chờ') && !sLower.includes('nợ') && !sLower.includes('cọc') && !sLower.includes('50%');
+      if (isFreeOnly && !s.match(/\d{4,}/)) return 0;
 
       if (s.includes('2.500.0000')) return 2500000;
 
@@ -1174,15 +1174,24 @@
         return Math.round(parseFloat(rawK) * 1000);
       }
 
-      // 3. Match standard formatted currency e.g. 10,000,000 or 500,000 or 500.000 or 1.000.000
+      // 3. Match standard formatted currency with dots/commas e.g. 26,000,000 or 500.000 or 1.000.000
       const curMatch = s.match(/(\d{1,3}(?:[.,]\d{3})+)/);
       if (curMatch) {
         return parseInt(curMatch[1].replace(/[,.]/g, ''), 10);
       }
 
-      // 4. Plain digits >= 5
-      const numMatch = s.replace(/[^0-9]/g, '');
-      if (numMatch && numMatch.length >= 5) {
+      // 4. Remove percentage terms like '50%', '30%' before extracting plain numbers!
+      const sCleaned = s.replace(/\d{1,3}\s*%/g, '');
+
+      // Match contiguous plain integer with 4 to 12 digits e.g. 26000000, 500000
+      const plainMatch = sCleaned.match(/\b(\d{4,12})\b/);
+      if (plainMatch) {
+        return parseInt(plainMatch[1], 10);
+      }
+
+      // Fallback to any contiguous digits >= 4 in cleaned string
+      const numMatch = sCleaned.replace(/[^0-9]/g, '');
+      if (numMatch && numMatch.length >= 4) {
         return parseInt(numMatch, 10);
       }
       return 0;
@@ -1490,10 +1499,10 @@
         modalFolderTitle: 'Thư Mục Source / Bộ Video',
         modalFolderDesc: 'Đây là thư mục Google Drive chứa nhiều clip/source. Nhấp vào nút bên dưới để mở duyệt trực tiếp trên Google Drive.',
         modalOpenFolder: 'MỞ THƯ MỤC GOOGLE DRIVE',
-        loginModalTitle: 'ĐĂNG NHẬP SUPABASE',
-        loginEmail: 'Email Quản Trị',
+        loginModalTitle: 'ĐĂNG NHẬP',
+        loginEmail: 'Email',
         loginPass: 'Mật khẩu',
-        loginEmailPlaceholder: 'Nhập email Supabase...',
+        loginEmailPlaceholder: 'Nhập email...',
         loginPassPlaceholder: 'Nhập mật khẩu...',
         loginClose: 'ĐÓNG',
         loginSubmit: 'ĐĂNG NHẬP',
@@ -1632,10 +1641,10 @@
         modalFolderTitle: 'Source Folder / Video Assets',
         modalFolderDesc: 'This is a Google Drive folder containing multiple clips/sources. Click below to browse directly on Google Drive.',
         modalOpenFolder: 'OPEN GOOGLE DRIVE FOLDER',
-        loginModalTitle: 'SUPABASE SIGN IN',
-        loginEmail: 'Admin Email',
+        loginModalTitle: 'SIGN IN',
+        loginEmail: 'Email',
         loginPass: 'Password',
-        loginEmailPlaceholder: 'Enter Supabase email...',
+        loginEmailPlaceholder: 'Enter email...',
         loginPassPlaceholder: 'Enter password...',
         loginClose: 'CLOSE',
         loginSubmit: 'SIGN IN',
