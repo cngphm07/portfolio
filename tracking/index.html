@@ -622,13 +622,29 @@
         <div class="cinema-card p-4 sm:p-5 rounded-2xl border border-borderSubtle">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
-              <h2 id="lblFinanceTitle" class="font-display font-bold text-base sm:text-lg text-ink uppercase tracking-wide">Bảng Kê Quyết Toán Theo Từng Tháng</h2>
-              <p id="lblFinanceSubtitle" class="text-xs text-inkMuted mt-0.5">Tổng hợp số lượng video và thù lao để đối soát thanh toán và nghiệm thu.</p>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h2 id="lblFinanceTitle" class="font-display font-bold text-base sm:text-lg text-ink uppercase tracking-wide">Bảng Kê Quyết Toán Theo Từng Tháng</h2>
+                <span id="financeModeBadge" class="px-2 py-0.5 rounded bg-neon/15 text-neon border border-neon/30 text-[10px] font-mono font-bold">💵 THEO ĐỢT THỰC THU</span>
+              </div>
+              <p id="lblFinanceSubtitle" class="text-xs text-inkMuted mt-0.5">Tổng hợp số lượng video và thù lao theo từng đợt dòng tiền thực tế.</p>
             </div>
-            <button id="financeInvoiceBtn" onclick="exportCurrentViewToInvoice()" class="flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl bg-neon text-bg font-mono font-bold text-xs hover:bg-neon/90 transition-transform active:scale-95 shadow-lg shadow-neon/10 self-stretch sm:self-auto">
-              <i data-lucide="file-text" class="w-4 h-4"></i>
-              <span id="lblOpenInvoiceStudioBtn">MỞ TRONG INVOICE STUDIO</span>
-            </button>
+            
+            <div class="flex items-center gap-2 flex-wrap">
+              <!-- Revenue recognition mode toggle -->
+              <div class="flex items-center bg-surface3 p-0.5 rounded-xl border border-borderSubtle text-[11px] font-mono">
+                <button type="button" onclick="setRevenueMode('cashflow')" id="btnFinModeCashflow" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-bg bg-neon font-bold transition-colors">
+                  💵 Dòng Tiền Theo Đợt
+                </button>
+                <button type="button" onclick="setRevenueMode('contract')" id="btnFinModeContract" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-inkMuted hover:text-ink transition-colors">
+                  📑 Tháng Ký Hợp Đồng
+                </button>
+              </div>
+
+              <button id="financeInvoiceBtn" onclick="exportCurrentViewToInvoice()" class="flex items-center justify-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl bg-neon text-bg font-mono font-bold text-xs hover:bg-neon/90 transition-transform active:scale-95 shadow-lg shadow-neon/10 self-stretch sm:self-auto">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+                <span id="lblOpenInvoiceStudioBtn">MỞ TRONG INVOICE STUDIO</span>
+              </button>
+            </div>
           </div>
 
           <!-- Monthly summary list -->
@@ -639,16 +655,19 @@
 
         <!-- Detailed Financial Table -->
         <div class="cinema-card p-4 sm:p-5 rounded-2xl border border-borderSubtle">
-          <h3 id="lblPaidDetailsTitle" class="font-display font-bold text-sm sm:text-base text-ink mb-3 uppercase tracking-wide">Chi Tiết Danh Mục Tính Phí & Gói Trọn Gói</h3>
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <h3 id="lblPaidDetailsTitle" class="font-display font-bold text-sm sm:text-base text-ink uppercase tracking-wide">Chi Tiết Danh Mục Tính Phí & Gói Trọn Gói</h3>
+            <span id="financeTableSubtitle" class="text-[11px] font-mono text-inkMuted hidden sm:inline">Phân rã theo từng đợt thanh toán</span>
+          </div>
           <div class="overflow-x-auto touch-pan-x">
             <table class="w-full text-left text-xs font-mono">
               <thead class="bg-surface2 text-inkMuted text-[10px] sm:text-[10.5px] uppercase border-b border-borderSubtle">
                 <tr>
-                  <th class="py-2.5 px-2 sm:px-3">STT</th>
-                  <th id="thFinTime" class="py-2.5 px-2.5 sm:px-3 whitespace-nowrap">Thời Gian</th>
-                  <th id="thFinVideo" class="py-2.5 px-3 sm:px-4 min-w-[160px]">Hạng Mục Video / Gói Package</th>
-                  <th id="thFinAppr" class="py-2.5 px-2.5 sm:px-3 whitespace-nowrap">Ngày Duyệt</th>
-                  <th id="thFinFee" class="py-2.5 px-3 sm:px-4 text-right whitespace-nowrap">Đơn Giá (VNĐ)</th>
+                  <th class="py-2.5 px-2 sm:px-3 text-center w-10 sm:w-12">#</th>
+                  <th id="thFinTime" class="py-2.5 px-2.5 sm:px-3 whitespace-nowrap">Tháng Thu Tiền</th>
+                  <th id="thFinVideo" class="py-2.5 px-3 sm:px-4 min-w-[160px]">Hạng Mục / Đợt Thanh Toán</th>
+                  <th id="thFinAppr" class="py-2.5 px-2.5 sm:px-3 whitespace-nowrap">Ngày Giao Dịch</th>
+                  <th id="thFinFee" class="py-2.5 px-3 sm:px-4 text-right whitespace-nowrap">Số Tiền (VNĐ)</th>
                   <th id="thFinStatus" class="py-2.5 px-2.5 sm:px-3 text-center whitespace-nowrap">Tình Trạng</th>
                 </tr>
               </thead>
@@ -1043,6 +1062,144 @@
         return new Date(y, m - 1, 1).getTime();
       }
       return 0;
+    }
+
+    function getMonthYearFromDateStr(dateStr, fallbackMonth = '') {
+      if (!dateStr) return fallbackMonth;
+      const parts = String(dateStr).trim().split('/');
+      if (parts.length === 3) {
+        const monthNum = String(parseInt(parts[1], 10)).padStart(2, '0');
+        let yearNum = parseInt(parts[2], 10);
+        if (yearNum < 100) yearNum += 2000;
+        const prefix = currentLang === 'en' ? 'Month' : 'Tháng';
+        return `${prefix} ${monthNum}/${yearNum}`;
+      }
+      return fallbackMonth;
+    }
+
+    // Revenue Recognition Mode: 'cashflow' (Dòng tiền theo đợt) | 'contract' (Tháng ký hợp đồng)
+    let revenueRecognitionMode = 'cashflow';
+
+    function setRevenueMode(mode) {
+      revenueRecognitionMode = mode;
+      
+      // Update toggle buttons UI across Financials & Analytics views
+      ['btnFinModeCashflow', 'btnChartModeCashflow'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.className = mode === 'cashflow' 
+          ? 'px-2.5 sm:px-3 py-1.5 rounded-lg text-bg bg-neon font-bold transition-colors' 
+          : 'px-2.5 sm:px-3 py-1.5 rounded-lg text-inkMuted hover:text-ink transition-colors';
+      });
+
+      ['btnFinModeContract', 'btnChartModeContract'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.className = mode === 'contract' 
+          ? 'px-2.5 sm:px-3 py-1.5 rounded-lg text-bg bg-neon font-bold transition-colors' 
+          : 'px-2.5 sm:px-3 py-1.5 rounded-lg text-inkMuted hover:text-ink transition-colors';
+      });
+
+      const badge = document.getElementById('financeModeBadge');
+      if (badge) {
+        badge.textContent = mode === 'cashflow' 
+          ? (currentLang === 'vi' ? '💵 THEO ĐỢT THỰC THU' : '💵 CASHFLOW BY INSTALLMENT')
+          : (currentLang === 'vi' ? '📑 THEO THÁNG KÝ HỢP ĐỒNG' : '📑 BY CONTRACT INCEPTION');
+      }
+
+      renderCurrentView();
+    }
+
+    // -------------------------------------------------------------
+    // Cashflow Installments Expander (Phân rã đợt 1 cọc & đợt 2 nghiệm thu)
+    // -------------------------------------------------------------
+    function expandCashflowInstallments(items) {
+      const installments = [];
+
+      items.forEach(item => {
+        const p = getPaymentMeta(item);
+        const itemPrice = item.price || 0;
+        const note = (item.note || '').toLowerCase();
+        
+        const mRecv = getMonthYearFromDateStr(item.dateReceived, item.month);
+        const mAppr = getMonthYearFromDateStr(item.dateApproved, mRecv);
+
+        if (p.isPartial && p.paidAmount > 0) {
+          // Installment 1: Deposit / Advance (Received in monthReceived)
+          installments.push({
+            ...item,
+            uniqueKey: `${item.stt}_inst1`,
+            installmentType: 'DEPOSIT',
+            stageLabel: currentLang === 'vi' ? `Đợt 1 (Cọc ${p.percent}%)` : `Installment 1 (Deposit ${p.percent}%)`,
+            month: mRecv,
+            date: item.dateReceived || '--',
+            amount: p.paidAmount,
+            status: 'PAID',
+            isCollected: true,
+            isPartialLeader: true,
+            displayPrice: `${formatVND(p.paidAmount)} (${currentLang === 'vi' ? 'Đã thu cọc' : 'Deposit collected'})`,
+            tag: currentLang === 'vi' ? `✓ ĐÃ THU CỌC ${p.percent}%` : `✓ DEPOSIT ${p.percent}% COLLECTED`,
+            classes: 'text-greenTerminal font-bold',
+            badgeClasses: 'bg-greenTerminal/15 text-greenTerminal border-greenTerminal/30'
+          });
+
+          // Installment 2: Final Settlement (Due in monthApproved)
+          const isDone = item.status === 'DONE';
+          const isSecondPaid = isDone && !note.includes('chưa') && !note.includes('chờ') && !note.includes('nợ');
+          
+          installments.push({
+            ...item,
+            uniqueKey: `${item.stt}_inst2`,
+            installmentType: 'FINAL',
+            stageLabel: currentLang === 'vi' ? `Đợt 2 (Nghiệm thu ${100 - p.percent}%)` : `Installment 2 (Final ${100 - p.percent}%)`,
+            month: mAppr,
+            date: item.dateApproved || item.dateReceived || '--',
+            amount: p.unpaidAmount,
+            status: isSecondPaid ? 'PAID' : 'UNPAID',
+            isCollected: isSecondPaid,
+            isPartialLeader: false,
+            displayPrice: `${formatVND(p.unpaidAmount)} (${isSecondPaid ? (currentLang === 'vi' ? 'Đã thanh toán' : 'Paid') : (currentLang === 'vi' ? 'Chưa thu' : 'Due')})`,
+            tag: isSecondPaid ? (currentLang === 'vi' ? '✓ ĐÃ THU ĐỢT 2' : '✓ FINAL PAID') : (currentLang === 'vi' ? `⏳ CHỜ THU ${100 - p.percent}%` : `⏳ DUE ${100 - p.percent}%`),
+            classes: isSecondPaid ? 'text-greenTerminal font-bold' : 'text-amberGlow font-bold',
+            badgeClasses: isSecondPaid ? 'bg-greenTerminal/15 text-greenTerminal border-greenTerminal/30' : 'bg-amberGlow/10 text-amberGlow border-amberGlow/30'
+          });
+        } else if (p.isFree) {
+          // Free / support job
+          installments.push({
+            ...item,
+            uniqueKey: `${item.stt}_free`,
+            installmentType: 'FULL',
+            stageLabel: currentLang === 'vi' ? 'Hỗ trợ (0đ)' : 'Support (0đ)',
+            month: mAppr,
+            date: item.dateApproved || item.dateReceived || '--',
+            amount: 0,
+            status: 'FREE',
+            isCollected: true,
+            displayPrice: p.displayPrice,
+            tag: p.tag,
+            classes: p.classes,
+            badgeClasses: p.badgeClasses
+          });
+        } else {
+          // Standard full 100% payment
+          const isPaid = p.isPaid;
+          installments.push({
+            ...item,
+            uniqueKey: `${item.stt}_full`,
+            installmentType: 'FULL',
+            stageLabel: currentLang === 'vi' ? 'Thanh toán 100%' : '100% Full Payment',
+            month: mAppr,
+            date: item.dateApproved || item.dateReceived || '--',
+            amount: item.isBundle ? (item.isBundleLeader ? item.bundlePrice : 0) : itemPrice,
+            status: isPaid ? 'PAID' : 'UNPAID',
+            isCollected: isPaid,
+            displayPrice: p.displayPrice,
+            tag: p.tag,
+            classes: p.classes,
+            badgeClasses: p.badgeClasses
+          });
+        }
+      });
+
+      return installments;
     }
 
     // -------------------------------------------------------------
@@ -3422,19 +3579,18 @@
       const billableCount = allData.filter(i => (i.isBundleLeader && i.bundlePrice > 0) || (!i.isBundle && i.price > 0)).length;
       const avgPrice = billableCount > 0 ? Math.round(totalRevenue / billableCount) : 0;
 
-      // Group monthly cashflow
+      // Group monthly cashflow by actual installment receipt months
       const monthMap = {};
-      allData.forEach(item => {
-        const m = item.month || (currentLang === 'vi' ? 'Khác' : 'Other');
+      const installments = expandCashflowInstallments(allData);
+      installments.forEach(inst => {
+        const m = inst.month || (currentLang === 'vi' ? 'Khác' : 'Other');
         if (!monthMap[m]) monthMap[m] = { total: 0, count: 0, paid: 0, unpaid: 0, free: 0, items: [] };
-        monthMap[m].total += item.price || 0;
+        monthMap[m].total += inst.amount || 0;
         monthMap[m].count++;
-        const p = getPaymentMeta(item);
-        if (p.isFree) monthMap[m].free++;
-        else if (p.isPartial) { monthMap[m].paid += p.paidAmount; monthMap[m].unpaid += p.unpaidAmount; }
-        else if (p.isPaid) monthMap[m].paid++;
+        if (inst.status === 'FREE') monthMap[m].free++;
+        else if (inst.isCollected) monthMap[m].paid++;
         else monthMap[m].unpaid++;
-        monthMap[m].items.push(item);
+        monthMap[m].items.push(inst);
       });
 
       const clientKeys = Object.keys(CLIENTS);
@@ -4026,25 +4182,42 @@
       if (!container) return;
       destroyCharts();
 
+      const isCashflow = revenueRecognitionMode === 'cashflow';
       const dataset = filteredData;
       const totalItems = dataset.length;
       const totalRevenue = dataset.reduce((sum, item) => sum + (item.price || 0), 0);
 
       // Monthly aggregation
       const monthMap = {};
-      dataset.forEach(item => {
-        const m = item.month || (currentLang === 'vi' ? 'Khác' : 'Other');
-        if (!monthMap[m]) monthMap[m] = { revenue: 0, count: 0, mp4: 0, folder: 0, paid: 0, unpaid: 0, free: 0 };
-        monthMap[m].revenue += item.price || 0;
-        monthMap[m].count++;
-        if (item.driveType === 'folder') monthMap[m].folder++;
-        else monthMap[m].mp4++;
-        
-        const payMeta = getPaymentMeta(item);
-        if (payMeta.isFree) monthMap[m].free++;
-        else if (payMeta.isPaid) monthMap[m].paid++;
-        else monthMap[m].unpaid++;
-      });
+      if (isCashflow) {
+        const installments = expandCashflowInstallments(dataset);
+        installments.forEach(inst => {
+          const m = inst.month || (currentLang === 'vi' ? 'Khác' : 'Other');
+          if (!monthMap[m]) monthMap[m] = { revenue: 0, count: 0, mp4: 0, folder: 0, paid: 0, unpaid: 0, free: 0 };
+          monthMap[m].revenue += inst.amount || 0;
+          monthMap[m].count++;
+          if (inst.driveType === 'folder') monthMap[m].folder++;
+          else monthMap[m].mp4++;
+          
+          if (inst.status === 'FREE') monthMap[m].free++;
+          else if (inst.isCollected) monthMap[m].paid++;
+          else monthMap[m].unpaid++;
+        });
+      } else {
+        dataset.forEach(item => {
+          const m = item.month || (currentLang === 'vi' ? 'Khác' : 'Other');
+          if (!monthMap[m]) monthMap[m] = { revenue: 0, count: 0, mp4: 0, folder: 0, paid: 0, unpaid: 0, free: 0 };
+          monthMap[m].revenue += item.price || 0;
+          monthMap[m].count++;
+          if (item.driveType === 'folder') monthMap[m].folder++;
+          else monthMap[m].mp4++;
+          
+          const payMeta = getPaymentMeta(item);
+          if (payMeta.isFree) monthMap[m].free++;
+          else if (payMeta.isPaid) monthMap[m].paid++;
+          else monthMap[m].unpaid++;
+        });
+      }
 
       const monthLabels = sortMonthStrings(Object.keys(monthMap), true);
       const monthlyRevenues = monthLabels.map(m => monthMap[m].revenue);
@@ -4056,8 +4229,16 @@
       dataset.forEach(item => {
         const payMeta = getPaymentMeta(item);
         if (payMeta.isFree) totalFree++;
-        else if (payMeta.isPaid) { totalPaid++; paidRevenue += item.price || 0; }
-        else { totalUnpaid++; }
+        else if (payMeta.isPartial) {
+          totalPaid++;
+          totalUnpaid++;
+          paidRevenue += payMeta.paidAmount;
+        } else if (payMeta.isPaid) { 
+          totalPaid++; 
+          paidRevenue += item.price || 0; 
+        } else { 
+          totalUnpaid++; 
+        }
       });
 
       // Turnaround Time Buckets
@@ -4137,7 +4318,7 @@
             </div>
             <div class="text-lg sm:text-2xl font-display font-black text-greenTerminal tracking-tight truncate">${collectionRate}%</div>
             <div class="text-[10px] sm:text-[11px] font-mono text-inkMuted mt-1 truncate">
-              <span class="text-ink">${totalPaid}/${totalItems} ${currentLang === 'vi' ? 'video đã thanh toán' : 'paid videos'}</span>
+              <span class="text-ink">${totalPaid}/${totalItems} ${currentLang === 'vi' ? 'mục đã thanh toán' : 'settled items'}</span>
             </div>
             <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-greenTerminal/70 to-transparent"></div>
           </div>
@@ -4163,13 +4344,29 @@
           <div class="cinema-card p-4 sm:p-5 rounded-2xl border border-borderSubtle space-y-3 lg:col-span-2">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-borderSubtle pb-3">
               <div>
-                <h3 class="font-display font-bold text-sm sm:text-base text-ink uppercase tracking-wide flex items-center gap-2">
-                  <i data-lucide="trending-up" class="w-4 h-4 text-neon"></i>
-                  <span>${t('chartRevVol')}</span>
-                </h3>
-                <p class="text-xs text-inkMuted mt-0.5">${currentLang === 'vi' ? 'Tương quan giữa doanh thu hợp đồng (cột) và số lượng deliverables bàn giao (đường) theo từng tháng.' : 'Correlation between monthly contract revenue (bars) and delivered video assets volume (line).'}</p>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="font-display font-bold text-sm sm:text-base text-ink uppercase tracking-wide flex items-center gap-2">
+                    <i data-lucide="trending-up" class="w-4 h-4 text-neon"></i>
+                    <span>${t('chartRevVol')}</span>
+                  </h3>
+                  <span class="px-2 py-0.5 rounded ${isCashflow ? 'bg-neon/15 text-neon border-neon/30' : 'bg-cyanGlow/15 text-cyanGlow border-cyanGlow/30'} border text-[10px] font-mono font-bold">
+                    ${isCashflow ? (currentLang === 'vi' ? '💵 THEO ĐỢT THỰC THU' : '💵 CASHFLOW') : (currentLang === 'vi' ? '📑 THEO THÁNG HỢP ĐỒNG' : '📑 INCEPTION')}
+                  </span>
+                </div>
+                <p class="text-xs text-inkMuted mt-0.5">${isCashflow ? (currentLang === 'vi' ? 'Tương quan giữa dòng tiền thực tế theo đợt (cọc & nghiệm thu) và số lượng deliverables bàn giao qua từng tháng.' : 'Correlation between monthly installment cashflow (bars) and delivered video assets volume (line).') : (currentLang === 'vi' ? 'Tương quan giữa doanh thu hợp đồng (cột) và số lượng deliverables bàn giao (đường) theo từng tháng.' : 'Correlation between monthly contract revenue (bars) and delivered video assets volume (line).')}</p>
               </div>
-              <div class="flex items-center gap-3 font-mono text-[11px]">
+              <div class="flex items-center gap-3 font-mono text-[11px] flex-wrap">
+                <!-- Mode toggle inside chart if admin -->
+                ${isAdmin ? `
+                  <div class="flex items-center bg-surface3 p-0.5 rounded-xl border border-borderSubtle text-[10.5px] font-mono mr-2">
+                    <button type="button" onclick="setRevenueMode('cashflow')" id="btnChartModeCashflow" class="${isCashflow ? 'px-2 py-1 rounded-lg text-bg bg-neon font-bold' : 'px-2 py-1 rounded-lg text-inkMuted hover:text-ink'} transition-colors">
+                      💵 ${currentLang === 'vi' ? 'Theo Đợt' : 'Cashflow'}
+                    </button>
+                    <button type="button" onclick="setRevenueMode('contract')" id="btnChartModeContract" class="${!isCashflow ? 'px-2 py-1 rounded-lg text-bg bg-neon font-bold' : 'px-2 py-1 rounded-lg text-inkMuted hover:text-ink'} transition-colors">
+                      📑 ${currentLang === 'vi' ? 'Hợp Đồng' : 'Inception'}
+                    </button>
+                  </div>
+                ` : ''}
                 <div class="flex items-center gap-1.5">
                   <span class="w-3 h-3 rounded bg-neon inline-block"></span>
                   <span class="text-inkMuted">${currentLang === 'vi' ? 'Doanh thu (VNĐ)' : 'Revenue (VND)'}</span>
@@ -4510,19 +4707,42 @@
 
       const monthContainer = document.getElementById('financeMonthSummary');
       const tableBody = document.getElementById('financeTableBody');
+      const tableSubtitle = document.getElementById('financeTableSubtitle');
+
+      const isCashflow = revenueRecognitionMode === 'cashflow';
+      if (tableSubtitle) {
+        tableSubtitle.textContent = isCashflow 
+          ? (currentLang === 'vi' ? 'Phân rã theo từng đợt dòng tiền thực thu' : 'Decomposed by actual installment cashflow')
+          : (currentLang === 'vi' ? 'Ghi nhận theo tháng ký hợp đồng ban đầu' : 'Recognized by initial contract inception month');
+      }
 
       const monthMap = {};
-      filteredData.forEach(item => {
-        const m = item.month || (currentLang === 'vi' ? 'Khác' : 'Other');
-        if (!monthMap[m]) monthMap[m] = { count: 0, revenue: 0, paid: 0, unpaid: 0, free: 0, items: [] };
-        monthMap[m].count++;
-        monthMap[m].revenue += item.price;
-        const payMeta = getPaymentMeta(item);
-        if (payMeta.isFree) monthMap[m].free++;
-        else if (payMeta.isPaid) monthMap[m].paid++;
-        else monthMap[m].unpaid++;
-        monthMap[m].items.push(item);
-      });
+      const itemsToProcess = isCashflow ? expandCashflowInstallments(filteredData) : filteredData;
+
+      if (isCashflow) {
+        itemsToProcess.forEach(inst => {
+          const m = inst.month || (currentLang === 'vi' ? 'Khác' : 'Other');
+          if (!monthMap[m]) monthMap[m] = { count: 0, revenue: 0, paid: 0, unpaid: 0, free: 0, items: [] };
+          monthMap[m].count++;
+          monthMap[m].revenue += inst.amount || 0;
+          if (inst.status === 'FREE') monthMap[m].free++;
+          else if (inst.isCollected) monthMap[m].paid++;
+          else monthMap[m].unpaid++;
+          monthMap[m].items.push(inst);
+        });
+      } else {
+        filteredData.forEach(item => {
+          const m = item.month || (currentLang === 'vi' ? 'Khác' : 'Other');
+          if (!monthMap[m]) monthMap[m] = { count: 0, revenue: 0, paid: 0, unpaid: 0, free: 0, items: [] };
+          monthMap[m].count++;
+          monthMap[m].revenue += item.price || 0;
+          const payMeta = getPaymentMeta(item);
+          if (payMeta.isFree) monthMap[m].free++;
+          else if (payMeta.isPaid) monthMap[m].paid++;
+          else monthMap[m].unpaid++;
+          monthMap[m].items.push(item);
+        });
+      }
 
       const months = sortMonthStrings(Object.keys(monthMap), true);
 
@@ -4536,7 +4756,7 @@
             </div>
 
             <div class="flex items-center justify-between text-[10.5px] sm:text-[11px] font-mono text-inkMuted border-t border-borderSubtle/60 pt-2">
-              <span>${data.count} videos</span>
+              <span>${data.count} ${isCashflow ? (currentLang === 'vi' ? 'đợt thu' : 'installments') : 'deliverables'}</span>
               <span>${I18N[currentLang].paidBreakdown(data.paid, data.unpaid, data.free)}</span>
             </div>
 
@@ -4548,35 +4768,73 @@
         `;
       }).join('');
 
-      const billableItems = filteredData.filter(i => (i.isBundleLeader && i.bundlePrice > 0) || (!i.isBundle && (i.price > 0 || (i.note && i.note.length > 0))));
-      billableItems.sort((a, b) => {
-        const tA = parseFullDateOrMonth(a);
-        const tB = parseFullDateOrMonth(b);
-        if (tA !== tB) return tA - tB;
-        return (a.stt || 0) - (b.stt || 0);
-      });
-      tableBody.innerHTML = billableItems.map((item, idx) => {
-        const payMeta = getPaymentMeta(item);
-        const finalPrice = item.isBundle ? item.bundlePrice : item.price;
-        return `
-          <tr class="hover:bg-surface2/50 ${item.isBundle ? 'bg-purpleGlow/5' : ''}">
-            <td class="py-2.5 px-2 sm:px-3 text-inkDim">#${idx + 1}</td>
-            <td class="py-2.5 px-2.5 sm:px-3 text-neon whitespace-nowrap">${item.month}</td>
-            <td class="py-2.5 px-3 sm:px-4 font-bold text-ink">
-              <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                <span>${item.video}</span>
-                ${item.clientName && activeClientId === 'all' ? `<span class="px-1.5 py-0.2 rounded bg-surface3 border border-borderSubtle text-cyanGlow text-[9px] font-bold">${item.clientName}</span>` : ''}
-                ${item.isBundle ? `<span class="px-1.5 py-0.2 rounded text-[9px] bg-purpleGlow/20 text-purpleGlow border border-purpleGlow/30">GỘP NHIỀU CLIP</span>` : ''}
-              </div>
-            </td>
-            <td class="py-2.5 px-2.5 sm:px-3 text-inkMuted whitespace-nowrap">${item.dateApproved || '--'}</td>
-            <td class="py-2.5 px-3 sm:px-4 text-right font-bold ${payMeta.classes} whitespace-nowrap">${formatVND(finalPrice)}</td>
-            <td class="py-2.5 px-2.5 sm:px-3 text-center whitespace-nowrap">
-              <span class="px-2 py-0.5 rounded text-[10px] border ${payMeta.badgeClasses}">${payMeta.tag}</span>
-            </td>
-          </tr>
-        `;
-      }).join('');
+      if (isCashflow) {
+        const billableInstallments = itemsToProcess.filter(i => (i.amount > 0) || (i.note && i.note.length > 0));
+        billableInstallments.sort((a, b) => {
+          const tA = parseMonthYearKey(a.month);
+          const tB = parseMonthYearKey(b.month);
+          if (tA !== tB) return tA - tB;
+          return (a.stt || 0) - (b.stt || 0);
+        });
+
+        tableBody.innerHTML = billableInstallments.map((inst, idx) => {
+          const isDeposit = inst.installmentType === 'DEPOSIT';
+          const isFinal = inst.installmentType === 'FINAL';
+          const stageBadge = isDeposit 
+            ? `<span class="px-1.5 py-0.2 rounded text-[9px] bg-cyanGlow/20 text-cyanGlow border border-cyanGlow/30 font-bold">${inst.stageLabel}</span>`
+            : (isFinal ? `<span class="px-1.5 py-0.2 rounded text-[9px] bg-amberGlow/20 text-amberGlow border border-amberGlow/30 font-bold">${inst.stageLabel}</span>` : '');
+
+          return `
+            <tr class="hover:bg-surface2/50 ${inst.isBundle ? 'bg-purpleGlow/5' : ''}">
+              <td class="py-2.5 px-2 sm:px-3 text-inkDim">#${idx + 1}</td>
+              <td class="py-2.5 px-2.5 sm:px-3 text-neon whitespace-nowrap font-bold">${inst.month}</td>
+              <td class="py-2.5 px-3 sm:px-4 font-bold text-ink">
+                <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <span>${inst.video}</span>
+                  ${stageBadge}
+                  ${inst.clientName && activeClientId === 'all' ? `<span class="px-1.5 py-0.2 rounded bg-surface3 border border-borderSubtle text-cyanGlow text-[9px] font-bold">${inst.clientName}</span>` : ''}
+                  ${inst.isBundle ? `<span class="px-1.5 py-0.2 rounded text-[9px] bg-purpleGlow/20 text-purpleGlow border border-purpleGlow/30">GỘP NHIỀU CLIP</span>` : ''}
+                </div>
+              </td>
+              <td class="py-2.5 px-2.5 sm:px-3 text-inkMuted whitespace-nowrap">${inst.date || '--'}</td>
+              <td class="py-2.5 px-3 sm:px-4 text-right font-bold ${inst.classes} whitespace-nowrap">${formatVND(inst.amount)}</td>
+              <td class="py-2.5 px-2.5 sm:px-3 text-center whitespace-nowrap">
+                <span class="px-2 py-0.5 rounded text-[10px] border ${inst.badgeClasses}">${inst.tag}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } else {
+        const billableItems = filteredData.filter(i => (i.isBundleLeader && i.bundlePrice > 0) || (!i.isBundle && (i.price > 0 || (i.note && i.note.length > 0))));
+        billableItems.sort((a, b) => {
+          const tA = parseFullDateOrMonth(a);
+          const tB = parseFullDateOrMonth(b);
+          if (tA !== tB) return tA - tB;
+          return (a.stt || 0) - (b.stt || 0);
+        });
+        tableBody.innerHTML = billableItems.map((item, idx) => {
+          const payMeta = getPaymentMeta(item);
+          const finalPrice = item.isBundle ? item.bundlePrice : item.price;
+          return `
+            <tr class="hover:bg-surface2/50 ${item.isBundle ? 'bg-purpleGlow/5' : ''}">
+              <td class="py-2.5 px-2 sm:px-3 text-inkDim">#${idx + 1}</td>
+              <td class="py-2.5 px-2.5 sm:px-3 text-neon whitespace-nowrap">${item.month}</td>
+              <td class="py-2.5 px-3 sm:px-4 font-bold text-ink">
+                <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <span>${item.video}</span>
+                  ${item.clientName && activeClientId === 'all' ? `<span class="px-1.5 py-0.2 rounded bg-surface3 border border-borderSubtle text-cyanGlow text-[9px] font-bold">${item.clientName}</span>` : ''}
+                  ${item.isBundle ? `<span class="px-1.5 py-0.2 rounded text-[9px] bg-purpleGlow/20 text-purpleGlow border border-purpleGlow/30">GỘP NHIỀU CLIP</span>` : ''}
+                </div>
+              </td>
+              <td class="py-2.5 px-2.5 sm:px-3 text-inkMuted whitespace-nowrap">${item.dateApproved || '--'}</td>
+              <td class="py-2.5 px-3 sm:px-4 text-right font-bold ${payMeta.classes} whitespace-nowrap">${formatVND(finalPrice)}</td>
+              <td class="py-2.5 px-2.5 sm:px-3 text-center whitespace-nowrap">
+                <span class="px-2 py-0.5 rounded text-[10px] border ${payMeta.badgeClasses}">${payMeta.tag}</span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
     }
 
     // -------------------------------------------------------------
@@ -4655,23 +4913,42 @@
         return;
       }
 
-      const items = currentData.filter(d => d.month === monthName && ((d.isBundleLeader && d.bundlePrice > 0) || (!d.isBundle && d.price > 0)));
-      if (items.length === 0) {
-        alert(currentLang === 'vi' ? `Không có mục tính phí nào trong ${monthName}.` : `No billable items in ${monthName}.`);
-        return;
-      }
+      const isCashflow = revenueRecognitionMode === 'cashflow';
+      let invoiceItems = [];
 
-      const client = CLIENTS[activeClientId] || CLIENTS.saigontourist;
-      const invoicePayload = {
-        clientName: activeClientId === 'all' ? 'TẤT CẢ DỰ ÁN' : client.name,
-        month: monthName,
-        items: items.map(i => ({
+      if (isCashflow) {
+        const allInst = expandCashflowInstallments(currentData);
+        const monthInst = allInst.filter(d => d.month === monthName && d.amount > 0);
+        if (monthInst.length === 0) {
+          alert(currentLang === 'vi' ? `Không có đợt thu tiền nào trong ${monthName}.` : `No billable installments in ${monthName}.`);
+          return;
+        }
+        invoiceItems = monthInst.map(i => ({
+          desc: `${i.video} [${i.stageLabel || 'Đợt thanh toán'}]`,
+          qty: 1,
+          price: i.amount,
+          date: i.date || i.dateApproved
+        }));
+      } else {
+        const items = currentData.filter(d => d.month === monthName && ((d.isBundleLeader && d.bundlePrice > 0) || (!d.isBundle && d.price > 0)));
+        if (items.length === 0) {
+          alert(currentLang === 'vi' ? `Không có mục tính phí nào trong ${monthName}.` : `No billable items in ${monthName}.`);
+          return;
+        }
+        invoiceItems = items.map(i => ({
           desc: i.isBundle ? `${currentLang === 'vi' ? 'Dựng video trọn gói' : 'Video Editing Bundle'}: ${i.video} (${i.bundleTitle || 'Gói gộp'})` : `${currentLang === 'vi' ? 'Dựng video' : 'Video Editing'}: ${i.video} (${i.linkLabel || 'Deliverable'})`,
           qty: 1,
           price: i.isBundle ? i.bundlePrice : i.price,
           date: i.dateApproved
-        })),
-        total: items.reduce((sum, i) => sum + (i.isBundle ? i.bundlePrice : i.price), 0)
+        }));
+      }
+
+      const client = CLIENTS[activeClientId] || CLIENTS.saigontourist;
+      const invoicePayload = {
+        clientName: activeClientId === 'all' ? (currentLang === 'vi' ? 'TẤT CẢ DỰ ÁN' : 'ALL PROJECTS') : client.name,
+        month: monthName,
+        items: invoiceItems,
+        total: invoiceItems.reduce((sum, i) => sum + (i.price || 0), 0)
       };
 
       try {
