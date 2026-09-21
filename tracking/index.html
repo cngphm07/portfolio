@@ -1864,14 +1864,43 @@
     }
 
     async function saveProjectToCloud(project) {
-      if (!supabaseClient || !isAdmin) return null;
+      if (!supabaseClient || !isAdmin || !cloudRegistryReady) return null;
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) {
+        throw new Error('CLOUD_AUTH_REQUIRED');
+      }
       const { data, error } = await supabaseClient
         .from('tracking_projects')
         .insert(toTrackingProjectRow(project))
         .select()
         .single();
-      if (error) throw error;
+      if (error) {
+        const details = [error.message, error.details, error.hint, error.code].filter(Boolean).join(' | ');
+        throw new Error('CLOUD_SAVE_FAILED: ' + details);
+      }
       return fromTrackingProjectRow(data);
+    }
+
+    function formatCloudProjectError(error) {
+      const message = String(error && error.message ? error.message : error || '');
+      if (message.includes('CLOUD_AUTH_REQUIRED')) {
+        return currentLang === 'vi'
+          ? 'Bạn đang ở chế độ PIN cục bộ, chưa có phiên Supabase. Dự án đã được lưu trên máy này; hãy đăng nhập bằng Email + Password để đồng bộ sang thiết bị khác.'
+          : 'You are using local PIN mode without a Supabase session. The project was saved on this device; sign in with email and password to sync it across devices.';
+      }
+      if (message.includes('relation') || message.includes('tracking_projects') || message.includes('42P01')) {
+        return currentLang === 'vi'
+          ? 'Supabase chưa có bảng tracking_projects. Dự án đã được lưu trên máy này; hãy chạy file tracking-supabase-schema.sql trong Supabase SQL Editor để bật đồng bộ đa thiết bị.'
+          : 'Supabase does not have the tracking_projects table yet. The project was saved locally; run tracking-supabase-schema.sql in Supabase SQL Editor to enable cross-device sync.';
+      }
+      if (message.includes('row-level security') || message.includes('42501') || message.includes('permission denied')) {
+        return currentLang === 'vi'
+          ? 'Supabase RLS đang chặn lưu cloud. Dự án đã được lưu trên máy này; hãy chạy lại tracking-supabase-schema.sql bằng tài khoản Supabase của bạn.'
+          : 'Supabase RLS is blocking cloud saving. The project was saved locally; rerun tracking-supabase-schema.sql in your Supabase account.';
+      }
+      return currentLang === 'vi'
+        ? 'Không thể đồng bộ dự án lên cloud lúc này. Dự án đã được lưu trên máy này; chi tiết: ' + message
+        : 'Could not sync this project to cloud right now. The project was saved on this device. Details: ' + message;
     }
 
     async function softDeleteProjectFromCloud(projectId) {
@@ -2434,21 +2463,33 @@
         isCloud: false
       };
 
+      let project = localProject;
+      let cloudError = null;
+
       try {
-        // Authenticated projects are cloud-first so they appear on every device.
-        const project = (supabaseClient && isAdmin)
-          ? await saveProjectToCloud(localProject)
-          : localProject;
-        CLIENTS[project.id] = project;
-        localStorage.setItem('oddpig_tracking_clients', JSON.stringify(CLIENTS));
-        renderClientSelectOptions();
-        closeClientModal();
-        switchClient(project.id);
-        syncGoogleSheet(true);
+        // Use cloud only when a real Supabase auth session and project registry
+        // are both active. PIN fallback mode remains usable offline.
+        if (supabaseClient && isAdmin && cloudRegistryReady) {
+          project = await saveProjectToCloud(localProject);
+        }
       } catch (error) {
+        cloudError = error;
+      }
+
+      // Never lose the user's new project because a remote registry is absent.
+      CLIENTS[project.id] = project;
+      localStorage.setItem('oddpig_tracking_clients', JSON.stringify(CLIENTS));
+      renderClientSelectOptions();
+      closeClientModal();
+      switchClient(project.id);
+      syncGoogleSheet(true);
+
+      if (cloudError) {
+        alert(formatCloudProjectError(cloudError));
+      } else if (supabaseClient && isAdmin && !cloudRegistryReady) {
         alert(currentLang === 'vi'
-          ? 'Không thể lưu dự án lên cloud. Vui lòng chạy schema Tracking Hub trong Supabase SQL Editor rồi thử lại.'
-          : 'Could not save the project to cloud. Run the Tracking Hub Supabase schema, then try again.');
+          ? 'Dự án đã được lưu trên máy này. Để đồng bộ giữa các thiết bị, đăng nhập bằng Email + Password và chạy tracking-supabase-schema.sql trong Supabase SQL Editor.'
+          : 'The project was saved on this device. To sync it across devices, sign in with email and password and run tracking-supabase-schema.sql in Supabase SQL Editor.');
       }
     }
 
