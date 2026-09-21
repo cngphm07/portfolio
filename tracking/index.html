@@ -883,7 +883,13 @@
 
       <!-- Client List Management -->
       <div class="space-y-2">
-        <label id="lblExistingClients" class="block font-mono text-[10.5px] sm:text-[11px] text-inkMuted uppercase">Danh sách đối tác / dự án hiện có:</label>
+        <div class="flex items-center justify-between">
+          <label id="lblExistingClients" class="block font-mono text-[10.5px] sm:text-[11px] text-inkMuted uppercase">Danh sách đối tác / dự án hiện có:</label>
+          <button type="button" onclick="forceSyncAllToCloud()" class="px-2 py-0.5 rounded bg-neon/15 hover:bg-neon/30 text-neon border border-neon/30 text-[10px] font-mono font-bold flex items-center gap-1 transition-colors">
+            <i data-lucide="cloud" class="w-3 h-3"></i>
+            <span>Đồng bộ Cloud</span>
+          </button>
+        </div>
         <div id="existingClientsList" class="max-h-40 overflow-y-auto space-y-1.5 pr-1">
           <!-- Rendered by JS -->
         </div>
@@ -2159,12 +2165,27 @@
     }
 
     function getLegacyLocalProjects() {
+      const list = [];
+      const seen = new Set();
       try {
         const saved = JSON.parse(localStorage.getItem('oddpig_tracking_clients') || '{}');
-        return Object.values(saved).filter(p => p && p.sheetId && p.name);
-      } catch (e) {
-        return [];
+        Object.values(saved).forEach(p => {
+          if (p && p.sheetId && p.name && !seen.has(p.sheetId)) {
+            list.push(p);
+            seen.add(p.sheetId);
+          }
+        });
+      } catch (e) {}
+
+      if (typeof CLIENTS !== 'undefined') {
+        Object.values(CLIENTS).forEach(p => {
+          if (p && p.sheetId && p.name && !seen.has(p.sheetId)) {
+            list.push(p);
+            seen.add(p.sheetId);
+          }
+        });
       }
+      return list;
     }
 
     async function seedAndMigrateCloudProjects(rows) {
@@ -2172,18 +2193,13 @@
       const userId = session?.user?.id;
       if (!userId) return;
 
-      const existingSheetIds = new Set(rows.map(row => row.sheet_id));
+      const existingSheetIds = new Set((rows || []).map(row => row.sheet_id));
       const legacy = getLegacyLocalProjects();
       const payloads = [];
 
-      const { data: builtInHistory, error: historyError } = await supabaseClient
-        .from('tracking_projects')
-        .select('id')
-        .eq('sheet_id', BUILTIN_CLIENTS.saigontourist.sheetId)
-        .maybeSingle();
-      if (historyError) throw historyError;
-      if (!builtInHistory) {
+      if (!existingSheetIds.has(BUILTIN_CLIENTS.saigontourist.sheetId)) {
         payloads.push(toTrackingProjectRow(BUILTIN_CLIENTS.saigontourist, userId));
+        existingSheetIds.add(BUILTIN_CLIENTS.saigontourist.sheetId);
       }
 
       legacy.forEach(project => {
@@ -2193,11 +2209,18 @@
         }
       });
 
-      if (payloads.length) {
-        const { error } = await supabaseClient
-          .from('tracking_projects')
-          .upsert(payloads, { onConflict: 'user_id,sheet_id' });
-        if (error) throw error;
+      for (const payload of payloads) {
+        try {
+          const { error: upsertErr } = await supabaseClient
+            .from('tracking_projects')
+            .upsert(payload, { onConflict: 'user_id,sheet_id' });
+          if (upsertErr) {
+            console.warn('Upsert failed, trying insert:', upsertErr.message);
+            await supabaseClient.from('tracking_projects').insert(payload);
+          }
+        } catch (e) {
+          console.warn('Migrate project item notice:', payload.name, e);
+        }
       }
     }
 
@@ -2230,6 +2253,7 @@
       if (!supabaseClient || !isAdmin) return false;
 
       try {
+        // 1. Fetch current cloud projects
         let { data: rows, error } = await supabaseClient
           .from('tracking_projects')
           .select('*')
@@ -2237,26 +2261,41 @@
           .order('created_at', { ascending: true });
         if (error) throw error;
 
-        await seedAndMigrateCloudProjects(rows || []);
-        ({ data: rows, error } = await supabaseClient
-          .from('tracking_projects')
-          .select('*')
-          .is('deleted_at', null)
-          .order('created_at', { ascending: true }));
-        if (error) throw error;
+        // 2. Populate CLIENTS immediately from Cloud
+        if (rows && rows.length > 0) {
+          Object.keys(CLIENTS).forEach(key => delete CLIENTS[key]);
+          rows.forEach(row => {
+            const project = fromTrackingProjectRow(row);
+            CLIENTS[project.id] = project;
+          });
+          cloudRegistryReady = true;
+          localStorage.setItem('oddpig_tracking_clients', JSON.stringify(CLIENTS));
+          renderClientSelectOptions();
+        }
 
-        // Cloud is authoritative once schema is ready
-        Object.keys(CLIENTS).forEach(key => delete CLIENTS[key]);
-        (rows || []).forEach(row => {
-          const project = fromTrackingProjectRow(row);
-          CLIENTS[project.id] = project;
-        });
-        cloudRegistryReady = true;
+        // 3. Try to migrate any legacy local-only projects in background
+        try {
+          await seedAndMigrateCloudProjects(rows || []);
+          const { data: updatedRows } = await supabaseClient
+            .from('tracking_projects')
+            .select('*')
+            .is('deleted_at', null)
+            .order('created_at', { ascending: true });
+          if (updatedRows && updatedRows.length > 0) {
+            Object.keys(CLIENTS).forEach(key => delete CLIENTS[key]);
+            updatedRows.forEach(row => {
+              const project = fromTrackingProjectRow(row);
+              CLIENTS[project.id] = project;
+            });
+            cloudRegistryReady = true;
+            localStorage.setItem('oddpig_tracking_clients', JSON.stringify(CLIENTS));
+            renderClientSelectOptions();
+          }
+        } catch (migErr) {
+          console.warn('Non-blocking seed/migrate notice:', migErr);
+        }
 
-        localStorage.setItem('oddpig_tracking_clients', JSON.stringify(CLIENTS));
-        renderClientSelectOptions();
-
-        // Auto fetch missing sheet datasets in background for cross-device hydration
+        // 4. Auto-fetch missing sheet datasets in background for cross-device hydration
         autoFetchMissingClientSheets().catch(err => console.warn('Auto fetch sheets:', err));
 
         return true;
@@ -2264,6 +2303,42 @@
         cloudRegistryReady = false;
         if (!options.silent) console.warn('Tracking cloud registry unavailable:', error.message || error);
         return false;
+      }
+    }
+
+    async function forceSyncAllToCloud() {
+      if (!supabaseClient || !isAdmin) {
+        openLoginModal();
+        return;
+      }
+      try {
+        const legacy = getLegacyLocalProjects();
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        const userId = session?.user?.id;
+        if (!userId) {
+          alert(currentLang === 'vi' ? 'Chưa có phiên đăng nhập Supabase. Vui lòng đăng nhập lại.' : 'No Supabase session.');
+          return;
+        }
+
+        let syncedCount = 0;
+        for (const p of legacy) {
+          try {
+            const payload = toTrackingProjectRow(p, userId);
+            const { error } = await supabaseClient
+              .from('tracking_projects')
+              .upsert(payload, { onConflict: 'user_id,sheet_id' });
+            if (!error) syncedCount++;
+            else {
+              await supabaseClient.from('tracking_projects').insert(payload);
+              syncedCount++;
+            }
+          } catch (e) {}
+        }
+
+        await hydrateCloudProjectRegistry();
+        alert(currentLang === 'vi' ? `Đã đồng bộ ${syncedCount} dự án lên Cloud Supabase thành công!` : `Successfully synced ${syncedCount} projects to Supabase Cloud!`);
+      } catch (err) {
+        alert('Lỗi đồng bộ Cloud: ' + (err.message || err));
       }
     }
 
