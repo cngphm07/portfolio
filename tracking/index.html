@@ -1248,7 +1248,48 @@
     }
 
     // -------------------------------------------------------------
-    // Payment Status & Package Parser (Displays "X tr (Gộp)" on all sub-items)
+    // Partial Payment / Deposit Parser (50%, 1/2, cọc, tạm ứng, đợt 1...)
+    // -------------------------------------------------------------
+    function parsePartialPayment(noteStr, totalPrice) {
+      if (!noteStr) return null;
+      const s = String(noteStr).trim();
+      const sLower = s.toLowerCase();
+
+      const isPartialKw = 
+        sLower.includes('cọc') || 
+        sLower.includes('đặt cọc') || 
+        sLower.includes('tạm ứng') || 
+        sLower.includes('đợt 1') || 
+        sLower.includes('50%') || 
+        sLower.includes('1/2') || 
+        sLower.includes('nửa') || 
+        sLower.includes('một nửa') ||
+        sLower.includes('deposit') || 
+        sLower.includes('advance') || 
+        sLower.includes('partial') || 
+        sLower.includes('nhận trước') ||
+        sLower.includes('trước 50%');
+
+      if (!isPartialKw) return null;
+
+      const mPct = s.match(/(\d{1,2})\s*%/);
+      const pct = mPct ? parseInt(mPct[1], 10) : (sLower.includes('1/2') || sLower.includes('nửa') ? 50 : 50);
+
+      const finalTotal = totalPrice || extractFlexiblePrice(s) || 0;
+      const paidAmt = finalTotal > 0 ? Math.round(finalTotal * pct / 100) : 0;
+      const unpaidAmt = finalTotal - paidAmt;
+
+      return {
+        isPartial: true,
+        percent: pct,
+        paidAmount: paidAmt,
+        unpaidAmount: unpaidAmt,
+        totalPrice: finalTotal
+      };
+    }
+
+    // -------------------------------------------------------------
+    // Payment Status & Package Parser (Displays "X tr (Gộp)", Partial Deposits, etc.)
     // -------------------------------------------------------------
     function getPaymentMeta(item) {
       const note = (item.note || '').toString().trim();
@@ -1282,6 +1323,7 @@
           badgeClasses: 'bg-purpleGlow/20 text-purpleGlow border-purpleGlow/30',
           displayPrice: displayPrice,
           isPaid: true,
+          isPartial: false,
           isFree: false,
           isPackage: true,
           packageTitle: item.bundleTitle || (currentLang === 'vi' ? 'Gộp thanh toán' : 'Bundled Payment')
@@ -1289,6 +1331,26 @@
       }
 
       const price = item.price || 0;
+
+      // Check Partial Payment / Deposit (Cọc 50%, Tạm ứng...)
+      const partial = parsePartialPayment(note, price);
+      if (partial && partial.isPartial && partial.totalPrice > 0) {
+        return {
+          status: 'PARTIAL',
+          label: currentLang === 'vi' ? `Đã cọc ${partial.percent}%` : `Deposit ${partial.percent}%`,
+          tag: currentLang === 'vi' ? `⏳ CỌC ${partial.percent}% • CÒN ${formatVND(partial.unpaidAmount)}` : `⏳ DEPOSIT ${partial.percent}% • DUE ${formatVND(partial.unpaidAmount)}`,
+          classes: 'text-cyanGlow font-bold',
+          badgeClasses: 'bg-cyanGlow/15 text-cyanGlow border-cyanGlow/30',
+          displayPrice: `${formatVND(partial.totalPrice)} (${currentLang === 'vi' ? 'Cọc ' + partial.percent + '%' : 'Deposit ' + partial.percent + '%'})`,
+          isPaid: false,
+          isPartial: true,
+          percent: partial.percent,
+          paidAmount: partial.paidAmount,
+          unpaidAmount: partial.unpaidAmount,
+          isFree: false,
+          isPackage: false
+        };
+      }
 
       if (isUnpaidKeyword || (!note && price === 0)) {
         return {
@@ -1299,6 +1361,7 @@
           badgeClasses: 'bg-amberGlow/10 text-amberGlow border-amberGlow/30',
           displayPrice: price > 0 ? `${formatVND(price)} (${currentLang === 'vi' ? 'Chưa nhận' : 'Pending'})` : (currentLang === 'vi' ? 'Chưa thanh toán' : 'Unpaid (Pending)'),
           isPaid: false,
+          isPartial: false,
           isFree: false,
           isPackage: false
         };
@@ -1313,6 +1376,7 @@
           badgeClasses: 'bg-surface3 text-inkDim border-borderSubtle',
           displayPrice: currentLang === 'vi' ? 'Hỗ trợ (0đ)' : 'Free (0đ)',
           isPaid: true,
+          isPartial: false,
           isFree: true,
           isPackage: false
         };
@@ -1326,6 +1390,7 @@
         badgeClasses: 'bg-greenTerminal/15 text-greenTerminal border-greenTerminal/30',
         displayPrice: formatVND(price),
         isPaid: true,
+        isPartial: false,
         isFree: false,
         isPackage: false
       };
@@ -3020,9 +3085,16 @@
 
         filteredData.forEach(item => {
           const payMeta = getPaymentMeta(item);
-          if (payMeta.isFree) freeCount++;
-          else if (payMeta.isPaid) paidCount++;
-          else unpaidCount++;
+          if (payMeta.isFree) {
+            freeCount++;
+          } else if (payMeta.isPartial) {
+            paidCount++;
+            unpaidCount++; // Partially unpaid balance
+          } else if (payMeta.isPaid) {
+            paidCount++;
+          } else {
+            unpaidCount++;
+          }
         });
 
         if (lblKpiCard2Title) lblKpiCard2Title.textContent = activeClientId === 'all' ? t('masterKpiRevenue') : t('kpiCard2AdminTitle');
@@ -3167,27 +3239,41 @@
 
       const allData = getAllProjectsData();
       const totalItems = allData.length;
-      const totalRevenue = allData.reduce((sum, item) => sum + item.price, 0);
+      let totalRevenue = 0;
+      let paidRevenue = 0;
+      let unpaidRevenue = 0;
 
-      const paidItems = allData.filter(i => {
-        const p = getPaymentMeta(i);
-        return p.isPaid && !p.isFree;
+      const paidItems = [];
+      const unpaidItems = [];
+      const freeItems = [];
+
+      allData.forEach(item => {
+        const p = getPaymentMeta(item);
+        const itemPrice = item.price || 0;
+        totalRevenue += itemPrice;
+
+        if (p.isFree) {
+          freeItems.push(item);
+        } else if (p.isPartial) {
+          paidItems.push(item);
+          unpaidItems.push(item);
+          paidRevenue += p.paidAmount;
+          unpaidRevenue += p.unpaidAmount;
+        } else if (p.isPaid) {
+          paidItems.push(item);
+          paidRevenue += itemPrice;
+        } else {
+          unpaidItems.push(item);
+          unpaidRevenue += itemPrice;
+        }
       });
-      const paidRevenue = paidItems.reduce((sum, item) => sum + item.price, 0);
 
-      const freeItems = allData.filter(i => getPaymentMeta(i).isFree);
-
-      const unpaidItems = allData.filter(i => {
-        const p = getPaymentMeta(i);
-        return !p.isPaid && !p.isFree;
-      });
       unpaidItems.sort((a, b) => {
         const tA = parseFullDateOrMonth(a);
         const tB = parseFullDateOrMonth(b);
         if (tA !== tB) return tA - tB;
         return (a.stt || 0) - (b.stt || 0);
       });
-      const unpaidRevenue = unpaidItems.reduce((sum, item) => sum + (item.price || 0), 0);
 
       const billableCount = allData.filter(i => (i.isBundleLeader && i.bundlePrice > 0) || (!i.isBundle && i.price > 0)).length;
       const avgPrice = billableCount > 0 ? Math.round(totalRevenue / billableCount) : 0;
@@ -3346,9 +3432,9 @@
                             ${statusMeta.label}
                           </span>
                         </td>
-                        <td class="py-3 px-3 sm:px-4 text-right whitespace-nowrap font-bold text-amber-400">
-                          ${item.price > 0 ? formatVND(item.price) : (currentLang === 'vi' ? 'Chưa định giá' : 'Pending Quote')}
-                          <span class="text-[9.5px] text-amber-400/80 block font-normal">⏳ CHƯA THANH TOÁN</span>
+                        <td class="py-3 px-3 sm:px-4 text-right whitespace-nowrap font-bold ${payMeta.isPartial ? 'text-cyanGlow' : 'text-amber-400'}">
+                          ${payMeta.isPartial ? formatVND(payMeta.unpaidAmount) : (item.price > 0 ? formatVND(item.price) : (currentLang === 'vi' ? 'Chưa định giá' : 'Pending Quote'))}
+                          <span class="text-[9.5px] ${payMeta.isPartial ? 'text-cyanGlow/80' : 'text-amber-400/80'} block font-normal">${payMeta.isPartial ? `⏳ CỌC ${payMeta.percent}% • CÒN ${formatVND(payMeta.unpaidAmount)}` : '⏳ CHƯA THANH TOÁN'}</span>
                         </td>
                         <td class="py-3 px-2.5 sm:px-3 text-center whitespace-nowrap">
                           <div class="flex items-center justify-center gap-1.5">
@@ -4480,23 +4566,31 @@
       const allData = getAllProjectsData();
       const unpaidItems = allData.filter(i => {
         const p = getPaymentMeta(i);
-        return !p.isPaid && !p.isFree;
+        return p.isPartial || (!p.isPaid && !p.isFree);
       });
       if (unpaidItems.length === 0) {
-        alert(currentLang === 'vi' ? 'Không có video nào chưa thanh toán!' : 'No unpaid videos found!');
+        alert(currentLang === 'vi' ? 'Không có video nào còn nợ hoặc chưa thanh toán!' : 'No unpaid or outstanding deliverables found!');
         return;
       }
 
       const invoicePayload = {
         clientName: 'TỔNG HỢP CÔNG NỢ TOÀN HỆ THỐNG',
         title: 'HÓA ĐƠN NHẮC THANH TOÁN TỔNG HỢP',
-        items: unpaidItems.map(i => ({
-          desc: `[${i.clientName || 'Dự Án'}] Dựng video: ${i.video} (${i.linkLabel || 'Deliverable'})`,
-          qty: 1,
-          price: i.price || 500000,
-          date: i.dateApproved || i.dateReceived
-        })),
-        total: unpaidItems.reduce((sum, i) => sum + (i.price || 500000), 0)
+        items: unpaidItems.map(i => {
+          const p = getPaymentMeta(i);
+          return {
+            desc: p.isPartial
+              ? `[${i.clientName || 'Dự Án'}] Dựng video: ${i.video} (Nghiệm thu Đợt 2 - Còn lại ${100 - p.percent}%)`
+              : `[${i.clientName || 'Dự Án'}] Dựng video: ${i.video} (${i.linkLabel || 'Deliverable'})`,
+            qty: 1,
+            price: p.isPartial ? p.unpaidAmount : (i.price || 500000),
+            date: i.dateApproved || i.dateReceived
+          };
+        }),
+        total: unpaidItems.reduce((sum, i) => {
+          const p = getPaymentMeta(i);
+          return sum + (p.isPartial ? p.unpaidAmount : (i.price || 500000));
+        }, 0)
       };
 
       try {
@@ -4516,15 +4610,18 @@
       if (!item) return;
 
       const clientName = item.clientName || (CLIENTS[activeClientId] ? CLIENTS[activeClientId].name : 'Khách hàng');
+      const p = getPaymentMeta(item);
       const invoicePayload = {
         clientName: clientName,
         items: [{
-          desc: `${currentLang === 'vi' ? 'Dựng video' : 'Video Editing'}: ${item.video} (${item.linkLabel || 'Deliverable'})`,
+          desc: p.isPartial
+            ? `${currentLang === 'vi' ? 'Dựng video' : 'Video Editing'}: ${item.video} (${currentLang === 'vi' ? 'Nghiệm thu Đợt 2 - Còn lại ' + (100 - p.percent) + '%' : 'Final Settlement - Due ' + (100 - p.percent) + '%'})`
+            : `${currentLang === 'vi' ? 'Dựng video' : 'Video Editing'}: ${item.video} (${item.linkLabel || 'Deliverable'})`,
           qty: 1,
-          price: item.price || 500000,
+          price: p.isPartial ? p.unpaidAmount : (item.price || 500000),
           date: item.dateApproved || item.dateReceived
         }],
-        total: item.price || 500000
+        total: p.isPartial ? p.unpaidAmount : (item.price || 500000)
       };
 
       try {
