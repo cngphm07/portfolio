@@ -534,8 +534,10 @@
           <div class="flex items-center gap-1.5 bg-surface2 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border border-borderSubtle ml-auto">
             <span id="lblFilterSort" class="text-inkDim hidden sm:inline">SẮP XẾP:</span>
             <select id="sortOrder" onchange="applyFilters()" class="bg-transparent text-ink focus:outline-none cursor-pointer pr-1 font-mono text-[11px] sm:text-xs">
+              <option value="time_asc" class="bg-surface">Thời gian: Cũ → Mới (Tăng dần)</option>
+              <option value="time_desc" class="bg-surface">Thời gian: Mới nhất trước</option>
               <option value="stt_asc" class="bg-surface">STT Tăng dần (1 → N)</option>
-              <option value="stt_desc" class="bg-surface">STT Giảm dần (Mới nhất)</option>
+              <option value="stt_desc" class="bg-surface">STT Giảm dần</option>
               <option value="name_asc" class="bg-surface">Tên A → Z</option>
             </select>
           </div>
@@ -984,24 +986,84 @@
     }
 
     // -------------------------------------------------------------
-    // Global Multi-Project Data Combiner (Always fresh from storage)
+    // Chronological Time Parsers & Sorter Helpers
+    // -------------------------------------------------------------
+    function parseMonthYearKey(str) {
+      if (!str) return 0;
+      const s = String(str).trim();
+      const m = s.match(/(\d{1,2})[\/\-](\d{2,4})/);
+      if (m) {
+        const month = parseInt(m[1], 10);
+        let year = parseInt(m[2], 10);
+        if (year < 100) year += 2000;
+        return year * 100 + month;
+      }
+      return 0;
+    }
+
+    function sortMonthStrings(monthArr, ascending = true) {
+      return [...monthArr].sort((a, b) => {
+        const keyA = parseMonthYearKey(a);
+        const keyB = parseMonthYearKey(b);
+        if (keyA !== keyB) {
+          return ascending ? keyA - keyB : keyB - keyA;
+        }
+        return a.localeCompare(b);
+      });
+    }
+
+    function parseFullDateOrMonth(item) {
+      if (!item) return 0;
+      const dStr = item.dateReceived || item.dateApproved;
+      if (dStr) {
+        const parts = String(dStr).trim().split('/');
+        if (parts.length === 3) {
+          const day = parseInt(parts[0], 10) || 1;
+          const month = parseInt(parts[1], 10) || 1;
+          let year = parseInt(parts[2], 10) || 2025;
+          if (year < 100) year += 2000;
+          return new Date(year, month - 1, day).getTime();
+        }
+      }
+      const mKey = parseMonthYearKey(item.month);
+      if (mKey > 0) {
+        const y = Math.floor(mKey / 100);
+        const m = mKey % 100;
+        return new Date(y, m - 1, 1).getTime();
+      }
+      return 0;
+    }
+
+    // -------------------------------------------------------------
+    // Global Multi-Project Data Combiner (Chronologically Sorted)
     // -------------------------------------------------------------
     function getAllProjectsData() {
       let combined = [];
-      let globalStt = 1;
 
       for (const cid in CLIENTS) {
         const c = CLIENTS[cid];
         const rawData = getClientRawData(cid);
         const processed = processBundles(rawData).map(item => ({
           ...item,
-          globalStt: globalStt++,
           clientId: cid,
           clientName: c.name
         }));
         combined = combined.concat(processed);
       }
-      return combined;
+
+      // Sort strictly chronologically ascending across all merged projects
+      combined.sort((a, b) => {
+        const tA = parseFullDateOrMonth(a);
+        const tB = parseFullDateOrMonth(b);
+        if (tA !== tB) return tA - tB;
+        return (a.stt || 0) - (b.stt || 0);
+      });
+
+      // Assign sequential global STT
+      return combined.map((item, idx) => ({
+        ...item,
+        globalStt: idx + 1
+      }));
     }
 
     // -------------------------------------------------------------
@@ -1289,8 +1351,10 @@
         reviewOnly: 'REVIEW (Chờ duyệt / Feedback)',
         pendingOnly: 'PENDING (Chờ bắt đầu)',
         filterSort: 'SẮP XẾP:',
+        sortTimeAsc: 'Thời gian: Cũ → Mới (Tăng dần)',
+        sortTimeDesc: 'Thời gian: Mới nhất trước',
         sortSttAsc: 'STT Tăng dần (1 → N)',
-        sortSttDesc: 'STT Giảm dần (Mới nhất)',
+        sortSttDesc: 'STT Giảm dần',
         sortNameAsc: 'Tên A → Z',
         showingText: (count, total) => `Hiển thị ${count} / ${total} videos`,
         paidBreakdown: (paid, unpaid, free) => `${paid} đã thanh toán • ${unpaid > 0 ? unpaid + ' chưa thanh toán • ' : ''}${free} hỗ trợ (0đ)`,
@@ -1429,8 +1493,10 @@
         reviewOnly: 'REVIEW (Feedback / Pending approval)',
         pendingOnly: 'PENDING (Not started)',
         filterSort: 'SORT BY:',
+        sortTimeAsc: 'Timeline: Oldest → Newest',
+        sortTimeDesc: 'Timeline: Newest First',
         sortSttAsc: 'No. Ascending (1 → N)',
-        sortSttDesc: 'No. Descending (Newest)',
+        sortSttDesc: 'No. Descending',
         sortNameAsc: 'Name A → Z',
         showingText: (count, total) => `Showing ${count} / ${total} videos`,
         paidBreakdown: (paid, unpaid, free) => `${paid} paid • ${unpaid > 0 ? unpaid + ' unpaid • ' : ''}${free} free (0đ)`,
@@ -1598,6 +1664,15 @@
         optPrice.options[4].text = dict.packageOnly;
         optPrice.options[5].text = dict.highPrice;
         optPrice.options[6].text = dict.lowPrice;
+      }
+
+      const optSort = document.getElementById('sortOrder');
+      if (optSort) {
+        optSort.options[0].text = dict.sortTimeAsc;
+        optSort.options[1].text = dict.sortTimeDesc;
+        optSort.options[2].text = dict.sortSttAsc;
+        optSort.options[3].text = dict.sortSttDesc;
+        optSort.options[4].text = dict.sortNameAsc;
       }
 
       document.getElementById('thTime').textContent = dict.thTime;
@@ -2790,8 +2865,10 @@
         }
       });
       
+      const sortedMonths = sortMonthStrings(months, true);
+
       select.innerHTML = `<option value="all" class="bg-surface">${t('allTime')}</option>`;
-      months.forEach(m => {
+      sortedMonths.forEach(m => {
         const opt = document.createElement('option');
         opt.value = m;
         opt.className = 'bg-surface';
@@ -2799,7 +2876,7 @@
         select.appendChild(opt);
       });
 
-      if (months.includes(currentVal)) {
+      if (sortedMonths.includes(currentVal)) {
         select.value = currentVal;
       } else {
         select.value = 'all';
@@ -2858,8 +2935,20 @@
       });
 
       filteredData.sort((a, b) => {
-        if (sort === 'stt_asc') return a.stt - b.stt;
-        if (sort === 'stt_desc') return b.stt - a.stt;
+        if (sort === 'time_asc') {
+          const tA = parseFullDateOrMonth(a);
+          const tB = parseFullDateOrMonth(b);
+          if (tA !== tB) return tA - tB;
+          return (a.stt || 0) - (b.stt || 0);
+        }
+        if (sort === 'time_desc') {
+          const tA = parseFullDateOrMonth(a);
+          const tB = parseFullDateOrMonth(b);
+          if (tA !== tB) return tB - tA;
+          return (b.stt || 0) - (a.stt || 0);
+        }
+        if (sort === 'stt_asc') return (a.stt || 0) - (b.stt || 0);
+        if (sort === 'stt_desc') return (b.stt || 0) - (a.stt || 0);
         if (sort === 'name_asc') return a.video.localeCompare(b.video);
         return 0;
       });
@@ -3064,6 +3153,12 @@
       const unpaidItems = allData.filter(i => {
         const p = getPaymentMeta(i);
         return !p.isPaid && !p.isFree;
+      });
+      unpaidItems.sort((a, b) => {
+        const tA = parseFullDateOrMonth(a);
+        const tB = parseFullDateOrMonth(b);
+        if (tA !== tB) return tA - tB;
+        return (a.stt || 0) - (b.stt || 0);
       });
       const unpaidRevenue = unpaidItems.reduce((sum, item) => sum + (item.price || 0), 0);
 
@@ -3332,7 +3427,7 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3">
-            ${Object.keys(monthMap).map(m => {
+            ${sortMonthStrings(Object.keys(monthMap), true).map(m => {
               const data = monthMap[m];
               const paidRate = data.count > 0 ? Math.round((data.paid / data.count) * 100) : 100;
               return `
@@ -3497,7 +3592,7 @@
         monthMap[m].push(item);
       });
 
-      const months = Object.keys(monthMap);
+      const months = sortMonthStrings(Object.keys(monthMap), true);
       if (months.length === 0) {
         container.innerHTML = `<div class="text-center py-12 text-inkMuted font-mono text-xs">${t('noVideoFound')}</div>`;
         return;
@@ -3505,6 +3600,12 @@
 
       container.innerHTML = months.map(m => {
         const items = monthMap[m];
+        items.sort((a, b) => {
+          const tA = parseFullDateOrMonth(a);
+          const tB = parseFullDateOrMonth(b);
+          if (tA !== tB) return tA - tB;
+          return (a.stt || 0) - (b.stt || 0);
+        });
         const monthRevenue = items.reduce((sum, i) => sum + i.price, 0);
 
         return `
@@ -3676,7 +3777,7 @@
         else monthMap[m].unpaid++;
       });
 
-      const monthLabels = Object.keys(monthMap);
+      const monthLabels = sortMonthStrings(Object.keys(monthMap), true);
       const monthlyRevenues = monthLabels.map(m => monthMap[m].revenue);
       const monthlyCounts = monthLabels.map(m => monthMap[m].count);
 
@@ -4154,7 +4255,7 @@
         monthMap[m].items.push(item);
       });
 
-      const months = Object.keys(monthMap);
+      const months = sortMonthStrings(Object.keys(monthMap), true);
 
       monthContainer.innerHTML = months.map(m => {
         const data = monthMap[m];
@@ -4179,6 +4280,12 @@
       }).join('');
 
       const billableItems = filteredData.filter(i => (i.isBundleLeader && i.bundlePrice > 0) || (!i.isBundle && (i.price > 0 || (i.note && i.note.length > 0))));
+      billableItems.sort((a, b) => {
+        const tA = parseFullDateOrMonth(a);
+        const tB = parseFullDateOrMonth(b);
+        if (tA !== tB) return tA - tB;
+        return (a.stt || 0) - (b.stt || 0);
+      });
       tableBody.innerHTML = billableItems.map((item, idx) => {
         const payMeta = getPaymentMeta(item);
         const finalPrice = item.isBundle ? item.bundlePrice : item.price;
