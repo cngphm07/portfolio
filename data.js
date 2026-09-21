@@ -1311,33 +1311,7 @@ const PORTFOLIO_DATA = {
       "thumb": "https://drive.google.com/thumbnail?id=1wA7Na6XY3Dj7FY1L1p9DwHgW7Nj54YPV&sz=w400"
     }
   ],
-  "Wedding": [
-    {
-      "id": "1b1vtHf7QlU7ZofRU-Im_pBKdouQJL81P",
-      "title": "240503 GiaBao&MaiHoa Prewedding [MASTER] V001",
-      "thumb": "https://drive.google.com/thumbnail?id=1b1vtHf7QlU7ZofRU-Im_pBKdouQJL81P&sz=w400"
-    },
-    {
-      "id": "1yl3t8Yv8f3bmTzRoppcxmgZaoHPPb_3y",
-      "title": "240512 Bao&Hoa TraditionalWeddingFilm [OFFLINE] v001",
-      "thumb": "https://drive.google.com/thumbnail?id=1yl3t8Yv8f3bmTzRoppcxmgZaoHPPb_3y&sz=w400"
-    },
-    {
-      "id": "18cX7-t1MK67BNkhjPMW-jfA18oYiUInN",
-      "title": "250111 THEPROJECT [MASTER] V001",
-      "thumb": "https://drive.google.com/thumbnail?id=18cX7-t1MK67BNkhjPMW-jfA18oYiUInN&sz=w400"
-    },
-    {
-      "id": "1sQbNWsA9uo9y5WntMkCnUwdGUJsePOnW",
-      "title": "250222 TungProposal V002 revised",
-      "thumb": "https://drive.google.com/thumbnail?id=1sQbNWsA9uo9y5WntMkCnUwdGUJsePOnW&sz=w400"
-    },
-    {
-      "id": "1z4PLxugLlh3fGdsKNLieGhfHCL6QMkdM",
-      "title": "Slide GiaBao&MaiHoa",
-      "thumb": "https://drive.google.com/thumbnail?id=1z4PLxugLlh3fGdsKNLieGhfHCL6QMkdM&sz=w400"
-    }
-  ],
+  "Wedding": [],
   "Architecture": {
     "3D Render": [
       {
