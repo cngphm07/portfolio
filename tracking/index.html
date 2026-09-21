@@ -1372,9 +1372,20 @@
       if (!item) return false;
       const v = String(item.video || '').toLowerCase();
       const n = String(item.note || '').toLowerCase();
+      const l = String(item.linkLabel || '').toLowerCase();
+      const s = String(item.status || '').toLowerCase();
+      const m = String(item.month || '').toLowerCase();
       const e = String(item.extra || '').toLowerCase();
-      const text = `${v} ${n} ${e}`;
-      return text.includes('lương') || text.includes('salary') || text.includes('retainer') || text.includes('lương cứng') || text.includes('lương tháng') || text.includes('cố định');
+      const text = `${v} ${n} ${l} ${s} ${m} ${e}`;
+      
+      const textNoAccent = text.normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+      return text.includes('lương') || textNoAccent.includes('luong') ||
+             text.includes('salary') || text.includes('retainer') ||
+             text.includes('cố định') || textNoAccent.includes('co dinh') ||
+             text.includes('khoản cố định') || textNoAccent.includes('khoan co dinh') ||
+             text.includes('phí duy trì') || textNoAccent.includes('phi duy tri') ||
+             text.includes('trọn tháng') || textNoAccent.includes('tron thang');
     }
 
     // -------------------------------------------------------------
@@ -1390,7 +1401,23 @@
         const note = (item.note || '').trim();
         const noteLower = note.toLowerCase();
         
-        const isBundleKeyword = !isSal && (noteLower.includes('gộp') || noteLower.includes('gói') || noteLower.includes('combo') || noteLower.includes('package') || noteLower.includes('trọn gói'));
+        if (isSal) {
+          activeBundle = null;
+          processed.push({
+            ...item,
+            isSalary: true,
+            category: 'SALARY',
+            isBundle: false,
+            bundleId: null,
+            bundleTitle: '',
+            bundlePrice: 0,
+            isBundleLeader: false,
+            price: item.price || 0
+          });
+          continue;
+        }
+
+        const isBundleKeyword = (noteLower.includes('gộp') || noteLower.includes('gói') || noteLower.includes('combo') || noteLower.includes('package') || noteLower.includes('trọn gói'));
         const price = extractFlexiblePrice(note);
 
         if (isBundleKeyword && price > 0) {
@@ -1402,8 +1429,8 @@
           };
           processed.push({
             ...item,
-            isSalary: isSal,
-            category: isSal ? 'SALARY' : 'PACKAGE',
+            isSalary: false,
+            category: 'PACKAGE',
             isBundle: true,
             bundleId: activeBundle.id,
             bundleTitle: activeBundle.title,
@@ -1415,8 +1442,8 @@
           activeBundle.items.push(item.video);
           processed.push({
             ...item,
-            isSalary: isSal,
-            category: isSal ? 'SALARY' : 'PACKAGE',
+            isSalary: false,
+            category: 'PACKAGE',
             isBundle: true,
             bundleId: activeBundle.id,
             bundleTitle: activeBundle.title,
@@ -1428,8 +1455,8 @@
           activeBundle = null;
           processed.push({
             ...item,
-            isSalary: isSal,
-            category: isSal ? 'SALARY' : 'VIDEO',
+            isSalary: false,
+            category: 'VIDEO',
             isBundle: false,
             bundleId: null,
             bundleTitle: '',
@@ -2119,14 +2146,16 @@
       };
     }
 
-    function toTrackingProjectRow(project) {
-      return {
+    function toTrackingProjectRow(project, userId = null) {
+      const row = {
         name: project.name,
         title: project.title || `${project.name} VIDEO TRACKING DATABASE`,
         sheet_id: project.sheetId,
         sheet_url: project.sheetUrl,
         share_token: project.key || generateOpaqueToken()
       };
+      if (userId) row.user_id = userId;
+      return row;
     }
 
     function getLegacyLocalProjects() {
@@ -2139,6 +2168,10 @@
     }
 
     async function seedAndMigrateCloudProjects(rows) {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      const userId = session?.user?.id;
+      if (!userId) return;
+
       const existingSheetIds = new Set(rows.map(row => row.sheet_id));
       const legacy = getLegacyLocalProjects();
       const payloads = [];
@@ -2150,12 +2183,12 @@
         .maybeSingle();
       if (historyError) throw historyError;
       if (!builtInHistory) {
-        payloads.push(toTrackingProjectRow(BUILTIN_CLIENTS.saigontourist));
+        payloads.push(toTrackingProjectRow(BUILTIN_CLIENTS.saigontourist, userId));
       }
 
       legacy.forEach(project => {
         if (!existingSheetIds.has(project.sheetId) && project.sheetId !== BUILTIN_CLIENTS.saigontourist.sheetId) {
-          payloads.push(toTrackingProjectRow(project));
+          payloads.push(toTrackingProjectRow(project, userId));
           existingSheetIds.add(project.sheetId);
         }
       });
@@ -2165,6 +2198,31 @@
           .from('tracking_projects')
           .upsert(payloads, { onConflict: 'user_id,sheet_id' });
         if (error) throw error;
+      }
+    }
+
+    async function autoFetchMissingClientSheets() {
+      const clientIds = Object.keys(CLIENTS).filter(cid => CLIENTS[cid] && CLIENTS[cid].sheetId);
+      const missing = clientIds.filter(cid => {
+        const cached = localStorage.getItem('oddpig_tracking_data_' + cid);
+        return !cached || cached === '[]';
+      });
+
+      if (missing.length > 0) {
+        await Promise.all(missing.map(cid => fetchAndSaveClientSheet(cid)));
+        if (activeClientId === 'all') {
+          currentData = getAllProjectsData();
+          updateClientUI();
+          populateMonthFilter();
+          applyFilters();
+          renderCurrentView();
+        } else if (missing.includes(activeClientId)) {
+          currentData = processBundles(getClientRawData(activeClientId));
+          updateClientUI();
+          populateMonthFilter();
+          applyFilters();
+          renderCurrentView();
+        }
       }
     }
 
@@ -2197,6 +2255,10 @@
 
         localStorage.setItem('oddpig_tracking_clients', JSON.stringify(CLIENTS));
         renderClientSelectOptions();
+
+        // Auto fetch missing sheet datasets in background for cross-device hydration
+        autoFetchMissingClientSheets().catch(err => console.warn('Auto fetch sheets:', err));
+
         return true;
       } catch (error) {
         cloudRegistryReady = false;
@@ -2206,14 +2268,15 @@
     }
 
     async function saveProjectToCloud(project) {
-      if (!supabaseClient || !isAdmin || !cloudRegistryReady) return null;
+      if (!supabaseClient || !isAdmin) return project;
       const { data: { session } } = await supabaseClient.auth.getSession();
       if (!session) {
         throw new Error('CLOUD_AUTH_REQUIRED');
       }
+      const userId = session.user.id;
       const { data, error } = await supabaseClient
         .from('tracking_projects')
-        .insert(toTrackingProjectRow(project))
+        .insert(toTrackingProjectRow(project, userId))
         .select()
         .single();
       if (error) {
@@ -2905,7 +2968,7 @@
       let cloudError = null;
 
       try {
-        if (supabaseClient && isAdmin && cloudRegistryReady) {
+        if (supabaseClient && isAdmin) {
           project = await saveProjectToCloud(localProject);
         }
       } catch (error) {
@@ -3039,27 +3102,31 @@
         let colMap = { stt: 0, month: 1, video: 2, recv: 3, appr: 4, status: 5, link: 6, note: 7, extra: 8 };
 
         let headerRowIndex = 0;
-        const headerKeywords = ['stt', '#', 'no', 'no.', 'thời gian', 'tháng', 'month', 'video', 'tên video', 'tên dự án', 'ngày nhận', 'ngày duyệt', 'trạng thái', 'status', 'link', 'drive', 'ghi chú', 'thù lao', 'giá', 'đơn giá', 'fee'];
+        const headerKeywords = [
+          'stt', '#', 'no', 'no.', 'thời gian', 'tháng', 'month', 'video', 'tên video', 'tên dự án', 'hạng mục', 'project', 'deliverable',
+          'ngày nhận', 'ngày duyệt', 'nhận', 'duyệt', 'trạng thái', 'status', 'link', 'drive', 'file', 'url',
+          'ghi chú', 'thù lao', 'giá', 'đơn giá', 'fee', 'price', 'note', 'tiền', 'chi phí', 'lương', 'thanh toán'
+        ];
 
         for (let i = 0; i < Math.min(rows.length, 3); i++) {
           const r = rows[i];
           let matchCount = 0;
           r.forEach(cell => {
             const val = cell.toLowerCase().trim();
-            if (headerKeywords.includes(val)) matchCount++;
+            if (headerKeywords.some(kw => val.includes(kw))) matchCount++;
           });
           if (matchCount >= 2) {
             headerRowIndex = i;
             r.forEach((cell, idx) => {
               const text = cell.toLowerCase().trim();
-              if (text === 'stt' || text === '#') colMap.stt = idx;
+              if (text === 'stt' || text === '#' || text === 'no' || text === 'no.') colMap.stt = idx;
               else if (text.includes('thời gian') || text.includes('tháng') || text.includes('month')) colMap.month = idx;
-              else if (text === 'video' || text.includes('tên video') || text.includes('tên dự án') || text.includes('project')) colMap.video = idx;
-              else if (text.includes('nhận') || text.includes('recv')) colMap.recv = idx;
-              else if (text.includes('duyệt') || text.includes('hoàn thành') || text.includes('appr')) colMap.appr = idx;
-              else if (text.includes('trạng thái') || text.includes('status')) colMap.status = idx;
-              else if (text.includes('link') || text.includes('drive') || text.includes('file')) colMap.link = idx;
-              else if (text.includes('ghi chú') || text.includes('giá') || text.includes('thù lao')) colMap.note = idx;
+              else if (text === 'video' || text.includes('tên video') || text.includes('tên dự án') || text.includes('project') || text.includes('hạng mục') || text.includes('deliverable')) colMap.video = idx;
+              else if (text.includes('nhận') || text.includes('recv') || text.includes('bắt đầu') || text.includes('start')) colMap.recv = idx;
+              else if (text.includes('duyệt') || text.includes('hoàn thành') || text.includes('appr') || text.includes('done') || text.includes('kết thúc')) colMap.appr = idx;
+              else if (text.includes('trạng thái') || text.includes('status') || text.includes('tiến độ')) colMap.status = idx;
+              else if (text.includes('link') || text.includes('drive') || text.includes('file') || text.includes('url')) colMap.link = idx;
+              else if (text.includes('ghi chú') || text.includes('giá') || text.includes('thù lao') || text.includes('note') || text.includes('chi phí') || text.includes('tiền') || text.includes('thành tiền') || text.includes('fee') || text.includes('price') || text.includes('lương') || text.includes('thanh toán')) colMap.note = idx;
             });
             break;
           }
