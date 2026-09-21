@@ -917,7 +917,23 @@
     let currentActiveModalItem = null;
 
     // -------------------------------------------------------------
-    // Global Multi-Project Data Combiner
+    // Helper: Get Fresh Client Raw Data (from localStorage or default)
+    // -------------------------------------------------------------
+    function getClientRawData(cid) {
+      const cached = localStorage.getItem('oddpig_tracking_data_' + cid);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        } catch (e) {}
+      }
+      if (cid === 'saigontourist') return DEFAULT_DATASET;
+      const c = CLIENTS[cid];
+      return (c && c.data) ? c.data : [];
+    }
+
+    // -------------------------------------------------------------
+    // Global Multi-Project Data Combiner (Always fresh from storage)
     // -------------------------------------------------------------
     function getAllProjectsData() {
       let combined = [];
@@ -925,17 +941,7 @@
 
       for (const cid in CLIENTS) {
         const c = CLIENTS[cid];
-        let rawData = [];
-        if (cid === 'saigontourist') {
-          rawData = DEFAULT_DATASET;
-        } else {
-          const cached = localStorage.getItem('oddpig_tracking_data_' + cid);
-          if (cached) {
-            try { rawData = JSON.parse(cached); } catch (e) { rawData = c.data || []; }
-          } else {
-            rawData = c.data || [];
-          }
-        }
+        const rawData = getClientRawData(cid);
         const processed = processBundles(rawData).map(item => ({
           ...item,
           globalStt: globalStt++,
@@ -2094,23 +2100,7 @@
           btnAllProjectsMasterToggle.classList.add('flex');
         }
 
-        if (clientId === 'saigontourist') {
-          currentData = processBundles([...DEFAULT_DATASET]);
-        } else {
-          const client = CLIENTS[clientId];
-          if (client) {
-            const cached = localStorage.getItem('oddpig_tracking_data_' + clientId);
-            if (cached) {
-              try {
-                currentData = processBundles(JSON.parse(cached));
-              } catch (e) {
-                currentData = processBundles(client.data || DEFAULT_DATASET);
-              }
-            } else {
-              currentData = processBundles(client.data || DEFAULT_DATASET);
-            }
-          }
-        }
+        currentData = processBundles(getClientRawData(clientId));
         updateClientUI();
         populateMonthFilter();
         applyFilters();
@@ -2374,36 +2364,19 @@
     // -------------------------------------------------------------
     // Live Google Sheets Synchronization Engine (CSV-backed)
     // -------------------------------------------------------------
-    async function syncGoogleSheet(showFeedback = true) {
-      if (!isAdmin) {
-        openLoginModal();
-        return;
-      }
-
-      if (activeClientId === 'all') {
-        if (showFeedback) alert('Vui lòng chọn một dự án cụ thể để đồng bộ Google Sheet.');
-        return;
-      }
-
-      const client = CLIENTS[activeClientId];
-      if (!client || !client.sheetId) {
-        if (showFeedback) alert('Chưa cấu hình Google Sheet ID cho dự án này.');
-        return;
-      }
-
-      const syncIcon = document.getElementById('syncIcon');
-      if (syncIcon) syncIcon.classList.add('animate-spin');
+    async function fetchAndSaveClientSheet(clientId) {
+      const client = CLIENTS[clientId];
+      if (!client || !client.sheetId) return false;
 
       const csvUrl = `https://docs.google.com/spreadsheets/d/${client.sheetId}/export?format=csv`;
 
       try {
         const res = await fetch(csvUrl);
+        if (!res.ok) return false;
         const csvText = await res.text();
         const rows = parseCSVText(csvText);
 
-        if (!rows || rows.length < 2) {
-          throw new Error('CSV is empty or inaccessible');
-        }
+        if (!rows || rows.length < 2) return false;
 
         let colMap = { stt: 0, month: 1, video: 2, recv: 3, appr: 4, status: 5, link: 6, note: 7, extra: 8 };
 
@@ -2495,26 +2468,83 @@
           });
         }
 
-        const parsed = processBundles(rawParsed);
+        if (rawParsed.length > 0) {
+          localStorage.setItem('oddpig_tracking_data_' + clientId, JSON.stringify(rawParsed));
+          if (CLIENTS[clientId]) CLIENTS[clientId].data = rawParsed;
+          return true;
+        }
+      } catch (e) {
+        console.warn('Fetch sheet error for ' + clientId, e);
+      }
+      return false;
+    }
 
-        if (parsed.length > 0) {
-          currentData = parsed;
-          try {
-            localStorage.setItem('oddpig_tracking_data_' + activeClientId, JSON.stringify(parsed));
-          } catch (e) {}
+    async function syncGoogleSheet(showFeedback = true) {
+      if (!isAdmin) {
+        openLoginModal();
+        return;
+      }
+
+      const syncIcon = document.getElementById('syncIcon');
+      if (syncIcon) syncIcon.classList.add('animate-spin');
+
+      try {
+        if (activeClientId === 'all') {
+          // Sync ALL projects in parallel
+          const clientIds = Object.keys(CLIENTS).filter(cid => CLIENTS[cid].sheetId);
+          let successCount = 0;
+
+          await Promise.all(clientIds.map(async (cid) => {
+            const ok = await fetchAndSaveClientSheet(cid);
+            if (ok) successCount++;
+          }));
+
+          currentData = getAllProjectsData();
+          updateClientUI();
+          populateMonthFilter();
+          applyFilters();
+          renderMasterHubView();
 
           const now = new Date();
           const timeStr = now.toLocaleTimeString(currentLang === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
           document.getElementById('lastSyncText').textContent = `${currentLang === 'vi' ? 'Đồng bộ lúc' : 'Synced at'} ${timeStr}`;
-          
-          populateMonthFilter();
-          applyFilters();
-          if (showFeedback) alert(currentLang === 'vi' ? `Đồng bộ thành công ${parsed.length} đầu việc từ Google Sheet!` : `Successfully synced ${parsed.length} deliverables from Google Sheet!`);
+
+          if (showFeedback) {
+            alert(currentLang === 'vi' ? `Đã đồng bộ thành công ${successCount}/${clientIds.length} dự án từ Google Sheets!` : `Successfully synced ${successCount}/${clientIds.length} projects from Google Sheets!`);
+          }
+        } else {
+          // Sync single active project
+          const client = CLIENTS[activeClientId];
+          if (!client || !client.sheetId) {
+            if (showFeedback) alert('Chưa cấu hình Google Sheet ID cho dự án này.');
+            return;
+          }
+
+          const ok = await fetchAndSaveClientSheet(activeClientId);
+          if (ok) {
+            currentData = processBundles(getClientRawData(activeClientId));
+            updateClientUI();
+            populateMonthFilter();
+            applyFilters();
+            renderCurrentView();
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString(currentLang === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('lastSyncText').textContent = `${currentLang === 'vi' ? 'Đồng bộ lúc' : 'Synced at'} ${timeStr}`;
+
+            if (showFeedback) {
+              alert(currentLang === 'vi' ? `Đồng bộ thành công dự án ${client.name} từ Google Sheet!` : `Successfully synced project ${client.name} from Google Sheet!`);
+            }
+          } else {
+            if (showFeedback) {
+              alert(currentLang === 'vi' ? 'Không thể kết nối trực tiếp đến Google Sheet. Đang hiển thị bản dữ liệu lưu trữ.' : 'Could not connect directly to Google Sheet. Showing cached data.');
+            }
+          }
         }
       } catch (err) {
-        console.warn('Live sync fallback:', err);
+        console.warn('Live sync error:', err);
         if (showFeedback) {
-          alert(currentLang === 'vi' ? 'Không thể kết nối trực tiếp đến Google Sheet. Đang hiển thị bản dữ liệu lưu trữ.' : 'Could not connect directly to Google Sheet. Showing offline cached data.');
+          alert(currentLang === 'vi' ? 'Lỗi đồng bộ Google Sheet. Vui lòng thử lại sau.' : 'Google Sheet sync error. Please try again.');
         }
       } finally {
         if (syncIcon) syncIcon.classList.remove('animate-spin');
@@ -3015,17 +3045,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
             ${clientKeys.map(cid => {
               const c = CLIENTS[cid];
-              let cData = [];
-              if (cid === 'saigontourist') {
-                cData = DEFAULT_DATASET;
-              } else {
-                const cached = localStorage.getItem('oddpig_tracking_data_' + cid);
-                if (cached) {
-                  try { cData = JSON.parse(cached); } catch (e) { cData = c.data || []; }
-                } else {
-                  cData = c.data || [];
-                }
-              }
+              const cData = getClientRawData(cid);
               const processed = processBundles(cData);
               const cRevenue = processed.reduce((s, i) => s + (i.price || 0), 0);
               const cPaid = processed.filter(i => { const p = getPaymentMeta(i); return p.isPaid && !p.isFree; }).length;
