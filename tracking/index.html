@@ -2732,12 +2732,33 @@
       tabs.forEach(t => {
         const btn = document.getElementById('btnView' + capitalize(t));
         const viewEl = document.getElementById(t === 'hub' ? 'viewMasterHub' : ('view' + capitalize(t)));
+        if (!btn || !viewEl) return;
+
+        if (t === 'hub') {
+          if (activeClientId !== 'all') {
+            btn.classList.add('hidden');
+            btn.classList.remove('flex');
+            viewEl.classList.add('hidden');
+            return;
+          } else {
+            btn.classList.remove('hidden');
+            btn.classList.add('flex');
+          }
+        }
+
+        if (t === 'finance' && !isAdmin) {
+          btn.classList.add('hidden');
+          btn.classList.remove('flex');
+          viewEl.classList.add('hidden');
+          return;
+        }
+
         if (t === viewName) {
-          if (btn) btn.className = 'tab-btn active flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all';
-          if (viewEl) viewEl.classList.remove('hidden');
+          btn.className = 'tab-btn active flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all';
+          viewEl.classList.remove('hidden');
         } else {
-          if (btn) btn.className = 'tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono text-inkMuted hover:text-ink transition-all';
-          if (viewEl) viewEl.classList.add('hidden');
+          btn.className = 'tab-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono text-inkMuted hover:text-ink transition-all';
+          viewEl.classList.add('hidden');
         }
       });
 
