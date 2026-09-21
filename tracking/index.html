@@ -1334,14 +1334,19 @@
 
       // Check Partial Payment / Deposit (Cọc 50%, Tạm ứng...)
       const partial = parsePartialPayment(note, price);
-      if (partial && partial.isPartial && partial.totalPrice > 0) {
+      if (partial && partial.isPartial) {
+        const hasPrice = partial.totalPrice > 0;
         return {
           status: 'PARTIAL',
           label: currentLang === 'vi' ? `Đã cọc ${partial.percent}%` : `Deposit ${partial.percent}%`,
-          tag: currentLang === 'vi' ? `⏳ CỌC ${partial.percent}% • CÒN ${formatVND(partial.unpaidAmount)}` : `⏳ DEPOSIT ${partial.percent}% • DUE ${formatVND(partial.unpaidAmount)}`,
+          tag: hasPrice
+            ? (currentLang === 'vi' ? `⏳ CỌC ${partial.percent}% • CÒN ${formatVND(partial.unpaidAmount)}` : `⏳ DEPOSIT ${partial.percent}% • DUE ${formatVND(partial.unpaidAmount)}`)
+            : (currentLang === 'vi' ? `⏳ ĐÃ CỌC ${partial.percent}% / CHỜ TT` : `⏳ DEPOSIT ${partial.percent}%`),
           classes: 'text-cyanGlow font-bold',
           badgeClasses: 'bg-cyanGlow/15 text-cyanGlow border-cyanGlow/30',
-          displayPrice: `${formatVND(partial.totalPrice)} (${currentLang === 'vi' ? 'Cọc ' + partial.percent + '%' : 'Deposit ' + partial.percent + '%'})`,
+          displayPrice: hasPrice
+            ? `${formatVND(partial.totalPrice)} (${currentLang === 'vi' ? 'Cọc ' + partial.percent + '%' : 'Deposit ' + partial.percent + '%'})`
+            : (currentLang === 'vi' ? `Cọc ${partial.percent}% (Đang tính)` : `Deposit ${partial.percent}% (Pending)`),
           isPaid: false,
           isPartial: true,
           percent: partial.percent,
