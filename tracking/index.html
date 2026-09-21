@@ -1928,16 +1928,20 @@
         if (btnViewHub) {
           if (activeClientId === 'all') {
             btnViewHub.classList.remove('hidden');
+            btnViewHub.classList.add('flex');
           } else {
             btnViewHub.classList.add('hidden');
+            btnViewHub.classList.remove('flex');
           }
         }
 
         if (btnAllProjectsMasterToggle) {
           if (activeClientId !== 'all') {
-            btnAllProjectsMasterToggle.classList.replace('hidden', 'flex');
+            btnAllProjectsMasterToggle.classList.remove('hidden');
+            btnAllProjectsMasterToggle.classList.add('flex');
           } else {
-            btnAllProjectsMasterToggle.classList.replace('flex', 'hidden');
+            btnAllProjectsMasterToggle.classList.add('hidden');
+            btnAllProjectsMasterToggle.classList.remove('flex');
           }
         }
 
@@ -1966,8 +1970,14 @@
         if (modalFeeBox) modalFeeBox.classList.remove('hidden');
         if (thFee) thFee.classList.remove('hidden');
         if (btnDeleteCurrentProject) btnDeleteCurrentProject.classList.replace('flex', 'hidden');
-        if (btnAllProjectsMasterToggle) btnAllProjectsMasterToggle.classList.replace('flex', 'hidden');
-        if (btnViewHub) btnViewHub.classList.add('hidden');
+        if (btnAllProjectsMasterToggle) {
+          btnAllProjectsMasterToggle.classList.add('hidden');
+          btnAllProjectsMasterToggle.classList.remove('flex');
+        }
+        if (btnViewHub) {
+          btnViewHub.classList.add('hidden');
+          btnViewHub.classList.remove('flex');
+        }
 
         if (currentView === 'finance' || currentView === 'hub') {
           switchView('grid');
@@ -2062,15 +2072,27 @@
 
       if (clientId === 'all') {
         currentData = getAllProjectsData();
-        if (btnViewHub) btnViewHub.classList.remove('hidden');
-        if (btnAllProjectsMasterToggle) btnAllProjectsMasterToggle.classList.replace('flex', 'hidden');
+        if (btnViewHub) {
+          btnViewHub.classList.remove('hidden');
+          btnViewHub.classList.add('flex');
+        }
+        if (btnAllProjectsMasterToggle) {
+          btnAllProjectsMasterToggle.classList.add('hidden');
+          btnAllProjectsMasterToggle.classList.remove('flex');
+        }
         updateClientUI();
         populateMonthFilter();
         applyFilters();
         switchView('hub');
       } else {
-        if (btnViewHub) btnViewHub.classList.add('hidden');
-        if (btnAllProjectsMasterToggle && isAdmin) btnAllProjectsMasterToggle.classList.replace('hidden', 'flex');
+        if (btnViewHub) {
+          btnViewHub.classList.add('hidden');
+          btnViewHub.classList.remove('flex');
+        }
+        if (btnAllProjectsMasterToggle && isAdmin) {
+          btnAllProjectsMasterToggle.classList.remove('hidden');
+          btnAllProjectsMasterToggle.classList.add('flex');
+        }
 
         if (clientId === 'saigontourist') {
           currentData = processBundles([...DEFAULT_DATASET]);
