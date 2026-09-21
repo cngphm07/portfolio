@@ -3396,6 +3396,7 @@
                 <tbody class="divide-y divide-borderSubtle">
                   ${unpaidItems.map(item => {
                     const statusMeta = getStatusMeta(item.status, item.driveType === 'folder');
+                    const payMeta = getPaymentMeta(item);
                     return `
                       <tr class="hover:bg-amber-500/5 transition-colors">
                         <td class="py-3 px-2.5 sm:px-3 text-center text-amber-400 font-bold">#${item.stt}</td>
