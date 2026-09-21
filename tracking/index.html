@@ -2321,13 +2321,8 @@
         if (thFee) thFee.classList.remove('hidden');
 
         if (btnViewHub) {
-          if (activeClientId === 'all') {
-            btnViewHub.classList.remove('hidden');
-            btnViewHub.classList.add('flex');
-          } else {
-            btnViewHub.classList.add('hidden');
-            btnViewHub.classList.remove('flex');
-          }
+          btnViewHub.classList.remove('hidden');
+          btnViewHub.classList.add('flex');
         }
 
         if (btnAllProjectsMasterToggle) {
@@ -2370,11 +2365,11 @@
           btnAllProjectsMasterToggle.classList.remove('flex');
         }
         if (btnViewHub) {
-          btnViewHub.classList.add('hidden');
-          btnViewHub.classList.remove('flex');
+          btnViewHub.classList.remove('hidden');
+          btnViewHub.classList.add('flex');
         }
 
-        if (currentView === 'finance' || currentView === 'hub') {
+        if (currentView === 'finance') {
           switchView('grid');
         }
       }
@@ -2467,10 +2462,6 @@
 
       if (clientId === 'all') {
         currentData = getAllProjectsData();
-        if (btnViewHub) {
-          btnViewHub.classList.remove('hidden');
-          btnViewHub.classList.add('flex');
-        }
         if (btnAllProjectsMasterToggle) {
           btnAllProjectsMasterToggle.classList.add('hidden');
           btnAllProjectsMasterToggle.classList.remove('flex');
@@ -2480,10 +2471,6 @@
         applyFilters();
         switchView('hub');
       } else {
-        if (btnViewHub) {
-          btnViewHub.classList.add('hidden');
-          btnViewHub.classList.remove('flex');
-        }
         if (btnAllProjectsMasterToggle && isAdmin) {
           btnAllProjectsMasterToggle.classList.remove('hidden');
           btnAllProjectsMasterToggle.classList.add('flex');
@@ -2493,8 +2480,7 @@
         updateClientUI();
         populateMonthFilter();
         applyFilters();
-        if (currentView === 'hub') switchView('grid');
-        else renderCurrentView();
+        renderCurrentView();
 
         if (isAdmin && CLIENTS[clientId] && CLIENTS[clientId].sheetId) {
           syncGoogleSheet(false);
@@ -3182,24 +3168,15 @@
         const viewEl = document.getElementById(t === 'hub' ? 'viewMasterHub' : ('view' + capitalize(t)));
         if (!btn || !viewEl) return;
 
-        if (t === 'hub') {
-          if (activeClientId !== 'all') {
-            btn.classList.add('hidden');
-            btn.classList.remove('flex');
-            viewEl.classList.add('hidden');
-            return;
-          } else {
-            btn.classList.remove('hidden');
-            btn.classList.add('flex');
-          }
-        }
-
         if (t === 'finance' && !isAdmin) {
           btn.classList.add('hidden');
           btn.classList.remove('flex');
           viewEl.classList.add('hidden');
           return;
         }
+
+        btn.classList.remove('hidden');
+        btn.classList.add('flex');
 
         if (t === viewName) {
           btn.className = 'tab-btn active flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-mono transition-all shrink-0';
@@ -3218,7 +3195,7 @@
     }
 
     function renderCurrentView() {
-      if (currentView === 'hub' && activeClientId === 'all') {
+      if (currentView === 'hub') {
         renderMasterHubView();
       } else if (currentView === 'grid') {
         renderGridView();
@@ -3236,13 +3213,14 @@
     }
 
     // -------------------------------------------------------------
-    // 0. RENDER GLOBAL MASTER TRACKING HUB (TẤT CẢ DỰ ÁN)
+    // 0. RENDER GLOBAL MASTER TRACKING HUB (TẤT CẢ DỰ ÁN & PROJECT OVERVIEW)
     // -------------------------------------------------------------
     function renderMasterHubView() {
       const container = document.getElementById('viewMasterHub');
       if (!container) return;
 
-      const allData = getAllProjectsData();
+      const isAll = activeClientId === 'all';
+      const allData = isAll ? getAllProjectsData() : currentData;
       const totalItems = allData.length;
       let totalRevenue = 0;
       let paidRevenue = 0;
@@ -3288,16 +3266,18 @@
       allData.forEach(item => {
         const m = item.month || (currentLang === 'vi' ? 'Khác' : 'Other');
         if (!monthMap[m]) monthMap[m] = { total: 0, count: 0, paid: 0, unpaid: 0, free: 0, items: [] };
-        monthMap[m].total += item.price;
+        monthMap[m].total += item.price || 0;
         monthMap[m].count++;
         const p = getPaymentMeta(item);
         if (p.isFree) monthMap[m].free++;
+        else if (p.isPartial) { monthMap[m].paid += p.paidAmount; monthMap[m].unpaid += p.unpaidAmount; }
         else if (p.isPaid) monthMap[m].paid++;
         else monthMap[m].unpaid++;
         monthMap[m].items.push(item);
       });
 
       const clientKeys = Object.keys(CLIENTS);
+      const currentClient = CLIENTS[activeClientId];
 
       container.innerHTML = `
         <!-- 1. Master Financial Cards (4 Cards) -->
@@ -3467,6 +3447,7 @@
           `}
         </div>
 
+        ${isAll ? `
         <!-- 3. All Client Projects Portfolio Cards (ONLY IN MASTER HUB) -->
         <div class="cinema-card p-4 sm:p-5 rounded-2xl border border-borderSubtle space-y-3.5 sm:space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -3489,7 +3470,7 @@
               const processed = processBundles(cData);
               const cRevenue = processed.reduce((s, i) => s + (i.price || 0), 0);
               const cPaid = processed.filter(i => { const p = getPaymentMeta(i); return p.isPaid && !p.isFree; }).length;
-              const cUnpaid = processed.filter(i => { const p = getPaymentMeta(i); return !p.isPaid && !p.isFree; }).length;
+              const cUnpaid = processed.filter(i => { const p = getPaymentMeta(i); return p.isPartial || (!p.isPaid && !p.isFree); }).length;
               const cFree = processed.filter(i => getPaymentMeta(i).isFree).length;
               const paidRate = processed.length > 0 ? Math.round((cPaid / processed.length) * 100) : 100;
 
@@ -3528,6 +3509,7 @@
             }).join('')}
           </div>
         </div>
+        ` : ''}
 
         <!-- 4. Global Monthly Cashflow Timeline -->
         <div class="cinema-card p-4 sm:p-5 rounded-2xl border border-borderSubtle space-y-3.5 sm:space-y-4">
