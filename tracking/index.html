@@ -1073,14 +1073,34 @@
 
     function getMonthYearFromDateStr(dateStr, fallbackMonth = '') {
       if (!dateStr) return fallbackMonth;
-      const parts = String(dateStr).trim().split('/');
-      if (parts.length === 3) {
-        const monthNum = String(parseInt(parts[1], 10)).padStart(2, '0');
-        let yearNum = parseInt(parts[2], 10);
+      const s = String(dateStr).trim();
+      const prefix = currentLang === 'en' ? 'Month' : 'Tháng';
+
+      // 1. Format: YYYY-MM-DD or YYYY/MM/DD
+      const mYMD = s.match(/^(\d{4})[\/\-\.](\d{1,2})[\/\-\.](\d{1,2})/);
+      if (mYMD) {
+        const monthNum = String(parseInt(mYMD[2], 10)).padStart(2, '0');
+        return `${prefix} ${monthNum}/${mYMD[1]}`;
+      }
+
+      // 2. Format: DD/MM/YYYY or D/M/YYYY or DD-MM-YYYY or DD.MM.YYYY
+      const mDMY = s.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})/);
+      if (mDMY) {
+        const monthNum = String(parseInt(mDMY[2], 10)).padStart(2, '0');
+        let yearNum = parseInt(mDMY[3], 10);
         if (yearNum < 100) yearNum += 2000;
-        const prefix = currentLang === 'en' ? 'Month' : 'Tháng';
         return `${prefix} ${monthNum}/${yearNum}`;
       }
+
+      // 3. Format: MM/YYYY or M/YYYY
+      const mMY = s.match(/(\d{1,2})[\/\-](\d{2,4})/);
+      if (mMY) {
+        const monthNum = String(parseInt(mMY[1], 10)).padStart(2, '0');
+        let yearNum = parseInt(mMY[2], 10);
+        if (yearNum < 100) yearNum += 2000;
+        return `${prefix} ${monthNum}/${yearNum}`;
+      }
+
       return fallbackMonth;
     }
 
@@ -1116,7 +1136,7 @@
     }
 
     // -------------------------------------------------------------
-    // Cashflow Installments Expander (Phân rã đợt 1 cọc & đợt 2 nghiệm thu)
+    // Cashflow Installments Expander (Phân rã đợt 1 nhận việc & đợt 2 nghiệm thu)
     // -------------------------------------------------------------
     function expandCashflowInstallments(items) {
       const installments = [];
@@ -1129,53 +1149,35 @@
         const mRecv = getMonthYearFromDateStr(item.dateReceived, item.month);
         const mAppr = getMonthYearFromDateStr(item.dateApproved, mRecv);
 
-        if (p.isPartial && p.paidAmount > 0) {
-          // Installment 1: Deposit / Advance (Received in monthReceived)
+        // Case 1: Lương cố định (Salary) -> KHÔNG chia nửa, giữ 100% trong tháng phát sinh lương
+        if (item.isSalary) {
+          const isPaid = p.isPaid;
           installments.push({
             ...item,
-            uniqueKey: `${item.stt}_inst1`,
-            installmentType: 'DEPOSIT',
-            stageLabel: currentLang === 'vi' ? `Đợt 1 (Cọc ${p.percent}%)` : `Installment 1 (Deposit ${p.percent}%)`,
-            month: mRecv,
-            date: item.dateReceived || '--',
-            amount: p.paidAmount,
-            status: 'PAID',
-            isCollected: true,
-            isPartialLeader: true,
-            displayPrice: `${formatVND(p.paidAmount)} (${currentLang === 'vi' ? 'Đã thu cọc' : 'Deposit collected'})`,
-            tag: currentLang === 'vi' ? `✓ ĐÃ THU CỌC ${p.percent}%` : `✓ DEPOSIT ${p.percent}% COLLECTED`,
-            classes: 'text-greenTerminal font-bold',
-            badgeClasses: 'bg-greenTerminal/15 text-greenTerminal border-greenTerminal/30'
-          });
-
-          // Installment 2: Final Settlement (Due in monthApproved)
-          const isDone = item.status === 'DONE';
-          const isSecondPaid = isDone && !note.includes('chưa') && !note.includes('chờ') && !note.includes('nợ');
-          
-          installments.push({
-            ...item,
-            uniqueKey: `${item.stt}_inst2`,
-            installmentType: 'FINAL',
-            stageLabel: currentLang === 'vi' ? `Đợt 2 (Nghiệm thu ${100 - p.percent}%)` : `Installment 2 (Final ${100 - p.percent}%)`,
-            month: mAppr,
+            uniqueKey: `${item.stt}_salary`,
+            installmentType: 'SALARY',
+            stageLabel: currentLang === 'vi' ? '💼 Lương cố định (100%)' : '💼 Monthly Salary (100%)',
+            month: mAppr || mRecv || item.month,
             date: item.dateApproved || item.dateReceived || '--',
-            amount: p.unpaidAmount,
-            status: isSecondPaid ? 'PAID' : 'UNPAID',
-            isCollected: isSecondPaid,
-            isPartialLeader: false,
-            displayPrice: `${formatVND(p.unpaidAmount)} (${isSecondPaid ? (currentLang === 'vi' ? 'Đã thanh toán' : 'Paid') : (currentLang === 'vi' ? 'Chưa thu' : 'Due')})`,
-            tag: isSecondPaid ? (currentLang === 'vi' ? '✓ ĐÃ THU ĐỢT 2' : '✓ FINAL PAID') : (currentLang === 'vi' ? `⏳ CHỜ THU ${100 - p.percent}%` : `⏳ DUE ${100 - p.percent}%`),
-            classes: isSecondPaid ? 'text-greenTerminal font-bold' : 'text-amberGlow font-bold',
-            badgeClasses: isSecondPaid ? 'bg-greenTerminal/15 text-greenTerminal border-greenTerminal/30' : 'bg-amberGlow/10 text-amberGlow border-amberGlow/30'
+            amount: itemPrice,
+            status: isPaid ? 'PAID' : 'UNPAID',
+            isCollected: isPaid,
+            displayPrice: p.displayPrice,
+            tag: p.tag,
+            classes: p.classes,
+            badgeClasses: p.badgeClasses
           });
-        } else if (p.isFree) {
-          // Free / support job
+          return;
+        }
+
+        // Case 2: Deliverable hỗ trợ 0đ (Free / Pro-bono)
+        if (p.isFree || (itemPrice === 0 && !item.isBundleLeader)) {
           installments.push({
             ...item,
             uniqueKey: `${item.stt}_free`,
-            installmentType: 'FULL',
+            installmentType: 'FREE',
             stageLabel: currentLang === 'vi' ? 'Hỗ trợ (0đ)' : 'Support (0đ)',
-            month: mAppr,
+            month: mAppr || mRecv || item.month,
             date: item.dateApproved || item.dateReceived || '--',
             amount: 0,
             status: 'FREE',
@@ -1185,25 +1187,66 @@
             classes: p.classes,
             badgeClasses: p.badgeClasses
           });
-        } else {
-          // Standard full 100% payment
-          const isPaid = p.isPaid;
-          installments.push({
-            ...item,
-            uniqueKey: `${item.stt}_full`,
-            installmentType: 'FULL',
-            stageLabel: currentLang === 'vi' ? 'Thanh toán 100%' : '100% Full Payment',
-            month: mAppr,
-            date: item.dateApproved || item.dateReceived || '--',
-            amount: item.isBundle ? (item.isBundleLeader ? item.bundlePrice : 0) : itemPrice,
-            status: isPaid ? 'PAID' : 'UNPAID',
-            isCollected: isPaid,
-            displayPrice: p.displayPrice,
-            tag: p.tag,
-            classes: p.classes,
-            badgeClasses: p.badgeClasses
-          });
+          return;
         }
+
+        // Case 3: Dự án / Deliverables thông thường (Không phải lương)
+        // DỰA VÀO PHẦN RECEIVE VÀ DELIVERY TRONG FILE ĐỂ CHIA NỬA THU NHẬP (50/50) CHO 2 MỐC THÁNG
+        const totalPrice = item.isBundle ? (item.isBundleLeader ? item.bundlePrice : 0) : itemPrice;
+        if (totalPrice === 0) return;
+
+        let p1Percent = 50;
+        let p2Percent = 50;
+        let amount1 = Math.round(totalPrice * 0.5);
+        let amount2 = totalPrice - amount1;
+
+        if (p.isPartial && p.percent > 0) {
+          p1Percent = p.percent;
+          p2Percent = 100 - p1Percent;
+          amount1 = p.paidAmount > 0 ? p.paidAmount : Math.round(totalPrice * (p1Percent / 100));
+          amount2 = totalPrice - amount1;
+        }
+
+        // MỐC 1: Ngày nhận việc / Receive (mRecv) -> 50% Đợt 1 (Đã thu khi nhận source/bắt đầu)
+        installments.push({
+          ...item,
+          uniqueKey: `${item.stt}_inst1`,
+          installmentType: 'DEPOSIT',
+          stageLabel: currentLang === 'vi' ? `Đợt 1 (Nhận việc ${p1Percent}%)` : `Stage 1 (Receive ${p1Percent}%)`,
+          month: mRecv,
+          date: item.dateReceived || '--',
+          amount: amount1,
+          status: 'PAID',
+          isCollected: true,
+          isPartialLeader: true,
+          displayPrice: `${formatVND(amount1)} (${currentLang === 'vi' ? 'Đợt 1 ' + p1Percent + '%' : 'Stage 1 ' + p1Percent + '%'})`,
+          tag: currentLang === 'vi' ? `✓ ĐÃ THU ĐỢT 1 (${p1Percent}%)` : `✓ STAGE 1 (${p1Percent}%) COLLECTED`,
+          classes: 'text-greenTerminal font-bold',
+          badgeClasses: 'bg-greenTerminal/15 text-greenTerminal border-greenTerminal/30'
+        });
+
+        // MỐC 2: Ngày duyệt / Delivery (mAppr) -> 50% Đợt 2 (Nghiệm thu / Bàn giao hoàn thành)
+        const isDone = item.status === 'DONE';
+        const isSecondPaid = isDone && !note.includes('chưa') && !note.includes('chờ') && !note.includes('nợ') && !note.includes('unpaid');
+
+        installments.push({
+          ...item,
+          uniqueKey: `${item.stt}_inst2`,
+          installmentType: 'FINAL',
+          stageLabel: currentLang === 'vi' ? `Đợt 2 (Nghiệm thu ${p2Percent}%)` : `Stage 2 (Delivery ${p2Percent}%)`,
+          month: mAppr,
+          date: item.dateApproved || item.dateReceived || '--',
+          amount: amount2,
+          status: isSecondPaid ? 'PAID' : 'UNPAID',
+          isCollected: isSecondPaid,
+          isPartialLeader: false,
+          displayPrice: `${formatVND(amount2)} (${isSecondPaid ? (currentLang === 'vi' ? 'Đã thanh toán' : 'Paid') : (currentLang === 'vi' ? 'Chưa thu' : 'Due')})`,
+          tag: isSecondPaid 
+            ? (currentLang === 'vi' ? `✓ ĐÃ THU ĐỢT 2 (${p2Percent}%)` : `✓ STAGE 2 (${p2Percent}%) PAID`)
+            : (currentLang === 'vi' ? `⏳ CHỜ THU ${p2Percent}%` : `⏳ DUE ${p2Percent}%`),
+          classes: isSecondPaid ? 'text-greenTerminal font-bold' : 'text-amberGlow font-bold',
+          badgeClasses: isSecondPaid ? 'bg-greenTerminal/15 text-greenTerminal border-greenTerminal/30' : 'bg-amberGlow/10 text-amberGlow border-amberGlow/30'
+        });
       });
 
       return installments;
