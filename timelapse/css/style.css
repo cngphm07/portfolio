@@ -1325,6 +1325,7 @@ strong, b {
   line-height: 1.05;
   letter-spacing: -0.04em;
   margin: 1.5rem 0 2rem;
+  text-wrap: balance;
 }
 
 .contact-heading-title strong {
@@ -1637,75 +1638,205 @@ input:focus, select:focus, textarea:focus {
 }
 
 @media (max-width: 580px) {
-  .brand-tag {
-    display: none;
+  :root {
+    --gutter: 1.15rem;
+    --section-pad: 4.5rem;
   }
 
-  .header-actions {
-    gap: 0.55rem;
+  /* ---- Header ---- */
+  .brand-name { font-size: 0.95rem; }
+  .brand-tag { display: none; }
+  .header-actions { gap: 0.55rem; }
+  .lang-switch { padding: 0.26rem 0.5rem; }
+  .header-cta { padding: 0.5rem 0.85rem; font-size: 0.66rem; }
+
+  /* ---- Hero: clean 3-line lockup ---- */
+  .hero {
+    padding-top: 6.5rem;
+    min-height: auto;
   }
 
-  .lang-switch {
-    padding: 0.26rem 0.5rem;
-  }
-
-  .header-cta {
-    padding: 0.5rem 0.85rem;
-    font-size: 0.66rem;
-  }
-
-  .hud-overlay {
-    inset: 1rem;
-    font-size: 0.5rem;
-  }
-
-  .hud-left,
-  .hud-right {
-    padding: 0.3rem 0.55rem;
-  }
+  .hero-head { margin-bottom: 2.5rem; }
 
   .hero-title {
-    font-size: clamp(2.4rem, 11.5vw, 3.8rem);
+    font-size: clamp(2rem, 8.9vw, 3.2rem);
+    line-height: 1.12;
   }
-  
+
+  .hero-title .text-accent { display: block; }
+
+  .hero-intro { font-size: 0.95rem; }
+
+  .hero-actions { width: 100%; }
+
+  .hero-actions .button {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .hero-cinema {
     aspect-ratio: 4 / 3;
+    max-height: none;
+    border-radius: 10px;
   }
-  
-  .value-grid {
-    grid-template-columns: 1fr;
+
+  .hud-overlay { inset: 0.9rem; font-size: 0.5rem; }
+
+  .hud-right { display: none; }
+
+  .hud-left,
+  .hud-right { padding: 0.28rem 0.5rem; }
+
+  .viewfinder { inset: 0.7rem; }
+
+  .viewfinder i {
+    width: 14px;
+    height: 14px;
   }
-  
+
+  .hero-footer-bar {
+    padding-top: 1.2rem;
+    font-size: 0.52rem;
+    gap: 1rem;
+  }
+
+  /* ---- Section rhythm & titles ---- */
+  .eyebrow {
+    margin-bottom: 1.1rem;
+    font-size: 0.62rem;
+  }
+
+  .section-title {
+    font-size: clamp(1.75rem, 7.6vw, 2.4rem);
+    line-height: 1.16;
+  }
+
+  .section-header { margin-bottom: 3rem; }
+
+  .section-lead { font-size: 0.92rem; }
+
+  .section-header-wide { gap: 1.25rem; }
+
+  /* ---- Value strip ---- */
+  .value-grid { grid-template-columns: 1fr; }
+
   .value-grid article {
     border-right: none;
     border-bottom: 1px solid var(--border-dark);
+    padding: 1.5rem 0;
   }
-  
-  .system-cards-grid {
-    grid-template-columns: 1fr;
+
+  .value-grid article:last-child { border-bottom: none; }
+
+  .value-title { font-size: 1.05rem; }
+
+  /* ---- Applications ---- */
+  .application-list { gap: 4rem; }
+
+  .app-row,
+  .app-row.is-reversed { gap: 1.6rem; }
+
+  .app-title {
+    font-size: clamp(1.7rem, 7.7vw, 2.3rem);
   }
-  
-  .form-inputs-grid {
-    grid-template-columns: 1fr;
+
+  .app-desc { font-size: 0.92rem; }
+
+  .app-features li { font-size: 0.82rem; }
+
+  /* ---- Process ---- */
+  .process-step {
+    grid-template-columns: 36px 1fr;
+    gap: 0.9rem;
+    padding: 1.6rem 0;
   }
-  
-  .field-span-2 {
-    grid-column: auto;
-  }
-  
-  .brief-form-box {
+
+  .step-title { font-size: 1.25rem; }
+
+  .step-desc { font-size: 0.88rem; }
+
+  .process-schematic { padding: 1.25rem; }
+
+  /* ---- System cards ---- */
+  .system-cards-grid { grid-template-columns: 1fr; }
+
+  .system-box {
+    min-height: 0;
     padding: 1.5rem;
   }
-  
+
+  .sys-code { margin-bottom: 1.2rem; }
+
+  .sys-title { font-size: 1.12rem; }
+
+  /* ---- Deliverables: spec chip drops under text ---- */
+  .deliv-card {
+    grid-template-columns: 32px 1fr;
+    gap: 0.9rem;
+    padding: 1.7rem 0;
+  }
+
+  .deliv-spec {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 0.4rem;
+  }
+
+  .deliv-title { font-size: 1.2rem; }
+
+  .deliv-desc { font-size: 0.88rem; }
+
+  /* ---- Showcase ---- */
+  .showcase-gallery { gap: 1.6rem; }
+
+  .stock-disclaimer { font-size: 0.6rem; }
+
+  /* ---- FAQ ---- */
+  .faq-trigger {
+    font-size: 1rem;
+    padding: 1.25rem 0;
+  }
+
+  .faq-answer { padding-right: 1rem; }
+
+  .faq-answer p { font-size: 0.9rem; }
+
+  /* ---- Contact ---- */
+  .contact-header { margin-bottom: 2.75rem; }
+
+  .contact-heading-title {
+    font-size: clamp(2rem, 9vw, 2.9rem);
+    line-height: 1.1;
+  }
+
+  .contact-lead { font-size: 0.95rem; }
+
+  .form-inputs-grid {
+    grid-template-columns: 1fr;
+    gap: 1.3rem;
+  }
+
+  .field-span-2 { grid-column: auto; }
+
+  .brief-form-box {
+    padding: 1.4rem;
+    border-radius: 12px;
+  }
+
   .form-submit-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 1rem;
   }
-  
+
+  /* ---- Footer ---- */
+  .footer-layout { gap: 2.2rem; }
+
   .footer-bottom-bar {
     flex-direction: column;
-    gap: 1rem;
     align-items: flex-start;
+    gap: 0.7rem;
+    font-size: 0.54rem;
   }
 }
 
