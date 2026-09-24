@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="CNGPHM · Tools Hub — Bộ công cụ làm việc tập trung, bảo vệ bằng đăng nhập">
+  <title>CNGPHM · Tools Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    :root {
+      --bg: #060606;
+      --surface: #0b0b0b;
+      --surface2: #121212;
+      --surface3: #181818;
+      --ink: #f4f4f4;
+      --ink-muted: #8e8e93;
+      --ink-dim: #48484a;
+      --neon: #c9f24b;
+      --green: #4ade80;
+      --orange: #fb923c;
+      --amber: #fbbf24;
+      --sky: #38bdf8;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.22);
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(201, 242, 75, 0.05), transparent 70%),
+        radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.03), transparent 40%);
+      margin: 0;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    .film-grain {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
+
+    .hidden { display: none !important; }
+
+    h1, h2, h3, .display {
+      font-family: 'Archivo', 'Inter', sans-serif;
+      font-stretch: 110%;
+    }
+
+    /* ============ LOGIN SCREEN ============ */
+    #loginScreen {
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: linear-gradient(180deg, var(--surface2), var(--surface));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 30px 30px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+      animation: rise 0.5s ease both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-logo {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(201, 242, 75, 0.18), rgba(201, 242, 75, 0.05));
+      border: 1px solid rgba(201, 242, 75, 0.3);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .login-logo svg { width: 28px; height: 28px; }
+
+    .login-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin: 0 0 6px;
+    }
+
+    .login-sub {
+      color: var(--ink-muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0 0 26px;
+    }
+
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      margin-bottom: 7px;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 13px 15px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .field input:focus {
+      border-color: rgba(201, 242, 75, 0.5);
+      background: #1c1c1c;
+    }
+
+    .field input::placeholder { color: var(--ink-dim); }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--neon);
+      color: #0a0a0a;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: filter 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover { filter: brightness(1.08); }
+    .btn-primary:active { transform: scale(0.985); }
+    .btn-primary:disabled { opacity: 0.55; cursor: wait; }
+
+    .login-links {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 18px;
+      font-size: 13px;
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--ink-muted);
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: var(--ink-dim);
+    }
+
+    .link-btn:hover { color: var(--neon); }
+
+    .login-foot {
+      margin-top: 28px;
+      color: var(--ink-dim);
+      font-size: 12px;
+      text-align: center;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(10, 10, 10, 0.3);
+      border-top-color: #0a0a0a;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .boot {
+      min-height: 100vh; min-height: 100dvh;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--ink-dim);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+    }
+
+    /* ============ APP (dashboard) ============ */
+    #app {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 22px 0 26px;
+      flex-wrap: wrap;
+    }
+
+    .brand { display: flex; align-items: center; gap: 13px; }
+
+    .brand-mark {
+      width: 44px; height: 44px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, rgba(201, 242, 75, 0.18), rgba(201, 242, 75, 0.05));
+      border: 1px solid rgba(201, 242, 75, 0.3);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-mark svg { width: 22px; height: 22px; }
+
+    .brand-name { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; line-height: 1.15; }
+    .brand-name span { color: var(--neon); }
+    .brand-sub { font-size: 11.5px; color: var(--ink-muted); font-family: 'IBM Plex Mono', monospace; }
+
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+    .chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--ink-muted);
+      font-size: 12.5px;
+      font-family: inherit;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .chip:hover { border-color: var(--border-hover); color: var(--ink); }
+
+    .chip .avatar {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon), #8fb832);
+      color: #0a0a0a;
+      font-size: 11px;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+    }
+
+    .chip.user-chip { cursor: default; max-width: 240px; }
+    .chip.user-chip .email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .hero { padding: 6px 0 30px; }
+    .hero h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 800; letter-spacing: -1px; margin: 0 0 8px; }
+    .hero h1 em { font-style: normal; color: var(--neon); }
+    .hero p { color: var(--ink-muted); font-size: 14.5px; margin: 0; max-width: 560px; line-height: 1.6; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+
+    .tool-card {
+      position: relative;
+      background: linear-gradient(180deg, var(--surface2), var(--surface));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 22px;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: left;
+      font-family: inherit;
+      color: inherit;
+      overflow: hidden;
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 20% 0%, var(--glow, rgba(201, 242, 75, 0.07)), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.25s;
+      pointer-events: none;
+    }
+
+    .tool-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .tool-card:hover::before { opacity: 1; }
+
+    .tool-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+
+    .tool-icon {
+      width: 46px; height: 46px;
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--icon-bg, rgba(201, 242, 75, 0.1));
+      border: 1px solid var(--icon-bd, rgba(201, 242, 75, 0.25));
+      flex-shrink: 0;
+    }
+
+    .tool-icon svg { width: 22px; height: 22px; }
+
+    .tool-arrow {
+      color: var(--ink-dim);
+      transition: color 0.2s, transform 0.2s;
+      margin-top: 12px;
+    }
+
+    .tool-card:hover .tool-arrow { color: var(--neon); transform: translate(2px, -2px); }
+
+    .tool-name { font-size: 17px; font-weight: 700; letter-spacing: -0.2px; margin: 0; }
+
+    .tool-desc { color: var(--ink-muted); font-size: 13.5px; line-height: 1.55; margin: 0; flex: 1; }
+
+    .tool-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .tag {
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-family: 'IBM Plex Mono', monospace;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--ink-muted);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tag.local { color: var(--orange); border-color: rgba(251, 146, 60, 0.35); background: rgba(251, 146, 60, 0.07); }
+    .tag.cloud { color: var(--sky); border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.06); }
+    .tag.auth { color: var(--green); border-color: rgba(74, 222, 128, 0.3); background: rgba(74, 222, 128, 0.06); }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink-muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin: 8px 0 16px;
+    }
+
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .page-foot {
+      margin-top: 46px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      color: var(--ink-dim);
+      font-size: 12px;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    /* ============ VIEWER (iframe) ============ */
+    #viewer {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      animation: viewerIn 0.25s ease both;
+    }
+
+    @keyframes viewerIn {
+      from { opacity: 0; transform: scale(0.99); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .viewer-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding-top: max(10px, env(safe-area-inset-top));
+    }
+
+    .viewer-btn {
+      background: var(--surface3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 9px 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      text-decoration: none;
+      transition: border-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .viewer-btn:hover { border-color: var(--border-hover); }
+    .viewer-btn.accent { color: var(--neon); }
+
+    .viewer-title {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    #viewerFrame {
+      flex: 1;
+      width: 100%;
+      border: none;
+      background: var(--bg);
+    }
+
+    /* ============ TOAST ============ */
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface3);
+      border: 1px solid var(--border-hover);
+      color: var(--ink);
+      font-size: 13.5px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      z-index: 1100;
+      max-width: min(92vw, 420px);
+      text-align: center;
+    }
+
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.err { border-color: rgba(248, 113, 113, 0.45); color: #fca5a5; }
+    #toast.ok { border-color: rgba(74, 222, 128, 0.4); color: #86efac; }
+
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr; }
+      .chip.user-chip { max-width: 150px; }
+      .login-card { padding: 30px 22px 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="film-grain"></div>
+
+  <!-- Boot / auth check -->
+  <div id="bootScreen" class="boot">···</div>
+
+  <!-- ============ LOGIN ============ -->
+  <div id="loginScreen" class="hidden">
+    <div class="login-card">
+      <div class="login-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c9f24b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><circle cx="12" cy="15.5" r="1.4" fill="#c9f24b" stroke="none"/>
+        </svg>
+      </div>
+      <h1 class="login-title">Tools Hub</h1>
+      <p class="login-sub" id="loginSub"></p>
+
+      <form id="authForm" autocomplete="on">
+        <div class="field">
+          <label for="emailInput" id="lblEmail">Email</label>
+          <input type="email" id="emailInput" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label for="passInput" id="lblPass"></label>
+          <input type="password" id="passInput" placeholder="••••••••" autocomplete="current-password" required minlength="6">
+        </div>
+        <button type="submit" class="btn-primary" id="authBtn"></button>
+      </form>
+
+      <div class="login-links">
+        <button type="button" class="link-btn" id="switchModeBtn"></button>
+        <button type="button" class="link-btn" id="forgotBtn"></button>
+      </div>
+    </div>
+    <div class="login-foot">oddpig.io.vn/tools · CNGPHM</div>
+  </div>
+
+  <!-- ============ APP ============ -->
+  <div id="app" class="hidden">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#c9f24b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a4.5 4.5 0 0 0-6.05 5.9L3 17.8V21h3.2l5.6-5.65a4.5 4.5 0 0 0 5.9-6.05L14.5 12.5l-3-3 3.2-3.2z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">CNGPHM <span>Tools</span></div>
+          <div class="brand-sub" id="brandSub">TOOLS HUB</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="chip" id="langBtn" title="Language">VI</button>
+        <div class="chip user-chip" id="userChip"><span class="avatar"></span><span class="email"></span></div>
+        <button class="chip" id="logoutBtn"></button>
+      </div>
+    </div>
+
+    <div class="hero">
+      <h1 id="heroTitle"></h1>
+      <p id="heroSub"></p>
+    </div>
+
+    <div class="section-label" id="workLabel"></div>
+    <div class="grid" id="gridWork"></div>
+
+    <div class="section-label" id="localLabel" style="margin-top:34px;"></div>
+    <div class="grid" id="gridLocal"></div>
+
+    <div class="page-foot">
+      <span>oddpig.io.vn/tools</span>
+      <span id="footRight">CNGPHM · TOOLS HUB</span>
+    </div>
+  </div>
+
+  <!-- ============ VIEWER ============ -->
+  <div id="viewer" class="hidden">
+    <div class="viewer-bar">
+      <button class="viewer-btn" id="viewerBack">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <span id="viewerBackLabel">Back</span>
+      </button>
+      <span class="viewer-title" id="viewerTitle"></span>
+      <a class="viewer-btn accent" id="viewerNewTab" target="_blank" rel="noopener">
+        <span id="viewerNewTabLabel">New tab</span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>
+      </a>
+    </div>
+    <iframe id="viewerFrame" title="Tool"></iframe>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    // ================= CONFIG =================
+    const SUPABASE_CONFIG = {
+      url: 'https://kksnzaswotrgkrxxwfcm.supabase.co',
+      anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtrc256YXN3b3RyZ2tyeHh3ZmNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0ODY3MjEsImV4cCI6MjEwNTA2MjcyMX0.cRPmJ4i9ivFglWCuZy7YG_anScqCiKVJNp8JDsBNwEo'
+    };
+
+    // Layout dò tự động: file:// hoặc local server → file .html lẻ cùng thư mục;
+    // GitHub Pages (/tools/) → thư mục anh em. Trên http(s) probe HEAD một lần rồi cache.
+    let _layout = null;
+    async function layout() {
+      if (_layout) return _layout;
+      if (location.protocol === 'file:') { _layout = 'flat'; return _layout; }
+      try {
+        const res = await fetch(TOOLS.find(x => x.embed).hostedPath, { method: 'HEAD' });
+        _layout = res.ok ? 'hosted' : 'flat';
+      } catch { _layout = 'flat'; }
+      return _layout;
+    }
+
+    const ICONS = {
+      check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 9h18M8.5 14.5l2.5 2.5 4.5-4.5"/></svg>',
+      chart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 15l3.5-4 3 2.5L18 8"/></svg>',
+      invoice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12a1 1 0 0 1 1 1v18l-2.5-1.5L14 21l-2-1.5L10 21l-2.5-1.5L5 21V3a1 1 0 0 1 1-1z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg>',
+      key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4.5"/><path d="M11.2 11.8L20 3M15.5 7.5L18 10M18.5 4.5L21 7"/></svg>',
+      truck: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 6h13v10h-13zM14.5 9h4l3 3.5V16h-7z"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17.5" cy="17.5" r="1.8"/></svg>'
+    };
+
+    const TOOLS = [
+      {
+        id: 'task-master',
+        icon: 'check',
+        glow: 'rgba(201, 242, 75, 0.08)',
+        color: '#c9f24b',
+        work: true,
+        embed: true,
+        flatPath: 'task-master.html',
+        hostedPath: '../task-master/',
+        vi: { name: 'Task Master', desc: 'Quản lý công việc hằng ngày, đồng bộ đám mây Supabase, song ngữ VI/EN.', tags: [['cloud', 'Cloud'], ['auth', 'Auth']] },
+        en: { name: 'Task Master', desc: 'Daily task manager with Supabase cloud sync, bilingual VI/EN.', tags: [['cloud', 'Cloud'], ['auth', 'Auth']] }
+      },
+      {
+        id: 'tracking',
+        icon: 'chart',
+        glow: 'rgba(56, 189, 248, 0.08)',
+        color: '#38bdf8',
+        work: true,
+        embed: true,
+        flatPath: 'tracking.html',
+        hostedPath: '../tracking/',
+        vi: { name: 'Tracking Hub', desc: 'Theo dõi dự án video & công việc: tiến độ, doanh thu, giao hàng.', tags: [['cloud', 'Cloud'], ['auth', 'Auth']] },
+        en: { name: 'Tracking Hub', desc: 'Video & job tracking portal: progress, revenue and deliveries.', tags: [['cloud', 'Cloud'], ['auth', 'Auth']] }
+      },
+      {
+        id: 'invoice',
+        icon: 'invoice',
+        glow: 'rgba(251, 191, 36, 0.08)',
+        color: '#fbbf24',
+        work: true,
+        embed: true,
+        flatPath: 'invoice.html',
+        hostedPath: '../invoice/',
+        vi: { name: 'Invoice Studio', desc: 'Tạo hóa đơn freelancer & dịch vụ chuyên nghiệp, xuất PDF vector sắc nét.', tags: [] },
+        en: { name: 'Invoice Studio', desc: 'Create professional freelancer & service invoices, export sharp vector PDF.', tags: [] }
+      },
+      {
+        id: 'license',
+        icon: 'key',
+        glow: 'rgba(74, 222, 128, 0.08)',
+        color: '#4ade80',
+        work: true,
+        embed: true,
+        flatPath: 'license-tools/index.html',
+        hostedPath: '../license-tools/',
+        vi: { name: 'Kiểm tra hạn tài khoản', desc: 'Tra cứu và theo dõi hạn sử dụng tài khoản, cảnh báo sắp hết hạn.', tags: [['cloud', 'Cloud'], ['auth', 'Auth']] },
+        en: { name: 'License Checker', desc: 'Look up and track account expiry dates with early warnings.', tags: [['cloud', 'Cloud'], ['auth', 'Auth']] }
+      },
+      {
+        id: 'link2drive',
+        icon: 'truck',
+        glow: 'rgba(251, 146, 60, 0.09)',
+        color: '#fb923c',
+        work: false,
+        embed: false,
+        path: 'http://localhost:3456/',        vi: { name: 'Link2Drive', desc: 'Chuyển link Mega / 1fichier sang Google Drive. Cần chạy backend local (CHAY LINK2DRIVE.cmd).', tags: [['local', 'Local']] },
+        en: { name: 'Link2Drive', desc: 'Transfer Mega / 1fichier links to Google Drive. Requires the local backend (CHAY LINK2DRIVE.cmd).', tags: [['local', 'Local']] }
+      }
+    ];
+
+    // ================= I18N =================
+    const STR = {
+      vi: {
+        loginSub: 'Đăng nhập để truy cập bộ công cụ làm việc của bạn.',
+        lblEmail: 'Email',
+        lblPass: 'Mật khẩu',
+        btnLogin: 'Đăng nhập',
+        btnSignup: 'Tạo tài khoản',
+        toSignup: 'Chưa có tài khoản? Đăng ký',
+        toLogin: 'Đã có tài khoản? Đăng nhập',
+        forgot: 'Quên mật khẩu?',
+        heroTitle: 'Bộ công cụ <em>của bạn</em>',
+        heroSub: 'Tất cả công cụ làm việc tập trung tại một nơi. Chọn một tool để mở — các tool có đăng nhập sẽ tự dùng phiên hiện tại.',
+        workLabel: 'Công việc',
+        localLabel: 'Tool chạy local',
+        logout: 'Đăng xuất',
+        back: 'Quay lại',
+        newTab: 'Tab mới',
+        greeting: 'Xin chào',
+        errRequired: 'Vui lòng nhập email và mật khẩu (tối thiểu 6 ký tự).',
+        errInvalid: 'Email hoặc mật khẩu không đúng.',
+        errExists: 'Tài khoản đã tồn tại. Hãy đăng nhập.',
+        errWeak: 'Mật khẩu quá yếu — cần tối thiểu 6 ký tự.',
+        errRate: 'Quá nhiều lần thử. Vui lòng đợi một lát rồi thử lại.',
+        errGeneric: 'Đăng nhập thất bại. Vui lòng thử lại.',
+        okReset: 'Đã gửi email đặt lại mật khẩu. Hãy kiểm tra hộp thư.',
+        okSignup: 'Tài khoản đã được tạo. Hãy đăng nhập.',
+        openingLocal: 'Đang mở Link2Drive — nhớ đảm bảo backend local đang chạy.',
+        footRight: 'CNGPHM · TOOLS HUB'
+      },
+      en: {
+        loginSub: 'Sign in to access your workspace tools.',
+        lblEmail: 'Email',
+        lblPass: 'Password',
+        btnLogin: 'Sign in',
+        btnSignup: 'Create account',
+        toSignup: 'No account yet? Sign up',
+        toLogin: 'Already have an account? Sign in',
+        forgot: 'Forgot password?',
+        heroTitle: 'Your <em>toolbox</em>',
+        heroSub: 'All your working tools in one place. Pick one to open — tools with login will reuse the current session.',
+        workLabel: 'Work',
+        localLabel: 'Local tools',
+        logout: 'Log out',
+        back: 'Back',
+        newTab: 'New tab',
+        greeting: 'Hello',
+        errRequired: 'Please enter your email and a password (at least 6 characters).',
+        errInvalid: 'Invalid email or password.',
+        errExists: 'Account already exists. Please sign in.',
+        errWeak: 'Password is too weak — at least 6 characters required.',
+        errRate: 'Too many attempts. Please wait a moment and try again.',
+        errGeneric: 'Sign-in failed. Please try again.',
+        okReset: 'Password reset email sent. Please check your inbox.',
+        okSignup: 'Account created. Please sign in.',
+        openingLocal: 'Opening Link2Drive — make sure the local backend is running.',
+        footRight: 'CNGPHM · TOOLS HUB'
+      }
+    };
+
+    let lang = localStorage.getItem('oddpig_tools_lang') || 'vi';
+    const t = k => (STR[lang] && STR[lang][k]) || STR.vi[k] || k;
+
+    // ================= STATE =================
+    let sb = null;
+    let authMode = 'login';
+    let currentUser = null;
+
+    const $ = id => document.getElementById(id);
+
+    function toast(msg, type = '') {
+      const el = $('toast');
+      el.textContent = msg;
+      el.className = 'show ' + type;
+      clearTimeout(el._t);
+      el._t = setTimeout(() => { el.className = ''; }, 3200);
+    }
+
+    function mapAuthError(msg) {
+      const m = (msg || '').toLowerCase();
+      if (m.includes('invalid login credentials')) return t('errInvalid');
+      if (m.includes('already registered') || m.includes('already been registered')) return t('errExists');
+      if (m.includes('password') && (m.includes('least') || m.includes('short'))) return t('errWeak');
+      if (m.includes('rate limit') || m.includes('too many')) return t('errRate');
+      if (m.includes('unable to validate email') || m.includes('invalid email')) return t('errRequired');
+      return t('errGeneric') + (msg ? ' (' + msg + ')' : '');
+    }
+
+    // ================= RENDER =================
+    function toolCard(tool) {
+      const L = tool[lang] || tool.vi;
+      const tags = (L.tags || []).map(([cls, label]) => `<span class="tag ${cls}">${label}</span>`).join('');
+      const btn = document.createElement('button');
+      btn.className = 'tool-card';
+      btn.style.setProperty('--glow', tool.glow);
+      btn.innerHTML = `
+        <div class="tool-card-head">
+          <div class="tool-icon" style="--icon-bg:${tool.color}1a;--icon-bd:${tool.color}40;color:${tool.color}">${ICONS[tool.icon]}</div>
+          <svg class="tool-arrow" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>
+        </div>
+        <div>
+          <h3 class="tool-name"></h3>
+          <p class="tool-desc"></p>
+        </div>
+        <div class="tool-tags">${tags}</div>`;
+      btn.querySelector('.tool-name').textContent = L.name;
+      btn.querySelector('.tool-desc').textContent = L.desc;
+      btn.addEventListener('click', () => openTool(tool));
+      return btn;
+    }
+
+    function renderTools() {
+      const gw = $('gridWork'), gl = $('gridLocal');
+      gw.innerHTML = ''; gl.innerHTML = '';
+      TOOLS.forEach(tool => (tool.work ? gw : gl).appendChild(toolCard(tool)));
+      $('workLabel').textContent = t('workLabel');
+      $('localLabel').textContent = t('localLabel');
+    }
+
+    function applyLang() {
+      document.documentElement.lang = lang;
+      $('langBtn').textContent = lang === 'vi' ? 'EN' : 'VI';
+      $('loginSub').textContent = t('loginSub');
+      $('lblEmail').textContent = t('lblEmail');
+      $('lblPass').textContent = t('lblPass');
+      $('authBtn').textContent = authMode === 'login' ? t('btnLogin') : t('btnSignup');
+      $('switchModeBtn').textContent = authMode === 'login' ? t('toSignup') : t('toLogin');
+      $('forgotBtn').textContent = t('forgot');
+      $('logoutBtn').textContent = t('logout');
+      $('viewerBackLabel').textContent = t('back');
+      $('viewerNewTabLabel').textContent = t('newTab');
+      $('footRight').textContent = t('footRight');
+      $('heroTitle').innerHTML = t('heroTitle');
+      $('heroSub').textContent = t('heroSub');
+      if (currentUser) {
+        const L = { vi: 'Xin chào', en: 'Hello' }[lang] || 'Hello';
+        $('brandSub').textContent = L + ', ' + (currentUser.split('@')[0] || 'user');
+      }
+      if (!$('app').classList.contains('hidden')) renderTools();
+      localStorage.setItem('oddpig_tools_lang', lang);
+    }
+
+    function showLogin() {
+      currentUser = null;
+      $('bootScreen').classList.add('hidden');
+      $('app').classList.add('hidden');
+      $('viewer').classList.add('hidden');
+      closeViewer();
+      $('loginScreen').classList.remove('hidden');
+      applyLang();
+    }
+
+    function enterApp(email) {
+      currentUser = email;
+      $('bootScreen').classList.add('hidden');
+      $('loginScreen').classList.add('hidden');
+      $('app').classList.remove('hidden');
+      const chip = $('userChip');
+      chip.querySelector('.avatar').textContent = (email[0] || '?').toUpperCase();
+      chip.querySelector('.email').textContent = email;
+      applyLang();
+    }
+
+    // ================= VIEWER =================
+    async function openTool(tool) {
+      const L = tool[lang] || tool.vi;
+      if (!tool.embed) {
+        toast(t('openingLocal'));
+        window.open(tool.path, '_blank', 'noopener');
+        return;
+      }
+      const src = (await layout()) === 'hosted' ? tool.hostedPath : tool.flatPath;
+      $('viewerTitle').textContent = L.name;
+      $('viewerNewTab').href = src;
+      $('viewerFrame').src = src;
+      $('viewer').classList.remove('hidden');
+    }
+
+    function closeViewer() {
+      $('viewerFrame').src = 'about:blank';
+      $('viewer').classList.add('hidden');
+    }
+
+    // ================= AUTH =================
+    function setBusy(busy) {
+      const btn = $('authBtn');
+      btn.disabled = busy;
+      btn.innerHTML = busy ? '<span class="spinner"></span>' : (authMode === 'login' ? t('btnLogin') : t('btnSignup'));
+    }
+
+    async function submitAuth(e) {
+      e.preventDefault();
+      const email = $('emailInput').value.trim();
+      const pass = $('passInput').value;
+      if (!email || pass.length < 6) { toast(t('errRequired'), 'err'); return; }
+      setBusy(true);
+      try {
+        const res = authMode === 'signup'
+          ? await sb.auth.signUp({ email, password: pass })
+          : await sb.auth.signInWithPassword({ email, password: pass });
+        if (res.error) { toast(mapAuthError(res.error.message), 'err'); return; }
+        if (authMode === 'signup') {
+          if (res.data.session) { enterApp(email); }
+          else { toast(t('okSignup'), 'ok'); setMode('login'); }
+        } else if (res.data.session) {
+          enterApp(res.data.user?.email || email);
+        }
+      } catch (err) {
+        toast(t('errGeneric'), 'err');
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function forgotPassword() {
+      const email = $('emailInput').value.trim();
+      if (!email) { toast(t('errRequired'), 'err'); return; }
+      try {
+        const { error } = await sb.auth.resetPasswordForEmail(email);
+        toast(error ? mapAuthError(error.message) : t('okReset'), error ? 'err' : 'ok');
+      } catch { toast(t('errGeneric'), 'err'); }
+    }
+
+    function setMode(mode) {
+      authMode = mode;
+      $('passInput').autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
+      applyLang();
+    }
+
+    function switchMode() { setMode(authMode === 'login' ? 'signup' : 'login'); }
+
+    async function logout() {
+      try { await sb.auth.signOut(); } catch {}
+      showLogin();
+    }
+
+    // ================= INIT =================
+    async function init() {
+      try {
+        sb = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
+          auth: { persistSession: true, autoRefreshToken: true }
+        });
+        const { data: { session } } = await sb.auth.getSession();
+        if (session?.user?.email) enterApp(session.user.email);
+        else showLogin();
+        sb.auth.onAuthStateChange((event, s) => {
+          if (event === 'SIGNED_OUT') showLogin();
+          else if (event === 'SIGNED_IN' && s?.user?.email && currentUser !== s.user.email) enterApp(s.user.email);
+        });
+      } catch (err) {
+        $('bootScreen').textContent = 'Supabase load failed — check your connection.';
+        showLogin();
+      }
+    }
+
+    // Events
+    $('authForm').addEventListener('submit', submitAuth);
+    $('switchModeBtn').addEventListener('click', switchMode);
+    $('forgotBtn').addEventListener('click', forgotPassword);
+    $('logoutBtn').addEventListener('click', logout);
+    $('viewerBack').addEventListener('click', closeViewer);
+    $('langBtn').addEventListener('click', () => { lang = lang === 'vi' ? 'en' : 'vi'; applyLang(); });
+
+    applyLang();
+    init();
+  </script>
+</body>
+</html>
