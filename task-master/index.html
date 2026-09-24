@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta name="theme-color" content="#060606">
+  <meta name="description" content="CNGPHM · Task Master — Daily task manager / Quản lý công việc hằng ngày">
+  <title>CNGPHM · Task Master</title>
+
+  <!-- Fonts: identical to oddpig.io.vn (Archivo / IBM Plex Mono / Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            bg: '#060606',
+            surface: '#0b0b0b',
+            surface2: '#121212',
+            surface3: '#181818',
+            ink: '#f4f4f4',
+            inkMuted: '#8e8e93',
+            inkDim: '#48484a',
+            neon: '#c9f24b',
+            greenT: '#4ade80',
+            cyanG: '#38bdf8',
+            purpleG: '#c084fc',
+            amberG: '#fbbf24',
+            orangeA: '#fb923c',
+            redA: '#f87171',
+            borderSubtle: 'rgba(255,255,255,0.08)',
+            borderStrong: 'rgba(255,255,255,0.20)'
+          },
+          fontFamily: {
+            display: ['Archivo', 'sans-serif'],
+            mono: ['"IBM Plex Mono"', 'monospace'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+  <style>
+    :root {
+      --font-display: 'Archivo', sans-serif;
+      --font-mono: 'IBM Plex Mono', monospace;
+      --font-body: 'Inter', sans-serif;
+      --bg: #060606; --surface: #0b0b0b; --surface2: #121212; --surface3: #181818;
+      --ink: #f4f4f4; --ink-muted: #8e8e93; --ink-dim: #48484a;
+      --neon: #c9f24b; --green: #4ade80; --orange: #fb923c; --amber: #fbbf24;
+      --border: rgba(255,255,255,0.08); --border-hover: rgba(255,255,255,0.22);
+      color-scheme: dark;
+    }
+    * { -webkit-tap-highlight-color: transparent; }
+    body { background: var(--bg); font-family: var(--font-body); }
+    ::selection { background: var(--neon); color: #000; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #26262a; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3a3a40; }
+
+    .font-display { font-family: var(--font-display); }
+    .font-mono2 { font-family: var(--font-mono); }
+
+    .grain::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: .04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    .card { background: var(--surface); border: 1px solid var(--border); }
+    .card:hover { border-color: var(--border-hover); }
+    .glow-neon { box-shadow: 0 0 24px rgba(201,242,75,.14); }
+    .checkbox-done { background: var(--neon); border-color: var(--neon); }
+
+    input[type="date"], input[type="time"], input[type="text"], input[type="password"], textarea, select { color-scheme: dark; }
+    .task-row { transition: border-color .2s ease; }
+    .strike-done .task-title { text-decoration: line-through; color: var(--ink-dim); }
+
+    .toast { animation: toastIn .25s ease; }
+    @keyframes toastIn { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+    .modal-backdrop { background: rgba(0,0,0,.72); backdrop-filter: blur(6px); }
+    @keyframes popDone { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
+    .pop { animation: popDone .3s ease; }
+    .tab-active { color: var(--neon); border-color: var(--neon); }
+  </style>
+</head>
+
+<body class="bg-bg text-ink min-h-screen grain antialiased">
+
+  <!-- ============ HEADER ============ -->
+  <header class="sticky top-0 z-40 border-b border-borderSubtle bg-bg/85 backdrop-blur-xl">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-9 h-9 rounded-lg bg-neon flex items-center justify-center shrink-0">
+          <i data-lucide="list-checks" class="w-5 h-5 text-black"></i>
+        </div>
+        <div class="min-w-0">
+          <h1 class="font-display font-extrabold tracking-tight text-lg leading-none truncate">TASK<span class="text-neon">MASTER</span></h1>
+          <p class="font-mono2 text-[10px] text-inkMuted uppercase tracking-widest mt-0.5" data-i18n="tagline">Điều phối công việc hằng ngày</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg card" title="Streak">
+          <i data-lucide="flame" class="w-4 h-4 text-orangeA"></i>
+          <span class="font-mono2 text-sm font-semibold" id="streakHeader">0</span>
+          <span class="text-[10px] text-inkMuted uppercase" data-i18n="streakUnit">ngày streak</span>
+        </div>
+        <!-- Cloud status -->
+        <button id="cloudBadge" onclick="openLogin()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg card text-xs font-mono2 hover:border-borderStrong">
+          <i data-lucide="cloud-off" class="w-3.5 h-3.5 text-inkDim" id="cloudIcon"></i>
+          <span id="cloudLabel" class="text-inkMuted">ĐĂNG NHẬP</span>
+        </button>
+        <!-- Language toggle -->
+        <div class="flex rounded-lg card overflow-hidden">
+          <button id="btnVi" onclick="setLang('vi')" class="px-2 py-1.5 font-display text-xs font-bold">VI</button>
+          <button id="btnEn" onclick="setLang('en')" class="px-2 py-1.5 font-display text-xs font-bold text-inkMuted">EN</button>
+        </div>
+        <button onclick="openSettings()" class="w-9 h-9 rounded-lg card flex items-center justify-center hover:border-borderStrong" data-i18n-title="settings">
+          <i data-lucide="settings" class="w-4 h-4 text-inkMuted"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 pb-28 pt-6">
+
+    <!-- ============ QUICK ADD ============ -->
+    <section class="card rounded-2xl p-4 mb-6 glow-neon">
+      <div class="flex flex-col md:flex-row gap-3">
+        <div class="flex-1 flex items-center gap-3">
+          <i data-lucide="zap" class="w-5 h-5 text-neon shrink-0"></i>
+          <input id="quickInput" type="text" data-i18n-placeholder="quickPlaceholder" placeholder="Nhập công việc cần giải quyết… (Enter để thêm, có thể kèm #thẻ ! ưu tiên hạn 25/9)"
+            class="flex-1 bg-transparent outline-none text-base placeholder:text-inkDim" autocomplete="off">
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <select id="quickPriority" class="bg-surface2 border border-borderSubtle rounded-lg px-2.5 py-2 text-xs font-mono2 outline-none">
+            <option value="urgent">🔴 <span data-i18n="p_urgent">Khẩn cấp</span></option>
+            <option value="high">🟠 <span data-i18n="p_high">Quan trọng</span></option>
+            <option value="medium" selected>🟡 <span data-i18n="p_medium">Bình thường</span></option>
+            <option value="low">🟢 <span data-i18n="p_low">Nhẹ</span></option>
+          </select>
+          <input id="quickDate" type="date" class="bg-surface2 border border-borderSubtle rounded-lg px-2.5 py-2 text-xs font-mono2 outline-none" title="Deadline">
+          <button onclick="quickAdd()" class="px-5 py-2 rounded-lg bg-neon text-black font-display font-bold text-sm hover:brightness-110 active:scale-95 transition">
+            <span data-i18n="add">THÊM</span>
+          </button>
+        </div>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-1.5 text-[10px] font-mono2 text-inkDim">
+        <span data-i18n="tipsLabel">Mẹo:</span>
+        <span class="px-1.5 py-0.5 rounded bg-surface2" data-i18n="tips1">"Nộp báo cáo #work !khẩn cấp hạn 25/9 lúc 15h30"</span>
+        <span class="px-1.5 py-0.5 rounded bg-surface2" data-i18n="tips2">hạn: hôm nay / ngày mai / t2..cn / 25/9 / 3 ngày tới</span>
+        <span data-i18n="tips3">— thẻ #tu-khoa · ưu tiên !khẩn cấp</span>
+      </div>
+    </section>
+
+    <!-- ============ STATS ============ -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6" id="statsRow"></section>
+
+    <!-- ============ DATE TABS ============ -->
+    <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1">
+      <button data-tab="all" class="tab-btn shrink-0 px-4 py-2 rounded-lg border border-borderSubtle font-display font-bold text-sm" data-i18n="tabAll">TẤT CẢ</button>
+      <button data-tab="today" class="tab-btn shrink-0 px-4 py-2 rounded-lg border border-borderSubtle font-display text-sm text-inkMuted" data-i18n="tabToday">HÔM NAY</button>
+      <button data-tab="upcoming" class="tab-btn shrink-0 px-4 py-2 rounded-lg border border-borderSubtle font-display text-sm text-inkMuted" data-i18n="tabUpcoming">SẮP TỚI</button>
+      <button data-tab="overdue" class="tab-btn shrink-0 px-4 py-2 rounded-lg border border-borderSubtle font-display text-sm text-inkMuted" data-i18n="tabOverdue">TRỄ HẠN</button>
+      <button data-tab="done" class="tab-btn shrink-0 px-4 py-2 rounded-lg border border-borderSubtle font-display text-sm text-inkMuted" data-i18n="tabDone">HOÀN THÀNH</button>
+      <div class="flex-1"></div>
+      <div class="relative shrink-0">
+        <i data-lucide="search" class="w-4 h-4 text-inkDim absolute left-2.5 top-1/2 -translate-y-1/2"></i>
+        <input id="searchInput" type="text" data-i18n-placeholder="search" placeholder="Tìm…" oninput="render()"
+          class="bg-surface2 border border-borderSubtle rounded-lg pl-8 pr-3 py-2 text-xs font-mono2 outline-none w-32 focus:w-44 transition-all">
+      </div>
+    </div>
+
+    <!-- ============ TASK LIST ============ -->
+    <div id="taskList" class="space-y-2"></div>
+    <div id="emptyState" class="hidden text-center py-20">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-surface2 border border-borderSubtle flex items-center justify-center mb-4">
+        <i data-lucide="feather" class="w-7 h-7 text-inkDim"></i>
+      </div>
+      <p class="font-display font-bold text-lg text-inkMuted" data-i18n="emptyTitle">Nhàn như cách sắp xếp</p>
+      <p class="text-sm text-inkDim mt-1" data-i18n="emptySub">Thêm công việc mới ở ô phía trên để bắt đầu.</p>
+    </div>
+  </main>
+
+  <!-- ============ AUTH MODAL ============ -->
+  <div id="loginModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-end md:items-center justify-center p-0 md:p-4" onclick="if(event.target===this)closeLogin()">
+    <div class="w-full md:max-w-md bg-surface border border-borderSubtle rounded-t-2xl md:rounded-2xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display font-extrabold text-lg" data-i18n="authTitle">ĐĂNG NHẬP CLOUD</h3>
+        <button onclick="closeLogin()" class="w-8 h-8 rounded-lg card flex items-center justify-center"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="flex rounded-lg card overflow-hidden mb-4">
+        <button id="tabLogin" onclick="authTab('login')" class="flex-1 py-2 font-display text-sm font-bold tab-active" data-i18n="authTabLogin">ĐĂNG NHẬP</button>
+        <button id="tabSignup" onclick="authTab('signup')" class="flex-1 py-2 font-display text-sm text-inkMuted" data-i18n="authTabSignup">ĐĂNG KÝ</button>
+      </div>
+      <input id="authEmail" type="email" data-i18n-placeholder="authEmail" placeholder="Email" class="w-full bg-surface2 border border-borderSubtle rounded-lg px-3 py-2.5 text-sm outline-none focus:border-neon mb-3">
+      <input id="authPass" type="password" data-i18n-placeholder="authPass" placeholder="Mật khẩu (≥ 6 ký tự)" class="w-full bg-surface2 border border-borderSubtle rounded-lg px-3 py-2.5 text-sm outline-none focus:border-neon mb-3">
+      <div id="authSignupHint" class="hidden text-[11px] text-inkDim mb-3 font-mono2" data-i18n="authSignupHint">Tài khoản dùng chung hệ thống với Tracking Hub (Supabase).</div>
+      <button id="authBtn" onclick="doAuth()" class="w-full py-2.5 rounded-lg bg-neon text-black font-display font-bold text-sm hover:brightness-110 mb-2" data-i18n="authBtnLogin">ĐĂNG NHẬP</button>
+      <button onclick="doSignOut()" id="authSignOutBtn" class="hidden w-full py-2.5 rounded-lg card font-mono2 text-sm text-inkMuted" data-i18n="authSignOut">Đăng xuất khỏi cloud</button>
+      <p class="text-[10px] font-mono2 text-inkDim mt-3 text-center" data-i18n="authNote">Dùng tài khoản CNGPHM — cùng hệ thống Supabase với Tracking Hub.</p>
+    </div>
+  </div>
+
+  <!-- ============ TASK EDIT MODAL ============ -->
+  <div id="editModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-end md:items-center justify-center p-0 md:p-4">
+    <div class="w-full md:max-w-lg bg-surface border border-borderSubtle rounded-t-2xl md:rounded-2xl p-5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display font-extrabold text-lg" data-i18n="editTitle">SỬA CÔNG VIỆC</h3>
+        <button onclick="closeEdit()" class="w-8 h-8 rounded-lg card flex items-center justify-center"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <input type="hidden" id="editId">
+      <label class="block text-[10px] font-mono2 uppercase tracking-widest text-inkMuted mb-1" data-i18n="fTitle">Tiêu đề</label>
+      <input id="editTitle" type="text" class="w-full bg-surface2 border border-borderSubtle rounded-lg px-3 py-2.5 text-sm outline-none focus:border-neon mb-3">
+      <label class="block text-[10px] font-mono2 uppercase tracking-widest text-inkMuted mb-1" data-i18n="fNotes">Ghi chú / Mô tả</label>
+      <textarea id="editNotes" rows="3" class="w-full bg-surface2 border border-borderSubtle rounded-lg px-3 py-2.5 text-sm outline-none focus:border-neon mb-3 resize-y"></textarea>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="block text-[10px] font-mono2 uppercase tracking-widest text-inkMuted mb-1" data-i18n="fDeadline">Hạn chót</label>
+          <input id="editDate" type="date" class="w-full bg-surface2 border border-borderSubtle rounded-lg px-3 py-2.5 text-sm outline-none">
+        </div>
+        <div>
+          <label class="block text-[10px] font-mono2 uppercase tracking-widest text-inkMuted mb-1" data-i18n="fTime">Giờ</label>
+          <input id="editTime" type="time" class="w-full bg-surface2 border border-borderSubtle rounded-lg px-3 py-2.5 text-sm outline-none">
+        </div>
+        <div>
+          <label class="block text-[10px] font-mono2 uppercase tracking-widest text-inkMuted mb-1" data-i18n="fPriority">Ưu tiên</label>
+          <select id="editPriority" class="w-full bg-surface2 border border-borderSubtle rounded-lg px-3 py-2.5 text-sm outline-none">
+            <option value="urgent">🔴 <span data-i18n="p_urgent">Khẩn cấp</span></option>
+            <option value="high">🟠 <span data-i18n="p_high">Quan trọng</span></option>
+            <option value="medium">🟡 <span data-i18n="p_medium">Bình thường</span></option>
+            <option value="low">🟢 <span data-i18n="p_low">Nhẹ</span></option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-mono2 uppercase tracking-widest text-inkMuted mb-1" data-i18n="fTags">Thẻ (phân loại)</label>
+          <input id="editTags" type="text" placeholder="work, personal" class="w-full bg-surface2 border border-borderSubtle rounded-lg px-3 py-2.5 text-sm outline-none">
+        </div>
+      </div>
+      <label class="flex items-center gap-2 text-sm mb-4 cursor-pointer">
+        <input id="editDaily" type="checkbox" class="accent-[#c9f24b] w-4 h-4">
+        <span><span data-i18n="fDaily">Lặp lại hằng ngày</span> <span class="text-inkDim text-xs" data-i18n="fDailySub">(tự tạo task mới cho ngày hôm sau khi hoàn thành)</span></span>
+      </label>
+      <div class="flex gap-2">
+        <button onclick="saveEdit()" class="flex-1 py-2.5 rounded-lg bg-neon text-black font-display font-bold text-sm hover:brightness-110" data-i18n="save">LƯU</button>
+        <button onclick="deleteCurrent()" class="px-4 py-2.5 rounded-lg border border-redA/40 text-redA text-sm font-mono2 hover:bg-redA/10"><i data-lucide="trash-2" class="w-4 h-4 inline -mt-0.5"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SETTINGS MODAL ============ -->
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 modal-backdrop flex items-end md:items-center justify-center p-0 md:p-4" onclick="if(event.target===this)closeSettings()">
+    <div class="w-full md:max-w-md bg-surface border border-borderSubtle rounded-t-2xl md:rounded-2xl p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-display font-extrabold text-lg" data-i18n="dataTitle">DỮ LIỆU</h3>
+        <button onclick="closeSettings()" class="w-8 h-8 rounded-lg card flex items-center justify-center"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div class="space-y-2">
+        <button onclick="syncNow()" id="btnSyncNow" class="w-full py-2.5 rounded-lg bg-neon/10 border border-neon/40 text-neon font-mono2 text-sm flex items-center gap-2 px-3 hover:bg-neon/20"><i data-lucide="refresh-cw" class="w-4 h-4"></i> <span data-i18n="syncNow">Đồng bộ cloud ngay</span></button>
+        <button onclick="exportData()" class="w-full py-2.5 rounded-lg card font-mono2 text-sm flex items-center gap-2 px-3 hover:border-borderStrong"><i data-lucide="download" class="w-4 h-4 text-neon"></i> <span data-i18n="export">Xuất file sao lưu (.json)</span></button>
+        <label class="w-full py-2.5 rounded-lg card font-mono2 text-sm flex items-center gap-2 px-3 hover:border-borderStrong cursor-pointer">
+          <i data-lucide="upload" class="w-4 h-4 text-cyanG"></i> <span data-i18n="import">Nhập từ file sao lưu</span>
+          <input type="file" accept=".json" class="hidden" onchange="importData(event)">
+        </label>
+        <button onclick="clearDone()" class="w-full py-2.5 rounded-lg card font-mono2 text-sm flex items-center gap-2 px-3 hover:border-borderStrong"><i data-lucide="broom" class="w-4 h-4 text-amberG"></i> <span data-i18n="clearDone">Dọn các task đã hoàn thành</span></button>
+        <div class="pt-2 text-[10px] font-mono2 text-inkDim text-center"><span data-i18n="dataNote">Chưa đăng nhập: dữ liệu lưu cục bộ trong trình duyệt (localStorage). Đăng nhập để đồng bộ đa thiết bị.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastBox" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[60] space-y-2 pointer-events-none"></div>
+
+<script>
+/* ================================================================
+   TASK MASTER — CNGPHM
+   · Font hệ thống đồng bộ oddpig.io.vn: Archivo / IBM Plex Mono / Inter
+   · Song ngữ VI-EN · Supabase auth + cloud sync (chung hệ thống Tracking Hub)
+   · Offline-first: luôn ghi localStorage, có đăng nhập thì push/pull cloud
+   ================================================================ */
+const LS_KEY = 'taskmaster_v1';
+const LS_LANG = 'taskmaster_lang';
+const LS_PENDING = 'taskmaster_pending';
+
+const SUPABASE_CONFIG = {
+  url: 'https://kksnzaswotrgkrxxwfcm.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtrc256YXN3b3RyZ2tyeHh3ZmNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0ODY3MjEsImV4cCI6MjEwNTA2MjcyMX0.cRPmJ4i9ivFglWCuZy7YG_anScqCiKVJNp8JDsBNwEo',
+  TABLE: 'taskmaster_tasks'
+};
+
+const PRIORITY = {
+  urgent: { icon: 'flame',        bg: 'bg-redA/10',    text: 'text-redA',    ring: 'border-redA/50',    weight: 0 },
+  high:   { icon: 'triangle-alert', bg: 'bg-orangeA/10', text: 'text-orangeA', ring: 'border-orangeA/50', weight: 1 },
+  medium: { icon: 'circle',       bg: 'bg-amberG/10',  text: 'text-amberG',  ring: 'border-amberG/50',  weight: 2 },
+  low:    { icon: 'leaf',         bg: 'bg-greenT/10',  text: 'text-greenT',  ring: 'border-greenT/50',  weight: 3 },
+};
+
+/* ---------------- i18n ---------------- */
+const I18N = {
+  vi: {
+    tagline: 'Điều phối công việc hằng ngày', streakUnit: 'ngày streak',
+    signIn: 'ĐĂNG NHẬP', signedIn: 'ĐÃ KẾT NỐI', offline: 'MÁY NÀY',
+    quickPlaceholder: 'Nhập công việc cần giải quyết… (Enter để thêm, có thể kèm #thẻ ! ưu tiên hạn 25/9)',
+    p_urgent: 'Khẩn cấp', p_high: 'Quan trọng', p_medium: 'Bình thường', p_low: 'Nhẹ',
+    add: 'THÊM', tipsLabel: 'Mẹo:',
+    tips1: '"Nộp báo cáo #work !khẩn cấp hạn 25/9 lúc 15h30"',
+    tips2: 'hạn: hôm nay / ngày mai / t2..cn / 25/9 / 3 ngày tới',
+    tips3: '— thẻ #tu-khoa · ưu tiên !khẩn cấp',
+    tabToday: 'HÔM NAY', tabUpcoming: 'SẮP TỚI', tabOverdue: 'TRỄ HẠN', tabDone: 'HOÀN THÀNH', tabAll: 'TẤT CẢ',
+    search: 'Tìm…', emptyTitle: 'Nhàn như cách sắp xếp', emptySub: 'Thêm công việc mới ở ô phía trên để bắt đầu.',
+    sToday: 'HÔM NAY', sOpen: 'ĐANG MỞ', sOverdue: 'TRỄ HẠN', sStreak: 'STREAK',
+    sSubToday: '% hoàn thành', sSubOpen: 'công việc chưa xong', sSubOverdue: 'cần xử lý ngay', sSubOverdueOk: 'không có', sSubStreak: 'kiên trì giải quyết',
+    dOverdue: 'Quá hạn {n} ngày', dToday: 'Hạn hôm nay', dOne: 'Còn 1 ngày', dN: 'Còn {n} ngày',
+    dl: 'hạn', today: 'hôm nay', tomorrow: 'ngày mai', thisweek: 'tuần này', nextweek: 'tuần sau', dayUnit: 'ngày',
+    editTitle: 'SỬA CÔNG VIỆC', fTitle: 'Tiêu đề', fNotes: 'Ghi chú / Mô tả', fDeadline: 'Hạn chót', fTime: 'Giờ', fPriority: 'Ưu tiên', fTags: 'Thẻ (phân loại)',
+    fDaily: 'Lặp lại hằng ngày', fDailySub: '(tự tạo task mới cho ngày hôm sau khi hoàn thành)',
+    save: 'LƯU', authTitle: 'ĐĂNG NHẬP CLOUD', authTabLogin: 'ĐĂNG NHẬP', authTabSignup: 'ĐĂNG KÝ',
+    authEmail: 'Email', authPass: 'Mật khẩu (≥ 6 ký tự)', authBtnLogin: 'ĐĂNG NHẬP', authBtnSignup: 'ĐĂNG KÝ TÀI KHOẢN',
+    authSignupHint: 'Tài khoản dùng chung hệ thống với Tracking Hub (Supabase).',
+    authSignOut: 'Đăng xuất khỏi cloud', authNote: 'Dùng tài khoản CNGPHM — cùng hệ thống Supabase với Tracking Hub.',
+    dataTitle: 'DỮ LIỆU', syncNow: 'Đồng bộ cloud ngay', export: 'Xuất file sao lưu (.json)',
+    import: 'Nhập từ file sao lưu', clearDone: 'Dọn các task đã hoàn thành', settings: 'Sao lưu & Cài đặt',
+    dataNote: 'Chưa đăng nhập: dữ liệu lưu cục bộ trong trình duyệt (localStorage). Đăng nhập để đồng bộ đa thiết bị.',
+    tAdded: 'Đã thêm:', tSaved: 'Đã lưu', tDone: 'Xong! 🎯', tDeleted: 'Đã xóa', tEmptyInput: 'Nhập công việc trước đã!',
+    tNoTitle: 'Không tìm thấy tiêu đề hợp lệ', tRecurring: 'Task lặp lại → đã tạo cho',
+    tExported: 'Đã xuất sao lưu', tImported: 'Đã nhập dữ liệu', tInvalidFile: 'File không hợp lệ',
+    tCleared: 'Đã dọn {n} task', tNoDone: 'Không có task đã hoàn thành', tNeedTitle: 'Tiêu đề không được để trống',
+    tSignedIn: 'Đã đăng nhập cloud ✓', tSignedUp: 'Tài khoản đã tạo ✓ Task của bạn sẽ đồng bộ từ bây giờ.',
+    tSignedOut: 'Đã đăng xuất (dữ liệu vẫn lưu trên máy này)', tAuthFail: 'Đăng nhập thất bại', tEmailNeeded: 'Nhập email và mật khẩu',
+    tPassShort: 'Mật khẩu tối thiểu 6 ký tự', tCloudSaved: '☁ Đã đồng bộ lên cloud', tCloudErr: 'Lỗi cloud — dữ liệu vẫn lưu trên máy này',
+    tPull: 'Đã tải {n} task từ cloud', tNoTable: 'Supabase chưa đủ cột/bảng taskmaster_tasks. Chạy taskmaster-supabase-setup.sql trong SQL Editor rồi bấm Đồng bộ lại.',
+    tSyncDone: 'Đồng bộ xong ✓', tOffline: 'Chưa đăng nhập — không thể đồng bộ cloud',
+    cfDelTitle: 'Xóa task?', cfDelMsg: 'Hành động này không thể hoàn tác.', cfClearTitle: 'Dọn task đã hoàn thành?', cfClearMsg: '{n} task sẽ bị xóa.',
+    cfImportTitle: 'Nhập file sao lưu?', cfImportMsg: 'Dữ liệu hiện tại sẽ bị THAY THẾ bởi {n} task trong file.',
+    cfOverwriteTitle: 'Gộp dữ liệu cloud & máy này?', cfOverwriteMsg: 'Bạn có {local} task trên máy này và {cloud} task trên cloud. Gộp tất cả? (Bỏ qua = tải từ cloud đè máy này)',
+    yes: 'Đồng ý', no: 'Hủy', cancel: 'Hủy', ok: 'OK', cloud: 'cloud', local: 'trên máy',
+  },
+  en: {
+    tagline: 'Daily work orchestration', streakUnit: 'day streak',
+    signIn: 'SIGN IN', signedIn: 'CONNECTED', offline: 'THIS DEVICE',
+    quickPlaceholder: 'Type a task to solve… (Enter to add; supports #tag !priority due 25/9)',
+    p_urgent: 'Urgent', p_high: 'Important', p_medium: 'Normal', p_low: 'Low',
+    add: 'ADD', tipsLabel: 'Tips:',
+    tips1: '"Submit report #work !urgent due 25/9 at 3:30pm"',
+    tips2: 'due: today / tomorrow / mon..sun / 25/9 / in 3 days',
+    tips3: '— tag #keyword · priority !urgent',
+    tabToday: 'TODAY', tabUpcoming: 'UPCOMING', tabOverdue: 'OVERDUE', tabDone: 'DONE', tabAll: 'ALL',
+    search: 'Search…', emptyTitle: 'Clear skies ahead', emptySub: 'Add a task in the box above to get started.',
+    sToday: 'TODAY', sOpen: 'OPEN', sOverdue: 'OVERDUE', sStreak: 'STREAK',
+    sSubToday: '% done', sSubOpen: 'tasks not finished', sSubOverdue: 'handle now', sSubOverdueOk: 'none', sSubStreak: 'days of consistency',
+    dOverdue: 'Overdue {n} d', dToday: 'Due today', dOne: '1 day left', dN: '{n} days left',
+    dl: 'due', today: 'today', tomorrow: 'tomorrow', thisweek: 'this week', nextweek: 'next week', dayUnit: 'd',
+    editTitle: 'EDIT TASK', fTitle: 'Title', fNotes: 'Notes / Description', fDeadline: 'Deadline', fTime: 'Time', fPriority: 'Priority', fTags: 'Tags',
+    fDaily: 'Repeat daily', fDailySub: '(spawns a new task for the next day when completed)',
+    save: 'SAVE', authTitle: 'CLOUD SIGN IN', authTabLogin: 'SIGN IN', authTabSignup: 'SIGN UP',
+    authEmail: 'Email', authPass: 'Password (≥ 6 chars)', authBtnLogin: 'SIGN IN', authBtnSignup: 'CREATE ACCOUNT',
+    authSignupHint: 'Same account system as Tracking Hub (Supabase).',
+    authSignOut: 'Sign out of cloud', authNote: 'Use your CNGPHM account — same Supabase system as Tracking Hub.',
+    dataTitle: 'DATA', syncNow: 'Sync cloud now', export: 'Export backup (.json)',
+    import: 'Import from backup', clearDone: 'Clear completed tasks', settings: 'Backup & Settings',
+    dataNote: 'Not signed in: data stays local in this browser (localStorage). Sign in to sync across devices.',
+    tAdded: 'Added:', tSaved: 'Saved', tDone: 'Done! 🎯', tDeleted: 'Deleted', tEmptyInput: 'Type a task first!',
+    tNoTitle: 'No valid title found', tRecurring: 'Recurring task → created for',
+    tExported: 'Backup exported', tImported: 'Data imported', tInvalidFile: 'Invalid file',
+    tCleared: 'Cleared {n} tasks', tNoDone: 'No completed tasks', tNeedTitle: 'Title cannot be empty',
+    tSignedIn: 'Signed in to cloud ✓', tSignedUp: 'Account created ✓ Your tasks will sync from now on.',
+    tSignedOut: 'Signed out (data remains on this device)', tAuthFail: 'Sign in failed', tEmailNeeded: 'Enter email and password',
+    tPassShort: 'Password must be at least 6 characters', tCloudSaved: '☁ Synced to cloud', tCloudErr: 'Cloud error — data saved locally',
+    tPull: 'Loaded {n} tasks from cloud', tNoTable: 'Supabase table/columns missing for taskmaster_tasks. Run taskmaster-supabase-setup.sql in SQL Editor, then Sync again.',
+    tSyncDone: 'Sync complete ✓', tOffline: 'Not signed in — cloud sync unavailable',
+    cfDelTitle: 'Delete task?', cfDelMsg: 'This cannot be undone.', cfClearTitle: 'Clear completed tasks?', cfClearMsg: '{n} tasks will be removed.',
+    cfImportTitle: 'Import backup?', cfImportMsg: 'Current data will be REPLACED by {n} tasks from the file.',
+    cfOverwriteTitle: 'Merge cloud & local data?', cfOverwriteMsg: 'You have {local} tasks on this device and {cloud} in the cloud. Merge all? (Cancel = pull cloud over local)',
+    yes: 'Yes', no: 'Cancel', cancel: 'Cancel', ok: 'OK', cloud: 'cloud', local: 'this device',
+  },
+};
+let LANG = localStorage.getItem(LS_LANG) || 'vi';
+const t = (key, vars) => {
+  let s = (I18N[LANG] && I18N[LANG][key]) || I18N.vi[key] || key;
+  if (vars) for (const k in vars) s = s.replace(new RegExp('\\{' + k + '\\}', 'g'), vars[k]);
+  return s;
+};
+const priLabel = (p) => t('p_' + p);
+
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
+  document.documentElement.lang = LANG;
+  document.getElementById('btnVi').className = LANG === 'vi' ? 'px-2 py-1.5 font-display text-xs font-bold tab-active bg-surface2' : 'px-2 py-1.5 font-display text-xs font-bold text-inkMuted';
+  document.getElementById('btnEn').className = LANG === 'en' ? 'px-2 py-1.5 font-display text-xs font-bold tab-active bg-surface2' : 'px-2 py-1.5 font-display text-xs font-bold text-inkMuted';
+  const btn = document.getElementById('authBtn');
+  if (btn && !session) btn.textContent = t(authMode === 'login' ? 'authBtnLogin' : 'authBtnSignup');
+}
+function setLang(l) {
+  LANG = l; localStorage.setItem(LS_LANG, l);
+  applyI18n(); render();
+}
+
+/* ---------------- core helpers ---------------- */
+let state = load();
+let currentTab = 'all';
+let session = null;
+let sb = null;
+let authMode = 'login';
+let cloudOk = true;
+
+function load() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) { const d = JSON.parse(raw); if (Array.isArray(d.tasks)) { d.tasks.forEach(migrateTask); return d; } }
+  } catch (e) {}
+  return { tasks: [], streak: { count: 0, lastDate: null } };
+}
+function migrateTask(tk) {
+  if (!tk.id || tk.id.length < 20) tk.id = uuidLike();
+  tk.deadline_at = normalizeDeadline(tk.deadline_at, tk.date, tk.time);
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+function uuidLike() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); });
+}
+function normalizeDeadline(existing, date, time) {
+  if (existing && /^\d{4}-\d{2}-\d{2}T/.test(existing)) return existing;
+  if (!date) return null;
+  return `${date}T${time && /^\d{2}:\d{2}$/.test(time) ? time : '23:59'}:00`;
+}
+const todayStr = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); };
+function dateStr(d) { return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function fmtDateVN(s) { if (!s) return ''; const [y, m, d] = s.split('-'); return LANG === 'vi' ? `${d}/${m}/${y}` : `${m}/${d}/${y}`; }
+function dlDate(task) { return task.deadline_at ? task.deadline_at.slice(0, 10) : todayStr(); }
+function dlTime(task) { return task.deadline_at ? task.deadline_at.slice(11, 16) : ''; }
+function addDaysDate(str, n) { const [y, m, d] = str.split('-').map(Number); return dateStr(new Date(y, m - 1, d + n)); }
+function dayDiff(fromStr, toStr) {
+  const [fy, fm, fd] = fromStr.split('-').map(Number);
+  const [ty, tm, td] = toStr.split('-').map(Number);
+  return Math.round((Date.UTC(ty, tm - 1, td) - Date.UTC(fy, fm - 1, fd)) / 86400000);
+}
+
+/* ---------------- deadline quick-add parser ---------------- */
+function fold(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim(); }
+function addDays(n) { const t2 = new Date(); return dateStr(new Date(t2.getFullYear(), t2.getMonth(), t2.getDate() + n)); }
+const WD_MAP = { '2': 1, '3': 2, '4': 3, '5': 4, '6': 5, '7': 6, '0': 0, 'cn': 0, 'chu nhat': 0 };
+const EN_WD = { 'mon': 1, 'tue': 2, 'tues': 2, 'wed': 3, 'weds': 3, 'thu': 4, 'thur': 5, 'thurs': 5, 'fri': 5, 'sat': 6, 'sun': 0 };
+function resolveDeadlineDate(raw) {
+  const e = fold(raw);
+  if (!e) return null;
+  if (/^(hom nay|today|hn)$/.test(e)) return todayStr();
+  if (/^(ngay mai|tomorrow|nm)$/.test(e)) return addDays(1);
+  if (/^(tuan sau|next week)$/.test(e)) return addDays(7);
+  if (e === 'this week' || e === 'tuan nay') { const t2 = new Date(); return addDays((7 - t2.getDay()) % 7 || 7); }
+  let m = e.match(/^(\d+) ngay toi$/) || e.match(/^in (\d+) days?$/);
+  if (m) return addDays(+m[1]);
+  m = e.match(/^(\d{1,2})[\/.](\d{1,2})(?:[\/.](\d{2,4}))?$/);
+  if (m) {
+    const t2 = new Date();
+    let day = +m[1], mon = +m[2];
+    if (mon < 1 || mon > 12 || day < 1 || day > 31) return null;
+    let year = m[3] ? +m[3] : t2.getFullYear();
+    if (year < 100) year += 2000;
+    let d = new Date(year, mon - 1, day);
+    if (!m[3] && d < new Date(t2.getFullYear(), t2.getMonth(), t2.getDate())) d = new Date(year + 1, mon - 1, day);
+    return dateStr(d);
+  }
+  m = e.match(/^(?:thu|t)?(2|3|4|5|6|7|0|cn|chu nhat)$/);
+  if (m) {
+    const wd = WD_MAP[m[1]];
+    if (wd === undefined) return null;
+    const t2 = new Date();
+    const diff = (wd - t2.getDay() + 7) % 7 || 7;
+    return addDays(diff);
+  }
+  m = e.match(/^(?:on\s+)?(mon|tue|tues|wed|weds|thu|thur|thurs|fri|sat|sun)$/);
+  if (m) {
+    const t2 = new Date();
+    const diff = (EN_WD[m[1]] - t2.getDay() + 7) % 7 || 7;
+    return addDays(diff);
+  }
+  return null;
+}
+const DL_KEYWORDS = /(?:^|\s)(?:han:|hạn:|han|hạn|deadline|due(?:\s+date)?|den:|dến:|den|đến|to:)\s+/i;
+function extractDeadline(text) {
+  let date = null;
+  const m = DL_KEYWORDS.exec(text);
+  if (m) {
+    const after = text.slice(m.index + m[0].length);
+    const words = after.split(/\s+/).slice(0, 3);
+    for (let n = words.length; n >= 1; n--) {
+      const d = resolveDeadlineDate(words.slice(0, n).join(' '));
+      if (d) {
+        date = d;
+        text = (text.slice(0, m.index + 1) + after.slice(words.slice(0, n).join(' ').length)).replace(/\s+/g, ' ').trim();
+        break;
+      }
+    }
+  }
+  return { text, date };
+}
+function extractTime(text) {
+  let time = null;
+  text = text.replace(/(?:^|\s)(?:luc:|lúc:|luc|lúc|vao:|vào:|vao|vào|at|gio:|giờ:|gio|giờ)\s*(\d{1,2})[:h.](\d{2})?\b/iu, (full, h, mm) => {
+    time = String(Math.min(23, +h)).padStart(2, '0') + ':' + (mm || '00');
+    return ' ';
+  });
+  if (!time) {
+    text = text.replace(/(?:^|\s)(\d{1,2})[:h](\d{2})?\b(?=\s|$)/u, (full, h, mm) => {
+      const hh = +h;
+      if (hh > 23 || (mm && +mm > 59)) return full;
+      time = String(hh).padStart(2, '0') + ':' + (mm || '00');
+      return ' ';
+    });
+  }
+  return { text, time };
+}
+function parseQuick(text) {
+  let tags = [];
+  let priority = null;
+  text = text.replace(/#([\p{L}\p{N}_-]+)/gu, (_, tg) => { tags.push(tg.toLowerCase()); return ''; });
+  const pMap = { 'khan cap': 'urgent', 'khancap': 'urgent', 'quan trong': 'high', 'binh thuong': 'medium', 'nhe': 'low', 'low': 'low', 'urgent': 'urgent', 'high': 'high', 'medium': 'medium', 'normal': 'medium' };
+  text = text.replace(/!(?:k\p{L}+n\s*c\p{L}+p|qu\p{L}+n\s*tr\p{L}+ng|binh\s*th\p{L}+ng|nh[ẹe]|nhe|urgent|high|medium|normal|low)(?=\s|$)/giu, (full) => {
+    const key = fold(full.slice(1));
+    if (pMap[key]) priority = pMap[key];
+    return '';
+  });
+  const dl = extractDeadline(text); text = dl.text;
+  const tm = extractTime(text); text = tm.text;
+  return { title: text.replace(/\s+/g, ' ').trim(), tags, priority, date: dl.date, time: tm.time };
+}
+
+/* ---------------- CRUD ---------------- */
+function buildTask(parsed, defaultDate) {
+  const date = parsed.date || defaultDate;
+  return {
+    id: uuidLike(),
+    title: parsed.title,
+    notes: '',
+    date,
+    time: parsed.time || '',
+    deadline_at: `${date}T${(parsed.time && /^\d{2}:\d{2}$/.test(parsed.time)) ? parsed.time : '23:59'}:00`,
+    priority: parsed.priority || document.getElementById('quickPriority').value,
+    tags: parsed.tags,
+    daily: false,
+    done: false,
+    sync: 'pending',
+    created_at: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    doneAt: null,
+  };
+}
+function quickAdd() {
+  const raw = document.getElementById('quickInput').value.trim();
+  if (!raw) { toast(t('tEmptyInput'), 'warn'); return; }
+  const parsed = parseQuick(raw);
+  if (!parsed.title) { toast(t('tNoTitle'), 'warn'); return; }
+  const task = buildTask(parsed, document.getElementById('quickDate').value || todayStr());
+  state.tasks.push(task);
+  persist(task);
+  document.getElementById('quickInput').value = '';
+  const dlTxt = dlTime(task) === '23:59' ? dlDate(task) : dlDate(task) + ' ' + dlTime(task);
+  toast(t('tAdded') + ' ' + parsed.title + ' · ' + t('dl') + ' ' + dlTxt, 'ok');
+  render();
+}
+
+function getFilteredTasks() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const today = todayStr();
+  let list = state.tasks.filter(tk => {
+    if (!tk.deleted_at && tk.done) return currentTab === 'done' || currentTab === 'all';
+    if (q && !(tk.title.toLowerCase().includes(q) || (tk.notes || '').toLowerCase().includes(q) || tk.tags.some(g => g.includes(q)))) return false;
+    const d = dlDate(tk);
+    switch (currentTab) {
+      case 'today':    return d === today;
+      case 'upcoming': return d > today;
+      case 'overdue':  return d < today;
+      case 'done':     return false;
+      case 'all':      return true;
+    }
+  });
+  if (currentTab === 'done') {
+    list.sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || ''));
+  } else {
+    list.sort((a, b) => {
+      const pd = PRIORITY[a.priority].weight - PRIORITY[b.priority].weight;
+      if (pd !== 0) return pd;
+      return (a.deadline_at || '').localeCompare(b.deadline_at || '');
+    });
+  }
+  return list;
+}
+
+/* ---------------- rendering ---------------- */
+function render() { renderStats(); renderTabs(); renderList(); applyI18n(); lucide.createIcons(); }
+
+function renderTabs() {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    const active = btn.dataset.tab === currentTab;
+    btn.classList.toggle('tab-active', active);
+    btn.classList.toggle('text-inkMuted', !active);
+  });
+  const od = state.tasks.filter(x => !x.done && !x.deleted_at && dlDate(x) < todayStr()).length;
+  const odBtn = document.querySelector('[data-tab="overdue"]');
+  odBtn.innerHTML = t('tabOverdue') + (od ? ` <span class="ml-1 px-1.5 py-0.5 rounded-full bg-redA/20 text-redA text-[10px] font-mono2">${od}</span>` : '');
+}
+
+function renderStats() {
+  const today = todayStr();
+  const todayTasks = state.tasks.filter(x => !x.deleted_at && dlDate(x) === today);
+  const doneToday = todayTasks.filter(x => x.done).length;
+  const openNow = state.tasks.filter(x => !x.done && !x.deleted_at).length;
+  const overdue = state.tasks.filter(x => !x.done && !x.deleted_at && dlDate(x) < today).length;
+  const pct = todayTasks.length ? Math.round(doneToday / todayTasks.length * 100) : 0;
+  const cards = [
+    { icon: 'target',    color: 'text-neon',    label: t('sToday'),   value: `${doneToday}/${todayTasks.length}`, sub: pct + ' ' + t('sSubToday').trim(), bar: pct },
+    { icon: 'loader',    color: 'text-cyanG',   label: t('sOpen'),    value: openNow,   sub: t('sSubOpen') },
+    { icon: 'alarm-off', color: 'text-redA',    label: t('sOverdue'), value: overdue,   sub: overdue ? t('sSubOverdue') : t('sSubOverdueOk') },
+    { icon: 'flame',     color: 'text-orangeA', label: t('sStreak'),  value: state.streak.count + ' ' + t('dayUnit'), sub: t('sSubStreak') },
+  ];
+  document.getElementById('statsRow').innerHTML = cards.map(c => `
+    <div class="card rounded-2xl p-4">
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-[10px] font-mono2 uppercase tracking-widest text-inkMuted">${c.label}</span>
+        <i data-lucide="${c.icon}" class="w-4 h-4 ${c.color}"></i>
+      </div>
+      <div class="font-display font-extrabold text-2xl">${c.value}</div>
+      <div class="text-[11px] text-inkDim mt-0.5">${c.sub}</div>
+      ${c.bar !== undefined ? `<div class="mt-2 h-1 rounded-full bg-surface3 overflow-hidden"><div class="h-full bg-neon transition-all" style="width:${c.bar}%"></div></div>` : ''}
+    </div>`).join('');
+  document.getElementById('streakHeader').textContent = state.streak.count;
+}
+
+function escapeHtml(s) { return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function deadlineBadge(task) {
+  const today = todayStr();
+  const d = dayDiff(today, dlDate(task));
+  let cls = 'text-inkDim', label;
+  if (!task.done) {
+    if (d < 0)        { cls = 'text-redA font-semibold';   label = t('dOverdue', { n: Math.abs(d) }); }
+    else if (d === 0) { cls = 'text-amberG font-semibold'; label = t('dToday'); }
+    else if (d === 1) { cls = 'text-orangeA';              label = t('dOne'); }
+    else if (d <= 3)  { cls = 'text-amberG';               label = t('dN', { n: d }); }
+    else              { cls = 'text-inkDim';               label = fmtDateVN(dlDate(task)); }
+  } else {
+    label = fmtDateVN(dlDate(task));
+  }
+  const time = dlTime(task) && dlTime(task) !== '23:59' ? ` ${dlTime(task)}` : '';
+  return `<span class="inline-flex items-center gap-1 font-mono2 text-[10px] ${cls}"><i data-lucide="calendar-clock" class="w-3 h-3"></i>${label}${time}</span>`;
+}
+
+function taskCard(task) {
+  const p = PRIORITY[task.priority];
+  const isOverdue = !task.done && dlDate(task) < todayStr();
+  return `
+  <div class="task-row card rounded-xl px-3.5 py-3 flex items-start gap-3 ${task.done ? 'strike-done opacity-60' : ''} ${isOverdue ? 'border-redA/30' : ''}" data-id="${task.id}">
+    <button onclick="toggleDone('${task.id}', this)" title="${escapeHtml(t('tabDone'))}"
+      class="mt-0.5 w-5 h-5 rounded-md border shrink-0 flex items-center justify-center transition
+      ${task.done ? 'checkbox-done' : 'border-inkDim hover:border-neon'}">
+      ${task.done ? '<i data-lucide="check" class="w-3.5 h-3.5 text-black"></i>' : ''}
+    </button>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="task-title text-sm font-medium leading-snug break-words">${escapeHtml(task.title)}</span>
+        ${task.daily ? `<i data-lucide="repeat" class="w-3 h-3 text-purpleG" title="${escapeHtml(t('fDaily'))}"></i>` : ''}
+        ${task.sync === 'pending' && session ? '<i data-lucide="cloud-off" class="w-3 h-3 text-inkDim" title="' + escapeHtml(t('tCloudErr')) + '"></i>' : ''}
+      </div>
+      ${task.notes ? `<p class="text-xs text-inkMuted mt-0.5 line-clamp-2">${escapeHtml(task.notes)}</p>` : ''}
+      <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+        <span class="px-1.5 py-0.5 rounded text-[9px] font-mono2 uppercase tracking-wide ${p.bg} ${p.text} border ${p.ring}">${priLabel(task.priority)}</span>
+        ${task.tags.map(g => `<span class="px-1.5 py-0.5 rounded text-[9px] font-mono2 text-cyanG bg-cyanG/10 border border-cyanG/30">#${escapeHtml(g)}</span>`).join('')}
+        ${deadlineBadge(task)}
+      </div>
+    </div>
+    <button onclick="openEdit('${task.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-inkDim hover:text-ink shrink-0" title="${escapeHtml(t('editTitle'))}">
+      <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+    </button>
+  </div>`;
+}
+
+function renderList() {
+  const list = getFilteredTasks();
+  document.getElementById('taskList').innerHTML = list.map(taskCard).join('');
+  document.getElementById('emptyState').classList.toggle('hidden', list.length > 0);
+}
+
+/* ---------------- done / streak ---------------- */
+function toggleDone(id, btn) {
+  const task = state.tasks.find(x => x.id === id);
+  if (!task) return;
+  if (btn) { btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop'); }
+  task.done = !task.done;
+  task.doneAt = task.done ? new Date().toISOString() : null;
+
+  if (task.done) {
+    updateStreak();
+    if (task.daily) {
+      const next = addDaysDate(dlDate(task), 1);
+      state.tasks.push({ ...task, id: uuidLike(), date: next, deadline_at: next + 'T23:59:00', done: false, doneAt: null, sync: 'pending', created_at: new Date().toISOString() });
+      toast(t('tRecurring') + ' ' + fmtDateVN(next), 'info');
+    } else {
+      toast(t('tDone') + ' ' + task.title, 'ok');
+    }
+  }
+  persist(task);
+  setTimeout(render, 150);
+}
+
+function updateStreak() {
+  const today = todayStr();
+  const s = state.streak;
+  const tasksToday = state.tasks.filter(x => !x.deleted_at && dlDate(x) === today);
+  const allDone = tasksToday.length > 0 && tasksToday.every(x => x.done);
+  if (allDone) {
+    if (s.lastDate !== today) {
+      const yesterday = addDaysDate(today, -1);
+      s.count = (s.lastDate === yesterday) ? s.count + 1 : 1;
+      s.lastDate = today;
+    }
+  } else if (s.lastDate !== today) {
+    if (s.lastDate !== addDaysDate(today, -1)) s.count = 0;
+  }
+}
+
+/* ---------------- edit modal ---------------- */
+function openEdit(id) {
+  const task = state.tasks.find(x => x.id === id);
+  if (!task) return;
+  document.getElementById('editId').value = id;
+  document.getElementById('editTitle').value = task.title;
+  document.getElementById('editNotes').value = task.notes || '';
+  document.getElementById('editDate').value = dlDate(task);
+  document.getElementById('editTime').value = dlTime(task) === '23:59' ? '' : dlTime(task);
+  document.getElementById('editPriority').value = task.priority;
+  document.getElementById('editTags').value = task.tags.join(', ');
+  document.getElementById('editDaily').checked = !!task.daily;
+  document.getElementById('editModal').classList.remove('hidden');
+  applyI18n(); lucide.createIcons();
+}
+function closeEdit() { document.getElementById('editModal').classList.add('hidden'); }
+function saveEdit() {
+  const task = state.tasks.find(x => x.id === document.getElementById('editId').value);
+  if (!task) return;
+  const title = document.getElementById('editTitle').value.trim();
+  if (!title) { toast(t('tNeedTitle'), 'warn'); return; }
+  task.title = title;
+  task.notes = document.getElementById('editNotes').value.trim();
+  const date = document.getElementById('editDate').value || todayStr();
+  const time = document.getElementById('editTime').value;
+  task.date = date; task.time = time;
+  task.deadline_at = date + 'T' + (time || '23:59') + ':00';
+  task.priority = document.getElementById('editPriority').value;
+  task.tags = document.getElementById('editTags').value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+  task.daily = document.getElementById('editDaily').checked;
+  persist(task);
+  closeEdit(); toast(t('tSaved'), 'ok'); render();
+}
+function deleteCurrent() {
+  const id = document.getElementById('editId').value;
+  if (!confirmDialog(t('cfDelTitle'), t('cfDelMsg'))) return;
+  const task = state.tasks.find(x => x.id === id);
+  if (task) { task.deleted_at = new Date().toISOString(); persist(task); }
+  state.tasks = state.tasks.filter(x => x.id !== id);
+  persist();
+  closeEdit(); toast(t('tDeleted'), 'info'); render();
+}
+
+/* ---------------- persistence + cloud sync ---------------- */
+function pending() { try { return JSON.parse(localStorage.getItem(LS_PENDING)) || []; } catch (e) { return []; } }
+function savePending(list) { localStorage.setItem(LS_PENDING, JSON.stringify(list)); }
+
+function toCloudRow(task) {
+  const d = task.deadline_at ? task.deadline_at.slice(0, 10) : null;
+  const tm = task.deadline_at ? task.deadline_at.slice(11, 16) : '';
+  return {
+    id: task.id,
+    title: task.title,
+    notes: task.notes || '',
+    deadline_at: task.deadline_at,
+    priority: task.priority,
+    tags: task.tags || [],
+    daily: !!task.daily,
+    done: !!task.done,
+    completed_at: task.doneAt || task.completed_at || null,
+    created_at: task.created_at || task.createdAt,
+    deleted_at: task.deleted_at || null,
+    // legacy columns kept in older versions of the table
+    due_date: d,
+    due_time: (tm && tm !== '23:59') ? tm : '',
+  };
+}
+// Upsert that adapts to whichever shape the table has: if the server rejects a
+// column (legacy table, or new table without it), retry without that column.
+async function cloudUpsert(rows) {
+  let payload = rows.map(r => ({ ...r }));
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const { error } = await sb.from(SUPABASE_CONFIG.TABLE).upsert(payload, { onConflict: 'id' });
+    if (!error) return { ok: true };
+    const msg = error.message || '';
+    if (/does not exist|relation|Could not find/i.test(msg) && !/null value|not-null|constraint/i.test(msg)) {
+      return { ok: false, schema: true, message: msg };
+    }
+    const m = msg.match(/Could not find the ['"]([a-z_]+)['"] column/i) || msg.match(/column ['"]([a-z_]+)['"]/i);
+    if (m && payload.length && (m[1] in payload[0])) {
+      const col = m[1];
+      payload = payload.map(r => { const c = { ...r }; delete c[col]; return c; });
+      continue;
+    }
+    const nm = msg.match(/null value in column ['"]([a-z_]+)['"]/i);
+    if (nm && payload.length) {
+      const col = nm[1];
+      const fallback = col === 'due_date' ? (payload[0].deadline_at || '').slice(0, 10) : '';
+      payload = payload.map(r => ({ ...r, [col]: fallback }));
+      continue;
+    }
+    return { ok: false, message: msg };
+  }
+  return { ok: false, message: 'schema mismatch' };
+}
+
+function persist(task) {
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+  if (task) {
+    const list = pending().filter(x => x.id !== task.id);
+    list.push(toCloudRow(task));
+    savePending(list);
+    pushPending().then(ok => updateCloudBadge(ok));
+  }
+}
+
+function mapCloudRow(row) {
+  const dl = row.deadline_at || (row.due_date ? `${row.due_date}T${/^\d{2}:\d{2}$/.test(row.due_time || '') ? row.due_time : '23:59'}:00` : null);
+  return {
+    id: row.id,
+    title: row.title,
+    notes: row.notes || '',
+    date: dl ? dl.slice(0, 10) : todayStr(),
+    time: dl ? dl.slice(11, 16) : '',
+    deadline_at: dl,
+    priority: row.priority || 'medium',
+    tags: row.tags || [],
+    daily: !!row.daily,
+    done: !!row.done,
+    sync: 'cloud',
+    created_at: row.created_at,
+    createdAt: row.created_at,
+    doneAt: row.completed_at,
+  };
+}
+function mergeTasks(cloudRows) {
+  const map = new Map();
+  cloudRows.forEach(r => map.set(r.id, mapCloudRow(r)));
+  let addedLocal = 0;
+  state.tasks.forEach(tk => {
+    const ex = map.get(tk.id);
+    if (!ex) { map.set(tk.id, tk); addedLocal++; }
+    else {
+      const localTs = (tk.doneAt || tk.createdAt || tk.created_at || '').valueOf();
+      const cloudTs = (ex.doneAt || ex.createdAt || ex.created_at || '').valueOf();
+      if (localTs > cloudTs && tk.sync !== 'cloud') map.set(tk.id, tk);
+    }
+  });
+  return Array.from(map.values());
+}
+
+async function pushPending() {
+  if (!sb || !session) return false;
+  let list = pending();
+  if (!list.length) return true;
+  try {
+    const res = await cloudUpsert(list);
+    if (!res.ok) {
+      if (res.schema) { cloudOk = false; toast(t('tNoTable'), 'warn'); }
+      else toast(t('tCloudErr') + ': ' + (res.message || ''), 'warn');
+      return false;
+    }
+    const ids = new Set(list.map(x => x.id));
+    savePending(pending().filter(x => !ids.has(x.id)));
+    state.tasks.forEach(tk => { if (ids.has(tk.id)) tk.sync = 'cloud'; });
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+    toast(t('tCloudSaved'), 'ok');
+    return true;
+  } catch (e) { cloudOk = false; toast(t('tCloudErr'), 'warn'); return false; }
+}
+
+async function pullCloud() {
+  if (!sb || !session) return;
+  try {
+    const { data, error } = await sb.from(SUPABASE_CONFIG.TABLE).select('*');
+    if (error) {
+      if (/does not exist|relation|Could not find/i.test(error.message || '')) { cloudOk = false; toast(t('tNoTable'), 'warn'); }
+      else toast(t('tCloudErr'), 'warn');
+      return;
+    }
+    const live = (data || []).filter(r => !r.deleted_at);
+    state.tasks = mergeTasks(live);
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+    // Drop pending entries already reflected in cloud; keep unsynced adds and deletions.
+    const liveIds = new Set(live.map(r => r.id));
+    savePending(pending().filter(x => !(liveIds.has(x.id) && !x.deleted_at)));
+    await pushPending();
+    toast(t('tPull', { n: live.length }), 'info');
+    render();
+  } catch (e) { cloudOk = false; }
+}
+
+async function syncNow() {
+  if (!sb || !session) { toast(t('tOffline'), 'warn'); return; }
+  cloudOk = true;
+  await pullCloud();
+  updateCloudBadge(true);
+  closeSettings();
+}
+
+/* ---------------- auth ---------------- */
+function openLogin() {
+  if (session) { openSettings(); return; }
+  document.getElementById('loginModal').classList.remove('hidden');
+  applyI18n(); lucide.createIcons();
+}
+function closeLogin() { document.getElementById('loginModal').classList.add('hidden'); }
+function authTab(mode) {
+  authMode = mode;
+  document.getElementById('tabLogin').className = mode === 'login' ? 'flex-1 py-2 font-display text-sm font-bold tab-active' : 'flex-1 py-2 font-display text-sm text-inkMuted';
+  document.getElementById('tabSignup').className = mode === 'signup' ? 'flex-1 py-2 font-display text-sm font-bold tab-active' : 'flex-1 py-2 font-display text-sm text-inkMuted';
+  document.getElementById('authSignupHint').classList.toggle('hidden', mode !== 'signup');
+  document.getElementById('authBtn').textContent = t(mode === 'login' ? 'authBtnLogin' : 'authBtnSignup');
+}
+async function doAuth() {
+  if (!sb) { toast(t('tCloudErr'), 'warn'); return; }
+  const email = document.getElementById('authEmail').value.trim();
+  const pass = document.getElementById('authPass').value;
+  if (!email || !pass) { toast(t('tEmailNeeded'), 'warn'); return; }
+  if (pass.length < 6) { toast(t('tPassShort'), 'warn'); return; }
+  try {
+    let res;
+    if (authMode === 'signup') res = await sb.auth.signUp({ email, password: pass });
+    else res = await sb.auth.signInWithPassword({ email, password: pass });
+    if (res.error) throw res.error;
+    if (res.data.session) {
+      session = res.data.session;
+      localStorage.setItem('taskmaster_session', JSON.stringify(session));
+      toast(t(authMode === 'signup' ? 'tSignedUp' : 'tSignedIn'), 'ok');
+      closeLogin();
+      await pullCloud();
+      updateCloudBadge(true);
+      render();
+    } else if (authMode === 'signup') {
+      toast('✓ ' + t('tSignedUp'), 'ok');
+    }
+  } catch (e) { toast(t('tAuthFail') + ': ' + (e.message || e), 'warn'); }
+}
+async function doSignOut() {
+  if (sb) { try { await sb.auth.signOut(); } catch (e) {} }
+  session = null;
+  localStorage.removeItem('taskmaster_session');
+  closeLogin();
+  updateCloudBadge(false);
+  toast(t('tSignedOut'), 'info');
+  render();
+}
+
+function updateCloudBadge(pushed) {
+  const icon = document.getElementById('cloudIcon');
+  const label = document.getElementById('cloudLabel');
+  if (!session) { icon.setAttribute('data-lucide', 'cloud-off'); icon.className = 'w-3.5 h-3.5 text-inkDim'; label.textContent = t('offline'); label.className = 'text-inkMuted'; }
+  else if (pending().length) { icon.setAttribute('data-lucide', 'cloud-upload'); icon.className = 'w-3.5 h-3.5 text-amberG'; label.textContent = pending().length + ' ⋯'; label.className = 'text-amberG font-semibold'; }
+  else { icon.setAttribute('data-lucide', 'cloud-check'); icon.className = 'w-3.5 h-3.5 text-greenT'; label.textContent = t('signedIn'); label.className = 'text-greenT'; }
+  lucide.createIcons();
+}
+
+/* ---------------- settings / data ---------------- */
+function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); applyI18n(); lucide.createIcons(); }
+function closeSettings() { document.getElementById('settingsModal').classList.add('hidden'); }
+function exportData() {
+  const blob = new Blob([JSON.stringify({ ...state, exported_at: new Date().toISOString(), app: 'taskmaster', version: 2 }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `taskmaster-backup-${todayStr()}.json`;
+  a.click();
+  toast(t('tExported'), 'ok');
+}
+function importData(ev) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data.tasks)) throw new Error();
+      data.tasks.forEach(migrateTask);
+      if (!confirmDialog(t('cfImportTitle'), t('cfImportMsg', { n: data.tasks.length }))) return;
+      state = data;
+      persist();
+      render();
+      closeSettings();
+      toast(t('tImported'), 'ok');
+    } catch (e) { toast(t('tInvalidFile'), 'warn'); }
+  };
+  reader.readAsText(file);
+  ev.target.value = '';
+}
+function clearDone() {
+  const n = state.tasks.filter(x => x.done).length;
+  if (!n) { toast(t('tNoDone'), 'info'); return; }
+  if (!confirmDialog(t('cfClearTitle'), t('cfClearMsg', { n }))) return;
+  state.tasks.filter(x => x.done).forEach(tk => { tk.deleted_at = new Date().toISOString(); persist(tk); });
+  state.tasks = state.tasks.filter(x => !x.done);
+  persist();
+  render();
+  toast(t('tCleared', { n }), 'ok');
+}
+
+/* ---------------- toast & confirm ---------------- */
+function toast(msg, kind = 'info') {
+  const colors = { ok: 'border-neon/50 text-neon', warn: 'border-amberG/50 text-amberG', info: 'border-cyanG/50 text-cyanG' };
+  const el = document.createElement('div');
+  el.className = `toast pointer-events-auto px-4 py-2.5 rounded-xl bg-surface border ${colors[kind] || colors.info} font-mono2 text-xs shadow-2xl max-w-[85vw] text-center`;
+  el.textContent = msg;
+  document.getElementById('toastBox').appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300); }, 2400);
+}
+function confirmDialog(title, msg) {
+  return window.confirm((LANG === 'vi' ? '' : '') + title + '\n' + msg);
+}
+
+/* ---------------- keyboard ---------------- */
+document.getElementById('quickInput').addEventListener('keydown', e => { if (e.key === 'Enter') quickAdd(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeEdit(); closeSettings(); closeLogin(); }
+  if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); document.getElementById('quickInput').focus(); }
+});
+document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => { currentTab = btn.dataset.tab; render(); }));
+
+/* ---------------- init ---------------- */
+(async function init() {
+  document.getElementById('quickDate').value = todayStr();
+  applyI18n();
+  if (window.supabase && window.supabase.createClient) {
+    sb = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+    try {
+      const saved = JSON.parse(localStorage.getItem('taskmaster_session') || 'null');
+      if (saved && saved.access_token && new Date(saved.expires_at * 1000) > new Date()) {
+        await sb.auth.setSession(saved);
+        const { data: { session: s } } = await sb.auth.getSession();
+        session = s;
+      }
+      if (!session) {
+        const { data: { session: s } } = await sb.auth.getSession();
+        session = s;
+        if (s) localStorage.setItem('taskmaster_session', JSON.stringify(s));
+      }
+    } catch (e) { /* offline or bad token */ }
+    if (session) { await pushPending(); }
+  }
+  updateCloudBadge();
+  render();
+})();
+</script>
+</body>
+</html>
