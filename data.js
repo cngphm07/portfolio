@@ -1,5 +1,81 @@
 const PORTFOLIO_DATA = {
-  "Animation Film": [],
+  "Animation Film": [
+    {
+      "id": "16tIfQhpECirE_gJ3FCHGv1h-TH2-dtdK",
+      "title": "Astronauts",
+      "thumb": "https://drive.google.com/thumbnail?id=16tIfQhpECirE_gJ3FCHGv1h-TH2-dtdK&sz=w400"
+    },
+    {
+      "id": "190YyuXdWIG7kskK6bEIpAvkFRD-yfhWC",
+      "title": "Chung cat phan doan kk 1",
+      "thumb": "https://drive.google.com/thumbnail?id=190YyuXdWIG7kskK6bEIpAvkFRD-yfhWC&sz=w400"
+    },
+    {
+      "id": "1-GvN3-qDjoy8rO2WvxT3ODrUPfKFnqtF",
+      "title": "Các chất điện li",
+      "thumb": "https://drive.google.com/thumbnail?id=1-GvN3-qDjoy8rO2WvxT3ODrUPfKFnqtF&sz=w400"
+    },
+    {
+      "id": "1MiB18MJWZ45WY7pd4NBrSEGf9D5wAAZt",
+      "title": "Datthu christmas",
+      "thumb": "https://drive.google.com/thumbnail?id=1MiB18MJWZ45WY7pd4NBrSEGf9D5wAAZt&sz=w400"
+    },
+    {
+      "id": "1dIUQFFf3CLXnei-CGdvfFRS1151TNWct",
+      "title": "Datthu livestream",
+      "thumb": "https://drive.google.com/thumbnail?id=1dIUQFFf3CLXnei-CGdvfFRS1151TNWct&sz=w400"
+    },
+    {
+      "id": "1CsbPoo0wTvHjwUz4eeLLIDuM7h-p88F2",
+      "title": "Datthu TET",
+      "thumb": "https://drive.google.com/thumbnail?id=1CsbPoo0wTvHjwUz4eeLLIDuM7h-p88F2&sz=w400"
+    },
+    {
+      "id": "1p9EU5bGSJ-7t8mMqA-w9gYvlqHfky44N",
+      "title": "Ensure video01",
+      "thumb": "https://drive.google.com/thumbnail?id=1p9EU5bGSJ-7t8mMqA-w9gYvlqHfky44N&sz=w400"
+    },
+    {
+      "id": "1350m3faJS-bIwQ-cXZn74skwP1JHzr0A",
+      "title": "Ensure video02",
+      "thumb": "https://drive.google.com/thumbnail?id=1350m3faJS-bIwQ-cXZn74skwP1JHzr0A&sz=w400"
+    },
+    {
+      "id": "1pOQplXOxuSxOLbiMwSjbgEnYNR5w1v93",
+      "title": "KALPHA Launching GẶP GỠ NGƯỜI NGOÀI HÀNH TINH KALPHA",
+      "thumb": "https://drive.google.com/thumbnail?id=1pOQplXOxuSxOLbiMwSjbgEnYNR5w1v93&sz=w400"
+    },
+    {
+      "id": "1iyDsLrlJSjeN6_JaxEEFPUUHO71l0DWa",
+      "title": "LAZADA KV",
+      "thumb": "https://drive.google.com/thumbnail?id=1iyDsLrlJSjeN6_JaxEEFPUUHO71l0DWa&sz=w400"
+    },
+    {
+      "id": "11jDZdPV45LgFLjSazyc3oGtBiZJiJjb7",
+      "title": "LOL Animation Film 01",
+      "thumb": "https://drive.google.com/thumbnail?id=11jDZdPV45LgFLjSazyc3oGtBiZJiJjb7&sz=w400"
+    },
+    {
+      "id": "1qUpdphtLjOc8NF2eKgToF0eJ4uSZ6T5B",
+      "title": "LOL Animation Film 02",
+      "thumb": "https://drive.google.com/thumbnail?id=1qUpdphtLjOc8NF2eKgToF0eJ4uSZ6T5B&sz=w400"
+    },
+    {
+      "id": "1_u8jy2rW0d7KwIddcd3kjy6a2XL-xVsk",
+      "title": "NOT ALL MONSTERS ARE UNDER THE BED",
+      "thumb": "https://drive.google.com/thumbnail?id=1_u8jy2rW0d7KwIddcd3kjy6a2XL-xVsk&sz=w400"
+    },
+    {
+      "id": "17rxCMsz9LuS1N4uKR9sC7F4OryMFGC7O",
+      "title": "Sự điện li của nước",
+      "thumb": "https://drive.google.com/thumbnail?id=17rxCMsz9LuS1N4uKR9sC7F4OryMFGC7O&sz=w400"
+    },
+    {
+      "id": "1m-kVXrkdT6XLbJ8sl1RNbvKN45GMC3aN",
+      "title": "Taisun revised1",
+      "thumb": "https://drive.google.com/thumbnail?id=1m-kVXrkdT6XLbJ8sl1RNbvKN45GMC3aN&sz=w400"
+    }
+  ],
   "Architecture Film": [
     {
       "id": "1wQRclN9VnN7qJD4Pt7B9ylI8jqU6-tyo",
