@@ -135,6 +135,9 @@
       touchMultiplier: 1.5
     });
 
+    // Expose for deep-linking and automated visual QA
+    window.__lenis = lenis;
+
     if (hasGsap) {
       gsap.registerPlugin(ScrollTrigger);
       lenis.on('scroll', ScrollTrigger.update);
@@ -179,7 +182,7 @@
     function handleScroll(y) {
       var delta = y - lastY;
       header.classList.toggle('is-scrolled', y > 40);
-      
+
       if (y < 120) {
         header.classList.remove('is-hidden');
       } else if (delta > 4 && y > 180) {
@@ -190,15 +193,12 @@
       lastY = y;
     }
 
-    if (lenis) {
-      lenis.on('scroll', function (e) {
-        handleScroll(e.scroll);
-      });
-    } else {
-      window.addEventListener('scroll', function () {
-        handleScroll(window.scrollY);
-      }, { passive: true });
-    }
+    // Lenis drives native scroll, so the window listener always fires.
+    // Native listener also covers anchor-hash jumps that happen before JS runs.
+    window.addEventListener('scroll', function () {
+      handleScroll(window.scrollY);
+    }, { passive: true });
+    handleScroll(window.scrollY);
   }
 
   /* ============ 4. GSAP Scroll Animations & Reveals ============ */
@@ -214,14 +214,14 @@
 
     gsap.registerPlugin(ScrollTrigger);
 
-    // Initial Hero Entrance Animation
+    // Initial Hero Entrance Animation (snappy corporate reveal)
     var heroTl = gsap.timeline({ defaults: { ease: 'power3.out' } });
     heroTl
-      .fromTo('.site-header', { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, 0)
-      .fromTo('.hero-head .eyebrow', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9 }, 0.15)
-      .fromTo('.hero-title', { y: 35, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1 }, 0.25)
-      .fromTo('.hero-sub-row', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, 0.45)
-      .fromTo('.hero-cinema', { y: 45, opacity: 0, scale: 0.98 }, { y: 0, opacity: 1, scale: 1, duration: 1.2 }, 0.55);
+      .fromTo('.site-header', { y: -20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7 }, 0)
+      .fromTo('.hero-head .eyebrow', { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6 }, 0.08)
+      .fromTo('.hero-title', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, 0.16)
+      .fromTo('.hero-sub-row', { y: 18, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7 }, 0.3)
+      .fromTo('.hero-cinema', { y: 28, opacity: 0, scale: 0.988 }, { y: 0, opacity: 1, scale: 1, duration: 0.85 }, 0.42);
 
     // Section Scroll Reveals
     var revealElements = gsap.utils.toArray('.reveal:not(.hero-head *):not(.hero-cinema)');
