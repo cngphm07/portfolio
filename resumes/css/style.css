@@ -30,6 +30,7 @@ html {
   background: var(--bg);
   scroll-behavior: smooth;
   color-scheme: dark;
+  overflow-x: clip;
 }
 
 body {
@@ -840,6 +841,14 @@ header.site-header {
 }
 
 /* ============ responsive ============ */
+/* tablet: 5 nav items + pill + timecode không vừa — ẩn tc, siết gap */
+@media (max-width: 1024px) {
+  .site-header { gap: 1rem; }
+  .site-header nav { gap: 1.3rem; }
+  .tc { display: none; }
+  .header-action { white-space: nowrap; }
+}
+
 @media (max-width: 760px) {
   .site-header { padding: 1.05rem 1.25rem; }
   .site-header nav { display: none; }
