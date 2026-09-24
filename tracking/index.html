@@ -1235,6 +1235,33 @@
         const totalPrice = item.isBundle ? (item.isBundleLeader ? item.bundlePrice : 0) : itemPrice;
         if (totalPrice === 0) return;
 
+        const hasReceivedDate = Boolean(String(item.dateReceived || '').trim());
+        const isDone = item.status === 'DONE';
+        const isSecondPaid = isDone && !note.includes('chưa') && !note.includes('chờ') && !note.includes('nợ') && !note.includes('unpaid');
+
+        // Không có mốc Receive: toàn bộ giá trị đi về Delivery, không tạo đợt 1 giả.
+        if (!hasReceivedDate) {
+          installments.push({
+            ...item,
+            uniqueKey: `${item.stt}_delivery_full`,
+            installmentType: 'FINAL',
+            stageLabel: currentLang === 'vi' ? 'Delivery (100% — không có Receive)' : 'Delivery (100% — no Receive)',
+            month: mAppr || item.month,
+            date: item.dateApproved || '--',
+            amount: totalPrice,
+            status: isSecondPaid ? 'PAID' : 'UNPAID',
+            isCollected: isSecondPaid,
+            isPartialLeader: false,
+            displayPrice: `${formatVND(totalPrice)} (${isSecondPaid ? (currentLang === 'vi' ? 'Đã thanh toán' : 'Paid') : (currentLang === 'vi' ? 'Chưa thu' : 'Due')})`,
+            tag: isSecondPaid 
+              ? (currentLang === 'vi' ? '✓ ĐÃ THU DELIVERY (100%)' : '✓ DELIVERY (100%) PAID')
+              : (currentLang === 'vi' ? '⏳ CHỜ THU DELIVERY (100%)' : '⏳ DELIVERY (100%) DUE'),
+            classes: isSecondPaid ? 'text-greenTerminal font-bold' : 'text-amberGlow font-bold',
+            badgeClasses: isSecondPaid ? 'bg-greenTerminal/15 text-greenTerminal border-greenTerminal/30' : 'bg-amberGlow/10 text-amberGlow border-amberGlow/30'
+          });
+          return;
+        }
+
         let p1Percent = 50;
         let p2Percent = 50;
         let amount1 = Math.round(totalPrice * 0.5);
@@ -1266,9 +1293,6 @@
         });
 
         // MỐC 2: Ngày duyệt / Delivery (mAppr) -> 50% Đợt 2 (Nghiệm thu / Bàn giao hoàn thành)
-        const isDone = item.status === 'DONE';
-        const isSecondPaid = isDone && !note.includes('chưa') && !note.includes('chờ') && !note.includes('nợ') && !note.includes('unpaid');
-
         installments.push({
           ...item,
           uniqueKey: `${item.stt}_inst2`,
