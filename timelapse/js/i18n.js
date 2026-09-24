@@ -22,7 +22,7 @@ window.I18N_DATA = {
     },
     hero: {
       eyebrow: "TIMELAPSE DÀI HẠN · GIÁM SÁT TIẾN ĐỘ",
-      title_light: "Hàng tháng thi công.",
+      title_light: "Hàng tháng thi\u00A0công.",
       title_bold: "Một câu chuyện <span class=\"text-accent\">có thể nhìn thấy.</span>",
       intro: "Từ công trình và nhà xưởng đến tàu biển, chúng tôi <strong>thiết kế và vận hành hệ thống ghi hình dài hạn</strong> — biến toàn bộ hành trình xây dựng thành tư liệu nghiệm thu và tài sản truyền thông chuẩn mực.",
       cta_primary: "Nhận phương án cho dự án",
@@ -45,7 +45,7 @@ window.I18N_DATA = {
     apps: {
       eyebrow: "ỨNG DỤNG MÔI TRƯỜNG",
       title_light: "Một hệ thống.",
-      title_bold: "Ba môi trường vận hành.",
+      title_bold: "Ba môi trường vận\u00A0hành.",
       lead: "Mỗi bối cảnh mang một nhịp độ, rủi ro và yêu cầu mỹ thuật khác nhau. Phương án tối ưu bắt đầu từ việc thấu hiểu địa hình.",
       s1_tag: "01 / XÂY DỰNG",
       s1_index: "SECTOR 01",
@@ -74,7 +74,7 @@ window.I18N_DATA = {
     process: {
       eyebrow: "QUY TRÌNH THỰC THI",
       title_light: "Một quy trình chuẩn mực",
-      title_bold: "để không bỏ lỡ khoảnh khắc.",
+      title_bold: "để không bỏ lỡ khoảnh\u00A0khắc.",
       lead: "Từ khâu khảo sát thực địa đến khâu hoàn thiện bản dựng, mọi công đoạn được thiết kế có <strong>hệ thống và kỷ luật</strong>.",
       schematic: "TIMELAPSE FIELD STATION // OPERATIONAL",
       p1_title: "Khảo sát bối cảnh & <strong>Hiện trường</strong>",
@@ -91,7 +91,7 @@ window.I18N_DATA = {
     system: {
       eyebrow: "ĐỘ TIN CẬY KỸ THUẬT",
       title_light: "Hình ảnh đẹp chỉ có giá trị",
-      title_bold: "khi hệ thống vận hành bền bỉ.",
+      title_bold: "khi hệ thống vận\u00A0hành bền\u00A0bỉ.",
       lead: "Mỗi dự án được thẩm định riêng biệt. Dưới đây là các lớp công nghệ được kết hợp linh hoạt cho từng điều kiện thi công thực tế.",
       c1_code: "01 // RIGID",
       c1_title: "Khung hình <strong>cố định siêu bền</strong>",
@@ -115,7 +115,7 @@ window.I18N_DATA = {
     deliv: {
       eyebrow: "HẠNG MỤC BÀN GIAO",
       title_light: "Một lần ghi hình.",
-      title_bold: "Đa dạng mục đích sử dụng.",
+      title_bold: "Đa dạng mục\u00A0đích sử\u00A0dụng.",
       lead: "Sản phẩm đầu ra được đóng gói chỉn chu theo từng kênh truyền thông và nhu cầu báo cáo của doanh nghiệp.",
       cta: "Trao đổi yêu cầu đầu ra",
       d1_title: "Phim timelapse <strong>tổng kết dự án</strong>",
@@ -134,7 +134,7 @@ window.I18N_DATA = {
     showcase: {
       eyebrow: "HÌNH ẢNH MÔ PHỎNG",
       title_light: "Nhìn thấy thời gian",
-      title_bold: "tạo nên những công trình vĩ đại.",
+      title_bold: "tạo nên những công\u00A0trình vĩ\u00A0đại.",
       disclaimer: "<span>[ MINH HỌA ]</span> Tư liệu stock có bản quyền minh chứng cho ngôn ngữ hình ảnh và năng lực ghi hình dài hạn.",
       cap1_left: "CONSTRUCTION INFRASTRUCTURE // STUDY 01",
       cap1_right: "LONG-TERM EVOLUTION",
@@ -144,7 +144,7 @@ window.I18N_DATA = {
     faq: {
       eyebrow: "CÂU HỎI THƯỜNG GẶP",
       title_light: "Trước khi camera",
-      title_bold: "bắt đầu bấm máy.",
+      title_bold: "bắt đầu bấm\u00A0máy.",
       intro: "Những băn khoăn phổ biến nhất của các đơn vị thi công và chủ đầu tư trước khi triển khai hệ thống.",
       q1: "Mất điện hoặc mất mạng có làm mất dữ liệu không?",
       a1: "Hệ thống luôn được trang bị <strong>bộ lưu điện dự phòng</strong> và <strong>bộ nhớ đệm tại chỗ</strong>. Khi mất kết nối internet, máy vẫn tiếp tục chụp và lưu trữ an toàn; dữ liệu sẽ tự động đồng bộ bù ngay khi có mạng trở lại.",
@@ -165,8 +165,8 @@ window.I18N_DATA = {
     },
     contact: {
       eyebrow: "BẮT ĐẦU TỪ MỘT GÓC NHÌN CHUẨN XÁC",
-      title_light: "Dự án chỉ diễn ra một lần.",
-      title_bold: "Hãy ghi lại trọn vẹn.",
+      title_light: "Dự án chỉ\u00A0diễn\u00A0ra\u00A0một\u00A0lần.",
+      title_bold: "Hãy ghi lại trọn\u00A0vẹn.",
       lead: "Gửi cho chúng tôi thông tin ban đầu về dự án. Chúng tôi sẽ phản hồi bằng phương án góc đặt camera và kế hoạch vận hành tối ưu trong vòng 24 giờ.",
       label_name: "HỌ VÀ TÊN *",
       ph_name: "Nguyễn Văn A",
@@ -374,7 +374,7 @@ window.I18N_DATA = {
     },
     contact: {
       eyebrow: "COMMENCE WITH PRECISION VISION",
-      title_light: "Your Project Happens Only Once.",
+      title_light: "Your Project Happens",
       title_bold: "Document It Completely.",
       lead: "Provide preliminary details about your upcoming project. We will deliver a customized camera placement strategy and operational proposal within 24 hours.",
       label_name: "FULL NAME *",
