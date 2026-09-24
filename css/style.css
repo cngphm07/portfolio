@@ -448,7 +448,7 @@ footer{
 /* ============ reduced motion ============ */
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .grain,.hs-line::after,.lb-bar .lb-rec{animation:none}
+  .grain,.hs-line::after,.lb-bar .lb-rec,.card-media::after{animation:none}
   *{transition-duration:.01ms!important}
 }
 
@@ -492,6 +492,36 @@ header nav a.active::after{transform:scaleX(1)}
 .brands span::before{transition:background .25s,transform .25s}
 .brands span:hover{color:var(--ink)}
 .brands span:hover::before{background:var(--accent);transform:scale(1.35)}
+
+/* ---------- card thumbnail: placeholder, sheen, fallback ---------- */
+/* never a dead black box: dot-stripe pattern while the thumb loads */
+.card-media{
+  background:
+    radial-gradient(circle at 28% 22%, rgba(255,255,255,.05), transparent 55%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,.022) 0 1px, transparent 1px 13px);
+}
+.card-media img{position:relative;z-index:1}
+/* sheen sweep, GPU transform only, stops once loaded */
+.card-media::after{
+  content:'';position:absolute;top:-20%;bottom:-20%;left:-30%;width:34%;
+  z-index:0;transform:skewX(-18deg) translateX(-140%);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.055),transparent);
+  pointer-events:none;
+}
+html.js .card:not(.has-thumb):not(.no-thumb) .card-media::after{
+  animation:thumbSheen 2.6s var(--ease) infinite;
+}
+@keyframes thumbSheen{
+  0%{transform:skewX(-18deg) translateX(-140%)}
+  60%,100%{transform:skewX(-18deg) translateX(480%)}
+}
+/* thumb missing or a black first-frame (flagged by drive-scan): dimmed play
+   glyph over the placeholder pattern reads as an intentional poster */
+.card.no-thumb .card-play{
+  opacity:.5;transform:scale(1);
+  background:transparent;border-color:rgba(255,255,255,.28);
+}
+.card.no-thumb .card-play::after{border-left-color:rgba(255,255,255,.55)}
 
 /* responsive upgrades */
 @media(max-width:760px){

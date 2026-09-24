@@ -144,7 +144,7 @@ function fillGrid(){
     card.dataset.cursor = 'PLAY';
     card.setAttribute('aria-label', 'Play: ' + v.title);
     card.innerHTML =
-      (v.thumb ? '<div class="card-media"><img loading="lazy" decoding="async" src="' + v.thumb + '" alt=""></div>' : '<div class="card-media"></div>') +
+      (v.thumb && !v.thumbDark ? '<div class="card-media"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="' + v.thumb + '" alt=""></div>' : '<div class="card-media"></div>') +
       '<span class="card-tag mono">' + v.cat + '</span>' +
       '<span class="card-play" aria-hidden="true"></span>' +
       '<figcaption class="card-label">' + v.title + '</figcaption>';
@@ -154,14 +154,38 @@ function fillGrid(){
     });
     var img = card.querySelector('img');
     if(img){
-      if(img.complete && img.naturalWidth > 0) img.classList.add('ld');
-      else img.addEventListener('load', function(){ img.classList.add('ld'); });
+      wireThumb(card, img, v);
+    }else{
+      card.classList.add('no-thumb');
     }
     frag.appendChild(card);
   });
   grid.innerHTML = '';
   grid.appendChild(frag);
   document.dispatchEvent(new CustomEvent('gallery:render'));
+}
+
+/* thumbnail lifecycle: fade in on load, retry on error (Drive rate-limits
+   burst requests), designed fallback when the thumb never arrives */
+function wireThumb(card, img, v){
+  var tries = 0;
+  function markLoaded(){
+    card.classList.add('has-thumb');
+    img.classList.add('ld');
+  }
+  img.addEventListener('load', markLoaded);
+  img.addEventListener('error', function(){
+    if(tries < 2){
+      tries++;
+      setTimeout(function(){
+        img.src = v.thumb + (v.thumb.indexOf('?') > -1 ? '&' : '?') + 'r=' + tries;
+      }, 900 * tries + Math.random() * 900);
+    }else{
+      card.classList.add('no-thumb');
+      img.remove();
+    }
+  });
+  if(img.complete && img.naturalWidth > 0) markLoaded();
 }
 
 /* ---------- lightbox ---------- */

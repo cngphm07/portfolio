@@ -13,12 +13,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "1-GvN3-qDjoy8rO2WvxT3ODrUPfKFnqtF",
       "title": "Các chất điện li",
-      "thumb": "https://drive.google.com/thumbnail?id=1-GvN3-qDjoy8rO2WvxT3ODrUPfKFnqtF&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1-GvN3-qDjoy8rO2WvxT3ODrUPfKFnqtF&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1MiB18MJWZ45WY7pd4NBrSEGf9D5wAAZt",
       "title": "Datthu christmas",
-      "thumb": "https://drive.google.com/thumbnail?id=1MiB18MJWZ45WY7pd4NBrSEGf9D5wAAZt&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1MiB18MJWZ45WY7pd4NBrSEGf9D5wAAZt&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1dIUQFFf3CLXnei-CGdvfFRS1151TNWct",
@@ -43,7 +45,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1pOQplXOxuSxOLbiMwSjbgEnYNR5w1v93",
       "title": "KALPHA Launching GẶP GỠ NGƯỜI NGOÀI HÀNH TINH KALPHA",
-      "thumb": "https://drive.google.com/thumbnail?id=1pOQplXOxuSxOLbiMwSjbgEnYNR5w1v93&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1pOQplXOxuSxOLbiMwSjbgEnYNR5w1v93&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1iyDsLrlJSjeN6_JaxEEFPUUHO71l0DWa",
@@ -68,7 +71,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "17rxCMsz9LuS1N4uKR9sC7F4OryMFGC7O",
       "title": "Sự điện li của nước",
-      "thumb": "https://drive.google.com/thumbnail?id=17rxCMsz9LuS1N4uKR9sC7F4OryMFGC7O&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=17rxCMsz9LuS1N4uKR9sC7F4OryMFGC7O&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1m-kVXrkdT6XLbJ8sl1RNbvKN45GMC3aN",
@@ -85,12 +89,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "107aNNtkAbh3tg07s0wGA7Z8XcfxYyriS",
       "title": "AProject Vinhome Central Apartment MASTER V002",
-      "thumb": "https://drive.google.com/thumbnail?id=107aNNtkAbh3tg07s0wGA7Z8XcfxYyriS&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=107aNNtkAbh3tg07s0wGA7Z8XcfxYyriS&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1G5Hz5nigyeDAKGNxr9MpMXckfd9pKubD",
       "title": "AProject VinhomeCentral Apartment V006",
-      "thumb": "https://drive.google.com/thumbnail?id=1G5Hz5nigyeDAKGNxr9MpMXckfd9pKubD&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1G5Hz5nigyeDAKGNxr9MpMXckfd9pKubD&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1pL-0x0R__Cs7l-dVXAT5sm5eFTAtNY1m",
@@ -100,12 +106,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "1MlwKPWHIGHunZMyGEILQdIRaBLgAbOdF",
       "title": "C ThuongHai [OFFLINE] v001 REVISED04",
-      "thumb": "https://drive.google.com/thumbnail?id=1MlwKPWHIGHunZMyGEILQdIRaBLgAbOdF&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1MlwKPWHIGHunZMyGEILQdIRaBLgAbOdF&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "19zei-iMv8rFdWbyChYG57ThMZBDODo8I",
       "title": "C ToanAnh ArchDaily [MASTER] v001",
-      "thumb": "https://drive.google.com/thumbnail?id=19zei-iMv8rFdWbyChYG57ThMZBDODo8I&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=19zei-iMv8rFdWbyChYG57ThMZBDODo8I&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "18AjV6QJYc6EEMSZGNWr7p_i3PF1oQ9wS",
@@ -115,17 +123,20 @@ const PORTFOLIO_DATA = {
     {
       "id": "1MkYCr9Lk5UmYlCgRcBSUuJAEvDkX8m4a",
       "title": "HonSon v002",
-      "thumb": "https://drive.google.com/thumbnail?id=1MkYCr9Lk5UmYlCgRcBSUuJAEvDkX8m4a&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1MkYCr9Lk5UmYlCgRcBSUuJAEvDkX8m4a&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1_2vGRlpkPfn4-u8YzTISups_rqisuEO1",
       "title": "HuaweiOffice v006",
-      "thumb": "https://drive.google.com/thumbnail?id=1_2vGRlpkPfn4-u8YzTISups_rqisuEO1&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1_2vGRlpkPfn4-u8YzTISups_rqisuEO1&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1nyZcZnnk5yopuKOAT_S3JcN_jXLCeciU",
       "title": "HuongViet v003",
-      "thumb": "https://drive.google.com/thumbnail?id=1nyZcZnnk5yopuKOAT_S3JcN_jXLCeciU&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1nyZcZnnk5yopuKOAT_S3JcN_jXLCeciU&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1-U2KIGTxO0k1INDT4mtl1QR_ztaTRUWh",
@@ -135,7 +146,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "11yY_vdUjS0Nl7zMXGNE2SAu7A9NTzX7T",
       "title": "MS.TRANG VILLAQ9 V003",
-      "thumb": "https://drive.google.com/thumbnail?id=11yY_vdUjS0Nl7zMXGNE2SAu7A9NTzX7T&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=11yY_vdUjS0Nl7zMXGNE2SAu7A9NTzX7T&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1mOwJaS0MWXw1iHaEcchv6uFf1w4LFdKG",
@@ -150,7 +162,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1tK_qQ8fdKXtmFPoV--I8j4-KJO3VcPY6",
       "title": "Sunrise City Apartment v001",
-      "thumb": "https://drive.google.com/thumbnail?id=1tK_qQ8fdKXtmFPoV--I8j4-KJO3VcPY6&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1tK_qQ8fdKXtmFPoV--I8j4-KJO3VcPY6&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1lcb5dw_YLS2Iix3Mrb51o9GTTvW9zwlO",
@@ -257,12 +270,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "1pIeDaGI8484SO9ioMJaXwTVung-9YRsr",
       "title": "Amanotes Google Case Study-vimeo-742506295-dash-fastly skyfire sep-video-6b38ecd5+dash-fastly skyfire sep-audio-af4ef603",
-      "thumb": "https://drive.google.com/thumbnail?id=1pIeDaGI8484SO9ioMJaXwTVung-9YRsr&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1pIeDaGI8484SO9ioMJaXwTVung-9YRsr&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1z-GQw9qzLKtoo55VbVSHfLSmaX9CrRmi",
       "title": "ARTIUS Brand Film",
-      "thumb": "https://drive.google.com/thumbnail?id=1z-GQw9qzLKtoo55VbVSHfLSmaX9CrRmi&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1z-GQw9qzLKtoo55VbVSHfLSmaX9CrRmi&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1YCUsRpawskahWQ2Bc4fD7h4hRtE5xioS",
@@ -277,17 +292,20 @@ const PORTFOLIO_DATA = {
     {
       "id": "1AZS0DSM1CPHEf7kaMdJrmaT1qEwMda8h",
       "title": "CHANGE - CEOs Anti-Bush Meat PSA",
-      "thumb": "https://drive.google.com/thumbnail?id=1AZS0DSM1CPHEf7kaMdJrmaT1qEwMda8h&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1AZS0DSM1CPHEf7kaMdJrmaT1qEwMda8h&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1fytH4fz0ul_wfB2QNemhZQy6WrUEoOTm",
       "title": "DT006 DATTHU2022 Showreel FULL [Master] v001 South.Male 230116 revised",
-      "thumb": "https://drive.google.com/thumbnail?id=1fytH4fz0ul_wfB2QNemhZQy6WrUEoOTm&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1fytH4fz0ul_wfB2QNemhZQy6WrUEoOTm&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1ueVfXqsWWyOwpDHzaSS6zACeRkqlTHyL",
       "title": "DT008 BDS-CAMP [MASTER] v002 221230 revised002",
-      "thumb": "https://drive.google.com/thumbnail?id=1ueVfXqsWWyOwpDHzaSS6zACeRkqlTHyL&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1ueVfXqsWWyOwpDHzaSS6zACeRkqlTHyL&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1T8to0xgjwyyzIAxTCO8gIIukc2PNx17k",
@@ -302,12 +320,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "10UzQro3aWOgKZ2xccHMGY1w0Qe7CrYx1",
       "title": "The River ThuThiem",
-      "thumb": "https://drive.google.com/thumbnail?id=10UzQro3aWOgKZ2xccHMGY1w0Qe7CrYx1&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=10UzQro3aWOgKZ2xccHMGY1w0Qe7CrYx1&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1smDIcw7I8BTzUCWatHiGh2ydPHAJ882Y",
       "title": "VIDEOBANNER DATTHU revised006",
-      "thumb": "https://drive.google.com/thumbnail?id=1smDIcw7I8BTzUCWatHiGh2ydPHAJ882Y&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1smDIcw7I8BTzUCWatHiGh2ydPHAJ882Y&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1602eUJ3_tbI3QuJ-35XpGNglnT5xZUDj",
@@ -319,7 +339,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "13BYCpJfu_X2qai19so49JFJxkU8HVdt2",
       "title": "241007 ASMR Video [OFFLINE] v003 revised",
-      "thumb": "https://drive.google.com/thumbnail?id=13BYCpJfu_X2qai19so49JFJxkU8HVdt2&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=13BYCpJfu_X2qai19so49JFJxkU8HVdt2&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1qS60Mk8bQzV4Gkh2IrvqHrXVbDmSMMeF",
@@ -334,12 +355,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "150mnIuMjfemDjTRbpwHhYnIG8NBzeRh5",
       "title": "A Boy in the Big City SAIGON CITY OF DREAM",
-      "thumb": "https://drive.google.com/thumbnail?id=150mnIuMjfemDjTRbpwHhYnIG8NBzeRh5&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=150mnIuMjfemDjTRbpwHhYnIG8NBzeRh5&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1faUPFU3SYgpeW-sTVzLBMP_iu37ki9Ji",
       "title": "A Girl in the Big City SAI GON CITY OF DREAMS",
-      "thumb": "https://drive.google.com/thumbnail?id=1faUPFU3SYgpeW-sTVzLBMP_iu37ki9Ji&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1faUPFU3SYgpeW-sTVzLBMP_iu37ki9Ji&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1v86cM3c-kM9A5Bup6BCcrX0iTrISz0VP",
@@ -354,7 +377,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1rZ_JLabE32RUaHkzAbfKhr_Wqdm6J49I",
       "title": "Headspace I Khoảng Nghĩ Covid thoughts captured by filmmakers",
-      "thumb": "https://drive.google.com/thumbnail?id=1rZ_JLabE32RUaHkzAbfKhr_Wqdm6J49I&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1rZ_JLabE32RUaHkzAbfKhr_Wqdm6J49I&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "10-MpSlRQK6_UiFvRIrDyoGDLwztULH-s",
@@ -364,12 +388,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "1Ksm2rLTrDMRCXgxCr2hT6V-FiNnaFwRh",
       "title": "The Book Doctor The Last Craftsmen",
-      "thumb": "https://drive.google.com/thumbnail?id=1Ksm2rLTrDMRCXgxCr2hT6V-FiNnaFwRh&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1Ksm2rLTrDMRCXgxCr2hT6V-FiNnaFwRh&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1MTiekXzfVyyUZ84CD6oAMqcsFppxA5rB",
       "title": "The Stove Maker The Last Craftsmen 1080pFHR",
-      "thumb": "https://drive.google.com/thumbnail?id=1MTiekXzfVyyUZ84CD6oAMqcsFppxA5rB&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1MTiekXzfVyyUZ84CD6oAMqcsFppxA5rB&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1I4XkDClRY8BvyKhuvhXECbOxoobecLhm",
@@ -379,12 +405,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "1YojAypyft9qBUqLbhIMehIZpu4sf4RH5",
       "title": "WHERE TO FIND AN AUTHENTIC HALAL CURRY EP1 STREET COOKS",
-      "thumb": "https://drive.google.com/thumbnail?id=1YojAypyft9qBUqLbhIMehIZpu4sf4RH5&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1YojAypyft9qBUqLbhIMehIZpu4sf4RH5&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1hwlNxFuj5ngUvLZQEKHkPViam0H27Lad",
       "title": "WWF - Phu Quoc Towards A Plastic-Free Island",
-      "thumb": "https://drive.google.com/thumbnail?id=1hwlNxFuj5ngUvLZQEKHkPViam0H27Lad&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1hwlNxFuj5ngUvLZQEKHkPViam0H27Lad&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "117Dge7MjWehAEXC7AR-ZeVqBRux3xvEc",
@@ -406,12 +434,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "1lqZ2covEdWUYZS2oIdv6K8030LcIX1AK",
       "title": "TanThanhCorp-30Year YEP",
-      "thumb": "https://drive.google.com/thumbnail?id=1lqZ2covEdWUYZS2oIdv6K8030LcIX1AK&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1lqZ2covEdWUYZS2oIdv6K8030LcIX1AK&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1GwSFaKI-tK0BDSwINZL8pX5bWz_rdH3j",
       "title": "Video Recap Huobi Global FINAL",
-      "thumb": "https://drive.google.com/thumbnail?id=1GwSFaKI-tK0BDSwINZL8pX5bWz_rdH3j&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1GwSFaKI-tK0BDSwINZL8pX5bWz_rdH3j&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1rsgfmEgr9Ns7vFvwrlbWZxl4eQ8R4I8w",
@@ -515,12 +545,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "1DACTWaJZ5ImPIlYvRIaVba0XdLHyIfyo",
       "title": "250530 PODCAST EP3 - ANH TUAN V004",
-      "thumb": "https://drive.google.com/thumbnail?id=1DACTWaJZ5ImPIlYvRIaVba0XdLHyIfyo&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1DACTWaJZ5ImPIlYvRIaVba0XdLHyIfyo&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1Yg1jatQFgLwPlueHTdUAxuw_2PW4V6Wm",
       "title": "250602 BUTECCO PODCAST EP2 V004",
-      "thumb": "https://drive.google.com/thumbnail?id=1Yg1jatQFgLwPlueHTdUAxuw_2PW4V6Wm&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1Yg1jatQFgLwPlueHTdUAxuw_2PW4V6Wm&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "17aPAUImsDJBaZA-PUNYyXXcQgXBCNl5S",
@@ -540,7 +572,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "13_vyPe8BLFWSh65WR7xkKFhP8tx5j1pf",
       "title": "250916 PODCAST-NLRS EP5-ANHPHUOC V003",
-      "thumb": "https://drive.google.com/thumbnail?id=13_vyPe8BLFWSh65WR7xkKFhP8tx5j1pf&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=13_vyPe8BLFWSh65WR7xkKFhP8tx5j1pf&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1Vd2OFJrYLJ4v0ZGtEe2PFBfWRnQ9VAke",
@@ -550,12 +583,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "12Sp4dDm3B2X0-fT2J8FQhA5L3QAn8kHy",
       "title": "251001 NLRS EP6 v002",
-      "thumb": "https://drive.google.com/thumbnail?id=12Sp4dDm3B2X0-fT2J8FQhA5L3QAn8kHy&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=12Sp4dDm3B2X0-fT2J8FQhA5L3QAn8kHy&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1HiXnDQiMijgbjJPv1LGIkmWYlTpRly0y",
       "title": "251106 NLRS EP7 v001",
-      "thumb": "https://drive.google.com/thumbnail?id=1HiXnDQiMijgbjJPv1LGIkmWYlTpRly0y&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1HiXnDQiMijgbjJPv1LGIkmWYlTpRly0y&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1j6Akr3EQtwYZDlIgSAq5ZJB5x-F476H2",
@@ -565,7 +600,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1DIAC08KnLAqL1raE2DShGRXhtKaU_5OW",
       "title": "260111 NLRS EP10 V002",
-      "thumb": "https://drive.google.com/thumbnail?id=1DIAC08KnLAqL1raE2DShGRXhtKaU_5OW&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1DIAC08KnLAqL1raE2DShGRXhtKaU_5OW&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1LuvkuqjQl2ZFzXauOxnmOVR7zwczNuY4",
@@ -582,7 +618,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "11o4ABV_UIEzGyoiy_ZoCdxFBB0CJGTMp",
       "title": "PHIM NGẮN 0 GIỜ ĐÊM TRAILER",
-      "thumb": "https://drive.google.com/thumbnail?id=11o4ABV_UIEzGyoiy_ZoCdxFBB0CJGTMp&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=11o4ABV_UIEzGyoiy_ZoCdxFBB0CJGTMp&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1NRERlrW5wh7OAABczqYy76qDxzP2S5aE",
@@ -592,7 +629,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1Ng8iIADAStHhJENs6uTgYf-cb7eLAiB0",
       "title": "Whispering Garden Short Film Trailer",
-      "thumb": "https://drive.google.com/thumbnail?id=1Ng8iIADAStHhJENs6uTgYf-cb7eLAiB0&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1Ng8iIADAStHhJENs6uTgYf-cb7eLAiB0&sz=w400",
+      "thumbDark": true
     }
   ],
   "Social Video": [
@@ -719,7 +757,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1Fw0Fnd6dfDez3KBN-Ybrk3Ns6LvwitCG",
       "title": "LIFE OF A FILMMAKER 6 Kilometres",
-      "thumb": "https://drive.google.com/thumbnail?id=1Fw0Fnd6dfDez3KBN-Ybrk3Ns6LvwitCG&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1Fw0Fnd6dfDez3KBN-Ybrk3Ns6LvwitCG&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "12ZuNV128LwYZr-YhadJXOb5RxDfHSuS-",
@@ -814,7 +853,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1v2KXZ9N-pDYl807i96OK6bYQKuySwr5-",
       "title": "251207 TETVIET v002",
-      "thumb": "https://drive.google.com/thumbnail?id=1v2KXZ9N-pDYl807i96OK6bYQKuySwr5-&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1v2KXZ9N-pDYl807i96OK6bYQKuySwr5-&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "112-HjP1tzKf5t8rSRTUyUY0KN3acFAkl",
@@ -894,7 +934,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1L1MYDy5ivXITVXV4c0CDnY2GSlN7RVxn",
       "title": "250414 SAOVANG V008",
-      "thumb": "https://drive.google.com/thumbnail?id=1L1MYDy5ivXITVXV4c0CDnY2GSlN7RVxn&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1L1MYDy5ivXITVXV4c0CDnY2GSlN7RVxn&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1AgZcqPZ6GbV8-FgVG83wGV2QtV2JdfzW",
@@ -914,12 +955,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "1XwMy38KZ0bKwLS8CCWUprEIyaWGfaDm_",
       "title": "250420 TOURCCB v004",
-      "thumb": "https://drive.google.com/thumbnail?id=1XwMy38KZ0bKwLS8CCWUprEIyaWGfaDm_&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1XwMy38KZ0bKwLS8CCWUprEIyaWGfaDm_&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1ezG1CPfYJdC7bzHksLbBNsynH6yQeRTz",
       "title": "250420 TOURCCB v004 HD",
-      "thumb": "https://drive.google.com/thumbnail?id=1ezG1CPfYJdC7bzHksLbBNsynH6yQeRTz&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1ezG1CPfYJdC7bzHksLbBNsynH6yQeRTz&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1pRDQ4Jtr5wOUmkQWJBcmRBCoIHyOj-Jv",
@@ -934,7 +977,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1IKRV_G8Bvp3Lb1ajHo6WfHY1LH7iJBOK",
       "title": "250429 BTS OUTBOUND V005",
-      "thumb": "https://drive.google.com/thumbnail?id=1IKRV_G8Bvp3Lb1ajHo6WfHY1LH7iJBOK&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1IKRV_G8Bvp3Lb1ajHo6WfHY1LH7iJBOK&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1vp7Q4k-b3If8nRaex1fdj0HMtZg_o47D",
@@ -1044,12 +1088,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "1qzdH03Jb_ckN8v638JrkwivEqe7e31rl",
       "title": "250802 SN50 v006",
-      "thumb": "https://drive.google.com/thumbnail?id=1qzdH03Jb_ckN8v638JrkwivEqe7e31rl&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1qzdH03Jb_ckN8v638JrkwivEqe7e31rl&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1PJhcqz27Er7eCOc65TTZj5x3Tz48zjb5",
       "title": "250803 XEBUSTHANKU V007",
-      "thumb": "https://drive.google.com/thumbnail?id=1PJhcqz27Er7eCOc65TTZj5x3Tz48zjb5&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1PJhcqz27Er7eCOc65TTZj5x3Tz48zjb5&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1hQgTYyQYd1V-6kLBJGHXWf749iFIMj0h",
@@ -1074,7 +1120,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1EvIdIMBpAC9K_hSWZlyU6iO_AVP3sW75",
       "title": "251221 PV NguoiDanDuong v003",
-      "thumb": "https://drive.google.com/thumbnail?id=1EvIdIMBpAC9K_hSWZlyU6iO_AVP3sW75&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1EvIdIMBpAC9K_hSWZlyU6iO_AVP3sW75&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "127p4HNZ6sZ-q5tz1nd9XsGIxorM7JZ1D",
@@ -1094,12 +1141,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "1QqqFMNEtm4IYGaJfO4lTAZBXiHMabPF5",
       "title": "260705 HAITRINHNIEMVUI v006",
-      "thumb": "https://drive.google.com/thumbnail?id=1QqqFMNEtm4IYGaJfO4lTAZBXiHMabPF5&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1QqqFMNEtm4IYGaJfO4lTAZBXiHMabPF5&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1-q7XGAvJljhLXaYVPM6DBGCtjQzlOLwl",
       "title": "[en] HAITRINHNIEMVUI v006",
-      "thumb": "https://drive.google.com/thumbnail?id=1-q7XGAvJljhLXaYVPM6DBGCtjQzlOLwl&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1-q7XGAvJljhLXaYVPM6DBGCtjQzlOLwl&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1fdLpBnke1VT8ZVhUF3NZ9y0PtcTpdOPd",
@@ -1158,7 +1207,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1vOxX0ZyweuyPYGMdcW6DZelStx_IHdYg",
       "title": "[en] KARTCHEN iTVC [MASTER] COMPRESSED v001",
-      "thumb": "https://drive.google.com/thumbnail?id=1vOxX0ZyweuyPYGMdcW6DZelStx_IHdYg&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1vOxX0ZyweuyPYGMdcW6DZelStx_IHdYg&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1WGwJsYhjScOJJ0MvILejXt79DrAw7J5T",
@@ -1173,22 +1223,26 @@ const PORTFOLIO_DATA = {
     {
       "id": "1wYhU5C-fGLfv7t2a4ZB-IAZbPCgnjs9Q",
       "title": "Happiness Conference & Film Festival 2020 - Teaser Party",
-      "thumb": "https://drive.google.com/thumbnail?id=1wYhU5C-fGLfv7t2a4ZB-IAZbPCgnjs9Q&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1wYhU5C-fGLfv7t2a4ZB-IAZbPCgnjs9Q&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "15VC-5WlZjBGTB-Hx2vfLv003ap5t31ui",
       "title": "Happiness Conference Film Festival 2020 - Teaser Classroom",
-      "thumb": "https://drive.google.com/thumbnail?id=15VC-5WlZjBGTB-Hx2vfLv003ap5t31ui&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=15VC-5WlZjBGTB-Hx2vfLv003ap5t31ui&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1fdN8s8sQcqsba3o4cDo0FyK082CsPpqH",
       "title": "Happiness Conference Film Festival 2020 - Teaser Office",
-      "thumb": "https://drive.google.com/thumbnail?id=1fdN8s8sQcqsba3o4cDo0FyK082CsPpqH&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1fdN8s8sQcqsba3o4cDo0FyK082CsPpqH&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1dEkuecmv4TDmN8mgA3CtzU6adtv0QsNn",
       "title": "HONDA BIGBIKE VIETNAM",
-      "thumb": "https://drive.google.com/thumbnail?id=1dEkuecmv4TDmN8mgA3CtzU6adtv0QsNn&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1dEkuecmv4TDmN8mgA3CtzU6adtv0QsNn&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1pI16Jin9e11Yfh2iUjRYOCVn7Gt-IXYS",
@@ -1268,12 +1322,14 @@ const PORTFOLIO_DATA = {
     {
       "id": "1WHKqonyjq0NuZi3XuLv_8nUwxsa9NGOo",
       "title": "Royal Enfield & Bandit 9 presents JAEGAR",
-      "thumb": "https://drive.google.com/thumbnail?id=1WHKqonyjq0NuZi3XuLv_8nUwxsa9NGOo&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1WHKqonyjq0NuZi3XuLv_8nUwxsa9NGOo&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1YNhZL399wtgufI0ryQJy5InEeJ79-qJG",
       "title": "SaigonHeat AllInVietNam VBA11",
-      "thumb": "https://drive.google.com/thumbnail?id=1YNhZL399wtgufI0ryQJy5InEeJ79-qJG&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1YNhZL399wtgufI0ryQJy5InEeJ79-qJG&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1rfdIqjhxQDVPdaxjZtnMGp-e_36GhAA8",
@@ -1288,7 +1344,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1gERebLgSBBllXX51XshIR4CMEVXavbas",
       "title": "Soundio MASTER 004",
-      "thumb": "https://drive.google.com/thumbnail?id=1gERebLgSBBllXX51XshIR4CMEVXavbas&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1gERebLgSBBllXX51XshIR4CMEVXavbas&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1H0eNm9sW1poquZ2wnz-wI7EKCxjoog7D",
@@ -1298,7 +1355,8 @@ const PORTFOLIO_DATA = {
     {
       "id": "1hodAyv_REZONDDeO6R1-WRSZbQDjfjDP",
       "title": "Woori Bank - Our Story (Vietnam)",
-      "thumb": "https://drive.google.com/thumbnail?id=1hodAyv_REZONDDeO6R1-WRSZbQDjfjDP&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1hodAyv_REZONDDeO6R1-WRSZbQDjfjDP&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1-xBVzG5vLj3LRDRMC2KFMlM1A0i-Miqe",
@@ -1315,22 +1373,26 @@ const PORTFOLIO_DATA = {
     {
       "id": "1b1vtHf7QlU7ZofRU-Im_pBKdouQJL81P",
       "title": "240503 GiaBao&MaiHoa Prewedding [MASTER] V001",
-      "thumb": "https://drive.google.com/thumbnail?id=1b1vtHf7QlU7ZofRU-Im_pBKdouQJL81P&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1b1vtHf7QlU7ZofRU-Im_pBKdouQJL81P&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1yl3t8Yv8f3bmTzRoppcxmgZaoHPPb_3y",
       "title": "240512 Bao&Hoa TraditionalWeddingFilm [OFFLINE] v001",
-      "thumb": "https://drive.google.com/thumbnail?id=1yl3t8Yv8f3bmTzRoppcxmgZaoHPPb_3y&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1yl3t8Yv8f3bmTzRoppcxmgZaoHPPb_3y&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "18cX7-t1MK67BNkhjPMW-jfA18oYiUInN",
       "title": "250111 THEPROJECT [MASTER] V001",
-      "thumb": "https://drive.google.com/thumbnail?id=18cX7-t1MK67BNkhjPMW-jfA18oYiUInN&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=18cX7-t1MK67BNkhjPMW-jfA18oYiUInN&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1sQbNWsA9uo9y5WntMkCnUwdGUJsePOnW",
       "title": "250222 TungProposal V002 revised",
-      "thumb": "https://drive.google.com/thumbnail?id=1sQbNWsA9uo9y5WntMkCnUwdGUJsePOnW&sz=w400"
+      "thumb": "https://drive.google.com/thumbnail?id=1sQbNWsA9uo9y5WntMkCnUwdGUJsePOnW&sz=w400",
+      "thumbDark": true
     },
     {
       "id": "1z4PLxugLlh3fGdsKNLieGhfHCL6QMkdM",
@@ -1343,7 +1405,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1WsWBF2QU2WVVh_eq0VzfYZnxLI6yoUi9",
         "title": "231205 Render ThuGiang [MASTER] v001",
-        "thumb": "https://drive.google.com/thumbnail?id=1WsWBF2QU2WVVh_eq0VzfYZnxLI6yoUi9&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1WsWBF2QU2WVVh_eq0VzfYZnxLI6yoUi9&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1ZuWdhEfeODUMqtxtJ708hM8uo371lMA4",
@@ -1363,12 +1426,14 @@ const PORTFOLIO_DATA = {
       {
         "id": "1gIvY47Pk83COrUd8VgbYQB5xcsIvYD2c",
         "title": "Cô Nhung MASTER 16x9",
-        "thumb": "https://drive.google.com/thumbnail?id=1gIvY47Pk83COrUd8VgbYQB5xcsIvYD2c&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1gIvY47Pk83COrUd8VgbYQB5xcsIvYD2c&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1vfYhzcPNHd1G5r0au_fBNW_MMDy-YJHb",
         "title": "mrQUANG LD MASTER 16x9",
-        "thumb": "https://drive.google.com/thumbnail?id=1vfYhzcPNHd1G5r0au_fBNW_MMDy-YJHb&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1vfYhzcPNHd1G5r0au_fBNW_MMDy-YJHb&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1QSz7qRswc_sIcFwjbIIhzoLK78V4utUX",
@@ -1450,7 +1515,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1zY1JgyZ7z40s1ddvAQDla2C0RA8kJzip",
         "title": "250530 PODCAST EP3 - ANH TUAN V004",
-        "thumb": "https://drive.google.com/thumbnail?id=1zY1JgyZ7z40s1ddvAQDla2C0RA8kJzip&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1zY1JgyZ7z40s1ddvAQDla2C0RA8kJzip&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1ZWEK563TwrHq7N_Z6ciyTlFAdarwkPlU",
@@ -1460,7 +1526,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1PGBxLJ8zJmGLV13KCzJmmhxLyppVUXKj",
         "title": "250602 BUTECCO PODCAST EP2 V004",
-        "thumb": "https://drive.google.com/thumbnail?id=1PGBxLJ8zJmGLV13KCzJmmhxLyppVUXKj&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1PGBxLJ8zJmGLV13KCzJmmhxLyppVUXKj&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1FwP8mfTcF64orfmO2QMb4mxY8qDHUGVG",
@@ -1480,7 +1547,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1qBb_lxkgUkBTBu6C4XCjz7PBtw3NSF4A",
         "title": "250916 PODCAST-NLRS EP5-ANHPHUOC V003",
-        "thumb": "https://drive.google.com/thumbnail?id=1qBb_lxkgUkBTBu6C4XCjz7PBtw3NSF4A&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1qBb_lxkgUkBTBu6C4XCjz7PBtw3NSF4A&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1S-z8TKKwqiOD-hqEUm2wX66LAmIPbINo",
@@ -1490,12 +1558,14 @@ const PORTFOLIO_DATA = {
       {
         "id": "1sdrrFsqZsJiBaBZeYY1hRSzz0M5cFwjs",
         "title": "251001 NLRS EP6 v002",
-        "thumb": "https://drive.google.com/thumbnail?id=1sdrrFsqZsJiBaBZeYY1hRSzz0M5cFwjs&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1sdrrFsqZsJiBaBZeYY1hRSzz0M5cFwjs&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1ZMpPTHsJQI1kMF-DH9J-GosQBbMIkoQQ",
         "title": "251106 NLRS EP7 v001",
-        "thumb": "https://drive.google.com/thumbnail?id=1ZMpPTHsJQI1kMF-DH9J-GosQBbMIkoQQ&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1ZMpPTHsJQI1kMF-DH9J-GosQBbMIkoQQ&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1a8sYPRV-QNHMxAe-IrG6lDrdl5LVmxlN",
@@ -1505,7 +1575,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1PATt2fDICEn0qEakhyY1RHgIUkX57q_E",
         "title": "260111 NLRS EP10 V002",
-        "thumb": "https://drive.google.com/thumbnail?id=1PATt2fDICEn0qEakhyY1RHgIUkX57q_E&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1PATt2fDICEn0qEakhyY1RHgIUkX57q_E&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1eTG-36ovAQPx4UQK4Ee1o-33ABa6gjpL",
@@ -1515,17 +1586,20 @@ const PORTFOLIO_DATA = {
       {
         "id": "19Ow-HkV2knvigyS8VcuLXhc1XIhsZ8RD",
         "title": "[DT007] XayNhaBangSuThauHieu EP5 [MASTER] v001",
-        "thumb": "https://drive.google.com/thumbnail?id=19Ow-HkV2knvigyS8VcuLXhc1XIhsZ8RD&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=19Ow-HkV2knvigyS8VcuLXhc1XIhsZ8RD&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1SKgv54_rbxE9_S-yK9teOd96wJsJEfcZ",
         "title": "AnhSang 4 BÍ QUYẾT GIÚP GIA CHỦ NHẸ NHÀNG XIN GPXD ĐÚNG HẠN v002",
-        "thumb": "https://drive.google.com/thumbnail?id=1SKgv54_rbxE9_S-yK9teOd96wJsJEfcZ&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1SKgv54_rbxE9_S-yK9teOd96wJsJEfcZ&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "13WHghNIhWGCVVqRXua1qrBF05MVjYWu5",
         "title": "anhSang 6GiaiphapQuanLyTienDoKhiXayNhaTaiBinhDuong v005",
-        "thumb": "https://drive.google.com/thumbnail?id=13WHghNIhWGCVVqRXua1qrBF05MVjYWu5&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=13WHghNIhWGCVVqRXua1qrBF05MVjYWu5&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1YD_fU01TtNiUWguigZEwnfFTc2C9HU1B",
@@ -1535,7 +1609,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1jVP35q33leACdoppPklucieCWX6u1LoL",
         "title": "DT003 XayNhaBangSuThauHieu Episode01 ASang [MASTER] V002 221223",
-        "thumb": "https://drive.google.com/thumbnail?id=1jVP35q33leACdoppPklucieCWX6u1LoL&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1jVP35q33leACdoppPklucieCWX6u1LoL&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "14NJNc6gM_M9IMUi11P5nvZuG8oBHjTgS",
@@ -1560,12 +1635,14 @@ const PORTFOLIO_DATA = {
       {
         "id": "1umNvr_8mWqtBSacaPLgSd24BJOZ90RJ8",
         "title": "DT013 NhungViecCanLamTruocKhiXayNha ATu EP1 [MASTER] v001",
-        "thumb": "https://drive.google.com/thumbnail?id=1umNvr_8mWqtBSacaPLgSd24BJOZ90RJ8&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1umNvr_8mWqtBSacaPLgSd24BJOZ90RJ8&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1RWLL5_3Cj66YWCLkWgsLlGCE3XNn3WQC",
         "title": "DT014 NhungViecCanLamTruocKhiXayNha ATu EP2 [OFFLINE] v002 revised001",
-        "thumb": "https://drive.google.com/thumbnail?id=1RWLL5_3Cj66YWCLkWgsLlGCE3XNn3WQC&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1RWLL5_3Cj66YWCLkWgsLlGCE3XNn3WQC&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1Zfl1sSnUgZ5xMeD7l_WAVwP5IIC1-MJL",
@@ -1595,7 +1672,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1qfpWjRCXTiqCLMQ05D-kQng4JSq79tWZ",
         "title": "NÉT ĐỘC ĐÁO TRONG KIẾN TRÚC CỦA TRUC HOUSE-",
-        "thumb": "https://drive.google.com/thumbnail?id=1qfpWjRCXTiqCLMQ05D-kQng4JSq79tWZ&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1qfpWjRCXTiqCLMQ05D-kQng4JSq79tWZ&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1rzXioN3Mp1rGekGk_J6E-n9j3rwX2lc5",
@@ -1629,7 +1707,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1RS8PmKBdOudaQ_FFKcFyP6-Wus-QF7gx",
         "title": "231222 Christmas Video [OFFLINE] v002 revised3",
-        "thumb": "https://drive.google.com/thumbnail?id=1RS8PmKBdOudaQ_FFKcFyP6-Wus-QF7gx&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1RS8PmKBdOudaQ_FFKcFyP6-Wus-QF7gx&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1t7kizFDtFgwrEcfDqPO1y_h34b4JN3tW",
@@ -1694,7 +1773,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1_20lq7YdJXHo79iACTSZcXFGnbHwpBHh",
         "title": "251216 CHRISTMAS VLOG V002",
-        "thumb": "https://drive.google.com/thumbnail?id=1_20lq7YdJXHo79iACTSZcXFGnbHwpBHh&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1_20lq7YdJXHo79iACTSZcXFGnbHwpBHh&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1ftevXCgCST3a-ksz9hBynVxvCHrwrQCO",
@@ -1704,7 +1784,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1MgPXCj7ROU-tEGyeJFQO1wO6S5b9A__1",
         "title": "260210 Teambuilding Story v001 sub REVISED",
-        "thumb": "https://drive.google.com/thumbnail?id=1MgPXCj7ROU-tEGyeJFQO1wO6S5b9A__1&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1MgPXCj7ROU-tEGyeJFQO1wO6S5b9A__1&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1n07-q0cstET470MFh6O9bkabUMATQG8C",
@@ -1719,7 +1800,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1ZDgfm8rL2rkWRaMU9emjaaYysxBY-UaV",
         "title": "DT008 BDS-CAMP [MASTER] v002 221230 revised002",
-        "thumb": "https://drive.google.com/thumbnail?id=1ZDgfm8rL2rkWRaMU9emjaaYysxBY-UaV&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1ZDgfm8rL2rkWRaMU9emjaaYysxBY-UaV&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1lQTgWg_hhveKDHAovLhB8syZSaGF77N6",
@@ -1729,7 +1811,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1Y9rLbUaxHsbHXRz5Ra0h7IrDfddQJH2w",
         "title": "VIDEOBANNER DATTHU revised006",
-        "thumb": "https://drive.google.com/thumbnail?id=1Y9rLbUaxHsbHXRz5Ra0h7IrDfddQJH2w&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1Y9rLbUaxHsbHXRz5Ra0h7IrDfddQJH2w&sz=w400",
+        "thumbDark": true
       }
     ],
     "Giai Đoạn Thi Công": [
@@ -1806,7 +1889,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1C90GImh7YyMF__EhthrY5qGYnBt5ThTx",
         "title": "250615 NHATKYTHICONG COOKIE STUDIO T6 V002",
-        "thumb": "https://drive.google.com/thumbnail?id=1C90GImh7YyMF__EhthrY5qGYnBt5ThTx&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1C90GImh7YyMF__EhthrY5qGYnBt5ThTx&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1bf8cS9RR9SFug-HcLY2xnLapj41KZE9y",
@@ -1826,7 +1910,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1_Gy9OjEf_Qlk-EpfpKeVUYapmLBIcRCG",
         "title": "250723 Podcast Chong Nong Chi Linh v002",
-        "thumb": "https://drive.google.com/thumbnail?id=1_Gy9OjEf_Qlk-EpfpKeVUYapmLBIcRCG&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1_Gy9OjEf_Qlk-EpfpKeVUYapmLBIcRCG&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1Kg6PCZ3Jy_8EXx2i7ZGMWuiLyR8uQ3WD",
@@ -1836,7 +1921,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1tZK6cC5OsDXQ60-QgG0HoVHPYCyIjKUu",
         "title": "250808 Podcast NLRS AnhDung v002",
-        "thumb": "https://drive.google.com/thumbnail?id=1tZK6cC5OsDXQ60-QgG0HoVHPYCyIjKUu&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1tZK6cC5OsDXQ60-QgG0HoVHPYCyIjKUu&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "14X0QlElqF47jBdV8N30gaeO-1y9Q7FvQ",
@@ -1851,7 +1937,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1cZokAdNr4n3iWBHu7ktN5nOe3lqhN2sg",
         "title": "250825 NKTC NGUYENHOUSE-T8 v002",
-        "thumb": "https://drive.google.com/thumbnail?id=1cZokAdNr4n3iWBHu7ktN5nOe3lqhN2sg&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1cZokAdNr4n3iWBHu7ktN5nOe3lqhN2sg&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1TsMu4jQ1QeLMMb5kFdZ2HT7HVSMwsw4h",
@@ -1861,7 +1948,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1y9c-8ls8yEpzia_2XUQBnlVywNPTpugv",
         "title": "250915 NhaTanAn BaiToanThiCong ANHTUNG v002",
-        "thumb": "https://drive.google.com/thumbnail?id=1y9c-8ls8yEpzia_2XUQBnlVywNPTpugv&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1y9c-8ls8yEpzia_2XUQBnlVywNPTpugv&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1eN8V4jXpeyKnTdjefgV856cPJ28E90A4",
@@ -1886,7 +1974,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "18B1l64nhC22ki8NbD9alMAN-YKo5Avbe",
         "title": "260106 NKCT YENHOUSE-T12 V002 revised",
-        "thumb": "https://drive.google.com/thumbnail?id=18B1l64nhC22ki8NbD9alMAN-YKo5Avbe&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=18B1l64nhC22ki8NbD9alMAN-YKo5Avbe&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1ohncpEYd-HeGlJJ2-kRvG791wEMLKyXB",
@@ -1901,7 +1990,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1sazz5gsJ6_RnLoVBPq7S3azpj9TS2OaT",
         "title": "260822 KIENAN CATNOC V002",
-        "thumb": "https://drive.google.com/thumbnail?id=1sazz5gsJ6_RnLoVBPq7S3azpj9TS2OaT&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1sazz5gsJ6_RnLoVBPq7S3azpj9TS2OaT&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1I7Rla5O9tpLy23iqU3qnZ6GBLsohNBQq",
@@ -1973,12 +2063,14 @@ const PORTFOLIO_DATA = {
       {
         "id": "1XOKevD6GcxtEwzqnG_mJjEKgeNjUMXnI",
         "title": "BuuCuong [OFFLINE] v003",
-        "thumb": "https://drive.google.com/thumbnail?id=1XOKevD6GcxtEwzqnG_mJjEKgeNjUMXnI&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1XOKevD6GcxtEwzqnG_mJjEKgeNjUMXnI&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1usEhNnxRu-yX9ZR7znPBRZA9up8FcNZI",
         "title": "CongTrinh AnhThu [MASTER] v001",
-        "thumb": "https://drive.google.com/thumbnail?id=1usEhNnxRu-yX9ZR7znPBRZA9up8FcNZI&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1usEhNnxRu-yX9ZR7znPBRZA9up8FcNZI&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1fsvKJYm8u98FX9jbiEhBv-rBiuqk1Z3h",
@@ -1998,12 +2090,14 @@ const PORTFOLIO_DATA = {
       {
         "id": "1oYMYygFH5kEARkpUsAczwit2RPWYXh4l",
         "title": "HDTC2124 - Nguyễn Văn Danh - YKKH",
-        "thumb": "https://drive.google.com/thumbnail?id=1oYMYygFH5kEARkpUsAczwit2RPWYXh4l&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1oYMYygFH5kEARkpUsAczwit2RPWYXh4l&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "19BlAc3s-uqv183yCV6j2i5-rpOqAE4bS",
         "title": "NAGOPA NHACAP4 BAUBANG [MASTER] v001",
-        "thumb": "https://drive.google.com/thumbnail?id=19BlAc3s-uqv183yCV6j2i5-rpOqAE4bS&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=19BlAc3s-uqv183yCV6j2i5-rpOqAE4bS&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1PSJ6TxXLJC6CZwXV0LIjM5FeZxJW4Wua",
@@ -2033,7 +2127,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1ohvehoxjGuEwuK9Pk5zKN9UawoWAb8tn",
         "title": "TruongNhuNguyen [OFFLINE] v001 revised",
-        "thumb": "https://drive.google.com/thumbnail?id=1ohvehoxjGuEwuK9Pk5zKN9UawoWAb8tn&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1ohvehoxjGuEwuK9Pk5zKN9UawoWAb8tn&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1NF70iRN2MVlhNL4Sh0a69gIvltoHtyXZ",
@@ -2048,7 +2143,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1kjw-B6jz5DMOd0bAOA8Plm8GeFnYTDER",
         "title": "ZHOME Penthouse KTS [MASTER] v002",
-        "thumb": "https://drive.google.com/thumbnail?id=1kjw-B6jz5DMOd0bAOA8Plm8GeFnYTDER&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1kjw-B6jz5DMOd0bAOA8Plm8GeFnYTDER&sz=w400",
+        "thumbDark": true
       }
     ],
     "Động Thổ": [
@@ -2080,7 +2176,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1ShW99XCzEwmf0-wWVh1zc2wkqEtTcXoX",
         "title": "240405 DongTho AnhThinh [OFFLINE] v003 revised",
-        "thumb": "https://drive.google.com/thumbnail?id=1ShW99XCzEwmf0-wWVh1zc2wkqEtTcXoX&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1ShW99XCzEwmf0-wWVh1zc2wkqEtTcXoX&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1VrRGcmuU4FF3v_mqirdkxuaKn0jQz0Ua",
@@ -2090,7 +2187,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1_gg5nX095RVCb-eqo51gVWKGEndjYmWl",
         "title": "240507 DongThoVietThang [OFFLINE] v003",
-        "thumb": "https://drive.google.com/thumbnail?id=1_gg5nX095RVCb-eqo51gVWKGEndjYmWl&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1_gg5nX095RVCb-eqo51gVWKGEndjYmWl&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1nWoRbeSYj1WIFvkQIZVSMGdHGPoylSpx",
@@ -2120,7 +2218,8 @@ const PORTFOLIO_DATA = {
       {
         "id": "1v-2zTXeav--zVAuSazHPBq2eqvNCkRh9",
         "title": "251004 DONGTHO YENHOUSE V003",
-        "thumb": "https://drive.google.com/thumbnail?id=1v-2zTXeav--zVAuSazHPBq2eqvNCkRh9&sz=w400"
+        "thumb": "https://drive.google.com/thumbnail?id=1v-2zTXeav--zVAuSazHPBq2eqvNCkRh9&sz=w400",
+        "thumbDark": true
       },
       {
         "id": "1Xj7Oxc1F4hHMQplB0eorrPtvXYm1QYNl",

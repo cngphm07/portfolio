@@ -94,6 +94,7 @@ async function scanAll() {
       }
     }
   }
+  await markDarkThumbs(data);
   return data;
 }
 
@@ -104,6 +105,45 @@ function toVideo(i) {
     // stable per-file thumbnail; the lh3 URLs from the folder view expire
     thumb: `https://drive.google.com/thumbnail?id=${i.id}&sz=w400`,
   };
+}
+
+// Drive thumbnails are auto-generated from the video's first frame; when that
+// frame is flat black the thumb JPEG compresses to ~0.8-1.6KB while real
+// content starts around 16KB. Band 2-2.8KB is still near-unreadable dark
+// scenes; ~4KB+ keeps readable posters (e.g. logo title cards).
+const DARK_THUMB_BYTES = 2800;
+
+async function probeThumbSize(id) {
+  // one retry: Drive rate-limits bursts and a 429 must not silently unflag
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(`https://drive.google.com/thumbnail?id=${id}&sz=w400`);
+      if (!res.ok) { await new Promise(r => setTimeout(r, 400 * (attempt + 1))); continue; }
+      const buf = await res.arrayBuffer();
+      return buf.byteLength;
+    } catch (e) {
+      await new Promise(r => setTimeout(r, 400 * (attempt + 1)));
+    }
+  }
+  return 0;
+}
+
+async function markDarkThumbs(data) {
+  const vids = [];
+  for (const cat of Object.values(data)) {
+    if (Array.isArray(cat)) vids.push(...cat);
+    else for (const arr of Object.values(cat)) vids.push(...arr);
+  }
+  let idx = 0, flagged = 0;
+  async function worker() {
+    while (idx < vids.length) {
+      const v = vids[idx++];
+      const size = await probeThumbSize(v.id);
+      if (size && size < DARK_THUMB_BYTES) { v.thumbDark = true; flagged++; }
+    }
+  }
+  await Promise.all(Array.from({ length: 12 }, worker));
+  console.log(`[scan] ${flagged}/${vids.length} thumbnails flagged dark`);
 }
 
 module.exports = { scanAll, cleanName };
