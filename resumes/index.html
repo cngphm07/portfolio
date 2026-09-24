@@ -13,6 +13,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css">
+  <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
 
@@ -36,25 +37,27 @@
   <!-- hero -->
   <section class="hero" id="top">
     <canvas id="heroCanvas" aria-hidden="true"></canvas>
-    <div class="hero-frame" aria-hidden="true">
+    <div class="hero-frame intro-fade" aria-hidden="true">
       <span class="hf hf-tl"></span><span class="hf hf-tr"></span>
       <span class="hf hf-bl"></span><span class="hf hf-br"></span>
-      <span class="hero-side mono">RÉSUMÉ — 2026</span>
+      <span class="hero-side mono">BASED IN VIETNAM</span>
       <span class="hero-side-r mono">CURRICULUM VITAE</span>
     </div>
 
     <!-- upper-left: crisp type lockup -->
-    <div class="hero-title-wrap" id="heroTitleWrap">
-      <p class="hero-kicker mono" id="heroKicker">RÉSUMÉ — 2026</p>
+    <div class="hero-title-wrap intro" style="--i:1" id="heroTitleWrap">
+      <p class="hero-kicker mono" id="heroKicker" style="--i:0">RÉSUMÉ — 2026</p>
       <h1 class="hero-title display" id="heroTitle">Filmmaker<br><span class="amp">&amp;</span> Media Producer</h1>
     </div>
 
     <!-- lower-left: identity cluster -->
     <div class="hero-content">
-      <p class="hero-name display" id="heroName">CUONG PHAM QUOC</p>
-      <p class="hero-loc mono" id="heroLoc">MEDIA LEADER · POST PRODUCTION MANAGER · VIDEO EDITOR</p>
+      <p class="hero-name display intro" style="--i:2" id="heroName">CUONG PHAM QUOC</p>
+      <p class="hero-loc mono intro" style="--i:3" id="heroLoc">MEDIA LEADER · POST PRODUCTION MANAGER · VIDEO EDITOR</p>
 
-      <div class="hero-actions mono">
+      <p class="avail mono intro" style="--i:4"><span class="dot" aria-hidden="true"></span>OPEN FOR PROJECTS &amp; COLLABS</p>
+
+      <div class="hero-actions mono intro" style="--i:5">
         <button class="btn-pill btn-accent" onclick="window.print()">
           <span>⎙ PRINT / SAVE PDF</span>
         </button>
@@ -66,27 +69,27 @@
         </a>
       </div>
 
-      <div class="hero-meta mono" id="heroMeta">
+      <div class="hero-meta mono intro" style="--i:6" id="heroMeta">
         <div>
-          <b class="display">10</b>
+          <b class="display"><span data-count="10">0</span></b>
           <span>YEARS EXP</span>
         </div>
         <div>
-          <b class="display">10+</b>
+          <b class="display"><span data-count="10" data-suffix="+">0</span></b>
           <span>ORGANIZATIONS</span>
         </div>
         <div>
-          <b class="display">6+</b>
+          <b class="display"><span data-count="6" data-suffix="+">0</span></b>
           <span>GLOBAL BRANDS</span>
         </div>
         <div>
-          <b class="display">2</b>
+          <b class="display"><span data-count="2">0</span></b>
           <span>FILM AWARDS</span>
         </div>
       </div>
     </div>
 
-    <a class="hero-scroll mono" href="#about" id="heroScroll" aria-label="Scroll to about">
+    <a class="hero-scroll mono intro" style="--i:7" href="#about" id="heroScroll" aria-label="Scroll to about">
       SCROLL<span class="hs-line"></span>
     </a>
   </section>
@@ -98,25 +101,26 @@
 
   <!-- section 01: about -->
   <section class="resume-section" id="about">
-    <div class="sec-head">
+    <span class="sec-mark" aria-hidden="true">01</span>
+    <div class="sec-head" data-reveal>
       <span class="sec-num mono">01</span>
       <span class="sec-rule"></span>
       <span class="sec-title-label mono">ABOUT ME</span>
     </div>
-    <p class="about-lead">
+    <p class="about-lead" data-reveal>
       I'm <b>Pham Quoc Cuong</b> — a media leader &amp; producer with nearly 10 years of
       experience in video production and brand storytelling. Over the course of my career,
       I have led diverse roles from Data Specialist, DOP Assistant, QTAKE &amp; Stream Operator,
       to Post-Production Operation Manager and Indie Filmmaker.
     </p>
-    <p class="about-lead" style="margin-top: 1.2rem">
+    <p class="about-lead" style="margin-top: 1.2rem" data-reveal>
       I cover the full production lifecycle — from pre-production planning and on-set execution
       to post-production finishing, color grading and special effects. I have collaborated with
       filmmakers and clients across Singapore, Malaysia, Australia, and Morocco, and produced visual
       content for international brands including Google, Honda, Lazada, Shopee, PepsiCo and Unilever.
     </p>
 
-    <div class="brands mono" aria-label="Brands worked with">
+    <div class="brands mono" aria-label="Brands worked with" data-reveal>
       <span>GOOGLE</span>
       <span>HONDA</span>
       <span>LAZADA</span>
@@ -125,7 +129,7 @@
       <span>UNILEVER</span>
     </div>
 
-    <div class="about-contact-inline">
+    <div class="about-contact-inline" data-reveal>
       <a href="mailto:cuongphamworks@gmail.com">cuongphamworks@gmail.com</a>
       <a href="tel:+84971807891">+84 97 180 7891</a>
       <span class="zalo-pill mono">ZALO</span>
@@ -135,17 +139,18 @@
 
   <!-- section 02: experience -->
   <section class="resume-section" id="experience">
-    <div class="sec-head">
+    <span class="sec-mark" aria-hidden="true">02</span>
+    <div class="sec-head" data-reveal>
       <span class="sec-num mono">02</span>
       <span class="sec-rule"></span>
       <span class="sec-title-label mono">EXPERIENCE</span>
       <span class="sec-count mono">10 POSITIONS</span>
     </div>
 
-    <div class="exp-list">
+    <div class="exp-list" data-stagger>
       <!-- 1. Freelance Filmmaker / Producer / Video Editor -->
-      <article class="exp-item">
-        <time class="exp-date mono">2018 — NOW</time>
+      <article class="exp-item" data-reveal>
+        <time class="exp-date mono"><span class="exp-idx" aria-hidden="true">01</span>2018 — NOW</time>
         <div>
           <h3 class="exp-role">Freelance Filmmaker / Producer / Video Editor</h3>
           <p class="exp-company">Independent · Worldwide &amp; Vietnam</p>
@@ -157,8 +162,8 @@
       </article>
 
       <!-- 2. Butecco -->
-      <article class="exp-item">
-        <time class="exp-date mono">2024 — 2026</time>
+      <article class="exp-item" data-reveal>
+        <time class="exp-date mono"><span class="exp-idx" aria-hidden="true">02</span>2024 — 2026</time>
         <div>
           <h3 class="exp-role">Media Leader</h3>
           <p class="exp-company">Butecco Design &amp; Build</p>
@@ -170,8 +175,8 @@
       </article>
 
       <!-- 3. Dat Thu -->
-      <article class="exp-item">
-        <time class="exp-date mono">2022 — 2024</time>
+      <article class="exp-item" data-reveal>
+        <time class="exp-date mono"><span class="exp-idx" aria-hidden="true">03</span>2022 — 2024</time>
         <div>
           <h3 class="exp-role">Media Leader</h3>
           <p class="exp-company">Dat Thu Design &amp; Construction</p>
@@ -183,8 +188,8 @@
       </article>
 
       <!-- 4. Manh Nguyen / Overco -->
-      <article class="exp-item">
-        <time class="exp-date mono">2021 — 2022</time>
+      <article class="exp-item" data-reveal>
+        <time class="exp-date mono"><span class="exp-idx" aria-hidden="true">04</span>2021 — 2022</time>
         <div>
           <h3 class="exp-role">Marketing Supervisor / Manager</h3>
           <p class="exp-company">Manh Nguyen Investment Development Co. LTD</p>
@@ -197,8 +202,8 @@
       </article>
 
       <!-- 5. OneCut -->
-      <article class="exp-item">
-        <time class="exp-date mono">2020 — 2022</time>
+      <article class="exp-item" data-reveal>
+        <time class="exp-date mono"><span class="exp-idx" aria-hidden="true">05</span>2020 — 2022</time>
         <div>
           <h3 class="exp-role">Operation Manager / DOP Assistant / Stream &amp; QTAKE Specialist / Filmmaker</h3>
           <p class="exp-company">OneCut Production House</p>
@@ -210,8 +215,8 @@
       </article>
 
       <!-- 6. RICE / Digipost -->
-      <article class="exp-item">
-        <time class="exp-date mono">2019 — 2020</time>
+      <article class="exp-item" data-reveal>
+        <time class="exp-date mono"><span class="exp-idx" aria-hidden="true">06</span>2019 — 2020</time>
         <div>
           <h3 class="exp-role">Filmmaker / Visual Artist</h3>
           <p class="exp-company">RICE Content &amp; Media / Digipost Production House</p>
@@ -223,8 +228,8 @@
       </article>
 
       <!-- 7. Hao Phuong -->
-      <article class="exp-item">
-        <time class="exp-date mono">2018 — 2019</time>
+      <article class="exp-item" data-reveal>
+        <time class="exp-date mono"><span class="exp-idx" aria-hidden="true">07</span>2018 — 2019</time>
         <div>
           <h3 class="exp-role">Video Editor / Photographer</h3>
           <p class="exp-company">Hao Phuong Corporation</p>
@@ -235,8 +240,8 @@
       </article>
 
       <!-- 8. Sao Do -->
-      <article class="exp-item">
-        <time class="exp-date mono">2017 — 2018</time>
+      <article class="exp-item" data-reveal>
+        <time class="exp-date mono"><span class="exp-idx" aria-hidden="true">08</span>2017 — 2018</time>
         <div>
           <h3 class="exp-role">Video Editor / Set Designer</h3>
           <p class="exp-company">Sao Do Production</p>
@@ -247,8 +252,8 @@
       </article>
 
       <!-- 9. Topica -->
-      <article class="exp-item">
-        <time class="exp-date mono">2017</time>
+      <article class="exp-item" data-reveal>
+        <time class="exp-date mono"><span class="exp-idx" aria-hidden="true">09</span>2017</time>
         <div>
           <h3 class="exp-role">Event Staff &amp; Producer</h3>
           <p class="exp-company">Topica Edutech Group</p>
@@ -259,8 +264,8 @@
       </article>
 
       <!-- 10. FPT Education -->
-      <article class="exp-item">
-        <time class="exp-date mono">2015 — 2017</time>
+      <article class="exp-item" data-reveal>
+        <time class="exp-date mono"><span class="exp-idx" aria-hidden="true">10</span>2015 — 2017</time>
         <div>
           <h3 class="exp-role">Copywriter</h3>
           <p class="exp-company">FPT Education Group — Cóc Đọc Magazine</p>
@@ -274,15 +279,16 @@
 
   <!-- section 03: skills -->
   <section class="resume-section" id="skills">
-    <div class="sec-head">
+    <span class="sec-mark" aria-hidden="true">03</span>
+    <div class="sec-head" data-reveal>
       <span class="sec-num mono">03</span>
       <span class="sec-rule"></span>
       <span class="sec-title-label mono">SKILLS &amp; CAPABILITIES</span>
     </div>
 
-    <div class="skills-grid">
-      <div class="skill-group">
-        <p class="skill-label mono">PRODUCTION</p>
+    <div class="skills-grid" data-stagger>
+      <div class="skill-group" data-reveal>
+        <p class="skill-label mono">PRODUCTION<span class="cnt">05</span></p>
         <span>Pre-production Planning &amp; Treatment</span>
         <span>On-set Directing &amp; Cinematography</span>
         <span>DOP Assistant &amp; Camera Operator</span>
@@ -290,8 +296,8 @@
         <span>Livestream &amp; Virtual Production R&amp;D</span>
       </div>
 
-      <div class="skill-group">
-        <p class="skill-label mono">POST-PRODUCTION</p>
+      <div class="skill-group" data-reveal>
+        <p class="skill-label mono">POST-PRODUCTION<span class="cnt">05</span></p>
         <span>Video Editing (Offline &amp; Online)</span>
         <span>Color Grading &amp; Film Emulation</span>
         <span>Visual Effects (VFX) &amp; Finishing</span>
@@ -299,16 +305,16 @@
         <span>Sound Design &amp; Audio Mixing</span>
       </div>
 
-      <div class="skill-group">
-        <p class="skill-label mono">TOOLS &amp; SOFTWARE</p>
+      <div class="skill-group" data-reveal>
+        <p class="skill-label mono">TOOLS &amp; SOFTWARE<span class="cnt">04</span></p>
         <span>Adobe Premiere Pro · After Effects</span>
         <span>DaVinci Resolve (Edit &amp; Color)</span>
         <span>Final Cut Pro · Cinema 4D · Nuke</span>
         <span>QTAKE HD · FilmConvert · Photoshop</span>
       </div>
 
-      <div class="skill-group">
-        <p class="skill-label mono">MANAGEMENT &amp; MARKETING</p>
+      <div class="skill-group" data-reveal>
+        <p class="skill-label mono">MANAGEMENT &amp; MARKETING<span class="cnt">05</span></p>
         <span>Media Team Leadership</span>
         <span>Post-Production Operations</span>
         <span>Marketing Department Workflows</span>
@@ -320,14 +326,15 @@
 
   <!-- section 04: education & honors -->
   <section class="resume-section" id="education">
-    <div class="sec-head">
+    <span class="sec-mark" aria-hidden="true">04</span>
+    <div class="sec-head" data-reveal>
       <span class="sec-num mono">04</span>
       <span class="sec-rule"></span>
       <span class="sec-title-label mono">EDUCATION &amp; HONORS</span>
     </div>
 
-    <div class="dual-grid">
-      <div>
+    <div class="dual-grid" data-stagger>
+      <div data-reveal>
         <p class="sub-sec-title mono">EDUCATION</p>
         <div class="info-item">
           <h3 class="info-title">Bachelor of Software Engineering</h3>
@@ -336,7 +343,7 @@
         </div>
       </div>
 
-      <div>
+      <div data-reveal>
         <p class="sub-sec-title mono">AWARDS &amp; PRESS</p>
         <div class="info-item">
           <h3 class="info-title">Best Pictures &amp; Best Sound Design</h3>
@@ -361,18 +368,18 @@
 
   <!-- section 05: contact footer -->
   <footer class="resume-footer" id="contact">
-    <div class="sec-head">
+    <div class="sec-head" data-reveal>
       <span class="sec-num mono">05</span>
       <span class="sec-rule"></span>
       <span class="sec-title-label mono">CONTACT</span>
     </div>
 
-    <h2 class="footer-h display">
+    <h2 class="footer-h display" data-reveal>
       Let's make<br>
-      something <a class="footer-mail" href="mailto:cuongphamworks@gmail.com">together</a>
+      something <a class="footer-mail" href="mailto:cuongphamworks@gmail.com" data-magnetic>together</a>
     </h2>
 
-    <div class="foot-grid mono">
+    <div class="foot-grid mono" data-stagger data-reveal>
       <div class="foot-col">
         <span class="foot-label">EMAIL</span>
         <a href="mailto:cuongphamworks@gmail.com">cuongphamworks@gmail.com</a>
@@ -394,7 +401,7 @@
       </div>
     </div>
 
-    <div class="foot-base mono">
+    <div class="foot-base mono" data-reveal>
       <span>© 2026 — CUONG PHAM QUOC</span>
       <span>RÉSUMÉ — MONOCHROME EDITION</span>
       <a href="#top">BACK TO TOP ↑</a>
@@ -403,6 +410,12 @@
 
   <!-- toast notification for email copy -->
   <div id="toast" class="toast mono" aria-live="polite">EMAIL COPIED TO CLIPBOARD</div>
+
+  <!-- custom cursor -->
+  <div class="cursor" id="cursor" aria-hidden="true">
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+  </div>
 
   <script>
     function copyEmail() {
@@ -417,5 +430,6 @@
   </script>
 
   <script defer src="js/hero.js"></script>
+  <script defer src="js/motion.js"></script>
 </body>
 </html>

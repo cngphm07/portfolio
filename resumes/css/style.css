@@ -937,3 +937,287 @@ header.site-header {
   .footer-mail::after { display: none; }
   .foot-base a { display: none; }
 }
+
+/* ============================================================
+   UX/UI UPGRADE LAYER — artist digital standard
+   ============================================================ */
+
+/* anchor offset for fixed header */
+section[id], footer[id] { scroll-margin-top: 4.5rem; }
+
+/* ---------- header: hide on scroll + active nav ---------- */
+header.site-header {
+  transition: transform .55s var(--ease);
+  will-change: transform;
+}
+
+header.site-header.hide { transform: translateY(-110%); }
+
+.site-header nav a.active { color: var(--ink); }
+.site-header nav a.active::after { transform: scaleX(1); }
+
+/* ---------- reveal-on-scroll system ---------- */
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .9s var(--ease), transform .9s var(--ease);
+  transition-delay: calc(var(--d, 0) * 70ms);
+}
+
+html.js [data-reveal].in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- hero intro choreography ---------- */
+html.js .intro {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: introRise .85s var(--ease) forwards;
+  animation-delay: calc(.25s + var(--i, 0) * .1s);
+}
+
+html.js .hero-title-wrap.intro { animation-name: introRiseSoft; }
+
+@keyframes introRise {
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes introRiseSoft {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+
+html.js .intro-fade {
+  opacity: 0;
+  animation: introFade 1.3s ease .95s forwards;
+}
+
+@keyframes introFade { to { opacity: 1; } }
+
+/* ---------- availability pill ---------- */
+.avail {
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  font-size: .58rem;
+  letter-spacing: .24em;
+  color: var(--g1);
+  border: 1px solid var(--line2);
+  border-radius: 99px;
+  padding: .5rem 1rem;
+  margin-top: 1.5rem;
+  width: fit-content;
+}
+
+.avail .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: availPulse 2s ease-in-out infinite;
+}
+
+@keyframes availPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .35; transform: scale(.72); }
+}
+
+/* ---------- giant section watermark ---------- */
+.resume-section { position: relative; }
+
+.sec-mark {
+  position: absolute;
+  top: clamp(2rem, 6vh, 4rem);
+  right: -.5rem;
+  z-index: 0;
+  font-family: var(--font-d);
+  font-weight: 900;
+  font-stretch: 118%;
+  font-size: clamp(7rem, 18vw, 16rem);
+  line-height: .8;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 255, 255, .055);
+  pointer-events: none;
+  user-select: none;
+}
+
+.resume-section > *:not(.sec-mark) { position: relative; z-index: 1; }
+
+/* ---------- experience rows: index + hover state ---------- */
+.exp-item {
+  position: relative;
+  transition: background .35s var(--ease);
+}
+
+.exp-item::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--pad));
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform .4s var(--ease);
+}
+
+.exp-item:hover { background: linear-gradient(90deg, rgba(255,255,255,.025), transparent 65%); }
+
+.exp-item:hover::before { transform: scaleY(1); }
+
+.exp-item:hover .exp-date { color: var(--ink); }
+
+.exp-idx {
+  display: block;
+  color: var(--g3);
+  font-size: .56rem;
+  letter-spacing: .2em;
+  margin-bottom: .45rem;
+  transition: color .3s;
+}
+
+.exp-item:hover .exp-idx { color: var(--accent); }
+
+/* ---------- skills: capability cards ---------- */
+.skill-group {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 1.7rem 1.6rem 1.9rem;
+  transition: border-color .3s var(--ease), transform .3s var(--ease);
+}
+
+.skill-group:hover {
+  border-color: var(--line2);
+  transform: translateY(-4px);
+}
+
+.skill-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.skill-label .cnt {
+  color: var(--g3);
+  font-size: .56rem;
+  transition: color .3s;
+}
+
+.skill-group:hover .cnt { color: var(--accent); }
+
+.skill-group span {
+  position: relative;
+  padding-left: 1.05rem;
+  transition: color .25s;
+  width: fit-content;
+}
+
+.skill-group span::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: .58em;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--g3);
+  transition: background .25s, transform .25s;
+}
+
+.skill-group span:hover { color: var(--ink); }
+
+.skill-group span:hover::before {
+  background: var(--accent);
+  transform: scale(1.35);
+}
+
+/* ---------- education / awards hover ---------- */
+.info-item { transition: background .3s var(--ease); }
+
+.info-item:hover { background: rgba(255, 255, 255, .018); }
+
+/* ---------- hero meta tabular numbers ---------- */
+.hero-meta b { font-variant-numeric: tabular-nums; }
+
+/* ---------- custom cursor ---------- */
+.cursor { position: fixed; inset: 0; z-index: 1200; pointer-events: none; display: none; }
+
+body.has-cursor { cursor: none; }
+
+body.has-cursor a,
+body.has-cursor button,
+body.has-cursor [role="button"] { cursor: none; }
+
+body.has-cursor .cursor { display: block; }
+
+.cursor-dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  background: var(--ink);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity .3s;
+}
+
+.cursor-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 1px solid rgba(255, 255, 255, .45);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity .3s, width .35s var(--ease), height .35s var(--ease),
+              margin .35s var(--ease), border-color .35s;
+}
+
+.cursor-ring.on {
+  width: 52px;
+  height: 52px;
+  margin: -26px 0 0 -26px;
+  border-color: var(--ink);
+}
+
+/* ---------- magnetic mail link ---------- */
+.footer-mail { transition: opacity .3s, transform .55s var(--ease); }
+
+/* ---------- responsive upgrades ---------- */
+@media (max-width: 760px) {
+  .sec-mark { display: none; }
+  .avail { margin-top: 1.3rem; }
+  .exp-item::before { left: -1.25rem; }
+}
+
+/* ---------- reduced motion upgrades ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html.js [data-reveal],
+  html.js .intro,
+  html.js .intro-fade {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  .avail .dot, .hs-line::after { animation: none; }
+}
+
+/* ---------- print upgrades ---------- */
+@media print {
+  .sec-mark, .cursor, .avail, .hero-scroll { display: none !important; }
+
+  html.js [data-reveal],
+  html.js .intro,
+  html.js .intro-fade {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+}
