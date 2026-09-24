@@ -826,7 +826,47 @@
   </div>
 
   <!-- ============================================================
-       8. ADMIN LOGIN MODAL (STRICT SUPABASE AUTH ONLY)
+       8. MONTHLY CHART DETAIL MODAL
+       ============================================================ -->
+  <div id="monthChartDetailModal" class="fixed inset-0 z-[60] bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-surface border border-borderStrong rounded-2xl w-full max-w-3xl max-h-[92vh] shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
+      <div class="px-4 sm:px-5 py-3.5 sm:py-4 bg-surface2 border-b border-borderSubtle flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div id="monthChartDetailIcon" class="p-2 rounded-xl bg-neon/10 text-neon shrink-0">
+            <i data-lucide="chart-column-big" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+          </div>
+          <div class="min-w-0">
+            <p id="monthChartDetailKind" class="font-mono text-[9.5px] sm:text-[10px] text-inkMuted uppercase tracking-wider">CHI TIẾT THEO THÁNG</p>
+            <h3 id="monthChartDetailTitle" class="font-display font-bold text-sm sm:text-lg text-ink truncate">Tháng 03/2025</h3>
+          </div>
+        </div>
+        <button onclick="closeMonthChartDetail()" class="p-1.5 sm:p-2 rounded-lg bg-surface3 hover:bg-white/10 text-inkMuted hover:text-ink transition-colors shrink-0 ml-2">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="p-3.5 sm:p-5 overflow-y-auto min-h-0">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 mb-3.5 sm:mb-4">
+          <div class="bg-surface2 p-3 rounded-xl border border-borderSubtle">
+            <p class="font-mono text-[9.5px] text-inkMuted uppercase">TỔNG GIÁ TRỊ</p>
+            <p id="monthChartDetailTotal" class="font-display font-black text-lg sm:text-2xl text-neon mt-1">0 ₫</p>
+          </div>
+          <div class="bg-surface2 p-3 rounded-xl border border-borderSubtle">
+            <p class="font-mono text-[9.5px] text-inkMuted uppercase">SỐ HẠNG MỤC</p>
+            <p id="monthChartDetailCount" class="font-display font-black text-lg sm:text-2xl text-ink mt-1">0</p>
+          </div>
+        </div>
+        <div id="monthChartDetailList" class="divide-y divide-borderSubtle border border-borderSubtle rounded-xl overflow-hidden"></div>
+      </div>
+
+      <div class="px-4 sm:px-5 py-3 bg-surface2 border-t border-borderSubtle flex items-center justify-end shrink-0">
+        <button onclick="closeMonthChartDetail()" class="px-4 py-2 rounded-xl bg-ink text-bg font-mono font-bold text-xs hover:bg-white transition-colors">ĐÓNG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       9. ADMIN LOGIN MODAL (STRICT SUPABASE AUTH ONLY)
        ============================================================ -->
   <div id="loginModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4">
     <div class="bg-surface border border-borderStrong rounded-2xl w-full max-w-sm p-5 sm:p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95">
@@ -2498,6 +2538,7 @@
           closeClientModal();
           closeLoginModal();
           closeShareModal();
+          closeMonthChartDetail();
           clearSearch();
         }
       });
@@ -4762,6 +4803,13 @@
             responsive: true,
             maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
+            onClick: (event, elements) => {
+              const hit = elements && elements[0];
+              // Dataset 0 is the revenue bar; do not open details for the volume line.
+              if (hit && hit.datasetIndex === 0 && monthLabels[hit.index]) {
+                openMonthChartDetail(monthLabels[hit.index], 'revenue');
+              }
+            },
             plugins: {
               legend: { display: false },
               tooltip: {
@@ -4826,6 +4874,12 @@
           options: {
             responsive: true,
             maintainAspectRatio: false,
+            onClick: (event, elements) => {
+              const hit = elements && elements[0];
+              if (hit && actualCashMonths[hit.index]) {
+                openMonthChartDetail(actualCashMonths[hit.index], 'actualCash');
+              }
+            },
             plugins: {
               legend: { display: false },
               tooltip: {
@@ -5144,6 +5198,122 @@
           `;
         }).join('');
       }
+    }
+
+    // -------------------------------------------------------------
+    // Monthly Analytics Chart Detail Modal
+    // -------------------------------------------------------------
+    function closeMonthChartDetail() {
+      const modal = document.getElementById('monthChartDetailModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function openMonthChartDetail(month, source) {
+      const modal = document.getElementById('monthChartDetailModal');
+      if (!modal) return;
+
+      const isActualCash = source === 'actualCash';
+      const isCashflow = revenueRecognitionMode === 'cashflow';
+      let detailItems = [];
+
+      if (isActualCash) {
+        detailItems = expandCashflowInstallments(filteredData)
+          .filter(inst => inst.month === month && inst.isCollected && (inst.amount || 0) > 0);
+      } else if (isCashflow) {
+        detailItems = expandCashflowInstallments(filteredData)
+          .filter(inst => inst.month === month && (inst.amount || 0) > 0);
+      } else {
+        detailItems = filteredData
+          .filter(item => item.month === month && ((item.isBundleLeader && item.bundlePrice > 0) || (!item.isBundle && (item.price || 0) > 0)))
+          .map(item => {
+            const p = getPaymentMeta(item);
+            const amount = item.isBundle ? item.bundlePrice : item.price;
+            return {
+              ...item,
+              amount,
+              date: item.dateApproved || item.dateReceived || '--',
+              stageLabel: item.isSalary
+                ? (currentLang === 'vi' ? '💼 Lương cố định' : '💼 Monthly Salary')
+                : (currentLang === 'vi' ? 'Giá trị hợp đồng' : 'Contract Value'),
+              isCollected: p.isPaid,
+              classes: p.classes,
+              badgeClasses: p.badgeClasses,
+              tag: p.tag
+            };
+          });
+      }
+
+      detailItems.sort((a, b) => {
+        const dateA = parseFullDateOrMonth({ dateReceived: a.date || a.dateReceived, dateApproved: a.dateApproved, month: a.month });
+        const dateB = parseFullDateOrMonth({ dateReceived: b.date || b.dateReceived, dateApproved: b.dateApproved, month: b.month });
+        if (dateA !== dateB) return dateA - dateB;
+        return (a.stt || 0) - (b.stt || 0);
+      });
+
+      const total = detailItems.reduce((sum, item) => sum + (item.amount || 0), 0);
+      const kindEl = document.getElementById('monthChartDetailKind');
+      const titleEl = document.getElementById('monthChartDetailTitle');
+      const totalEl = document.getElementById('monthChartDetailTotal');
+      const countEl = document.getElementById('monthChartDetailCount');
+      const iconEl = document.getElementById('monthChartDetailIcon');
+      const listEl = document.getElementById('monthChartDetailList');
+
+      const kindText = isActualCash
+        ? (currentLang === 'vi' ? 'CHI TIẾT THỰC THU ĐÃ XÁC NHẬN' : 'CONFIRMED ACTUAL CASH DETAILS')
+        : (isCashflow
+          ? (currentLang === 'vi' ? 'CHI TIẾT DÒNG TIỀN THEO ĐỢT' : 'INSTALLMENT CASHFLOW DETAILS')
+          : (currentLang === 'vi' ? 'CHI TIẾT DOANH THU HỢP ĐỒNG' : 'CONTRACT REVENUE DETAILS'));
+
+      if (kindEl) kindEl.textContent = kindText;
+      if (titleEl) titleEl.textContent = month;
+      if (totalEl) {
+        totalEl.textContent = formatVND(total);
+        totalEl.className = `font-display font-black text-lg sm:text-2xl mt-1 ${isActualCash ? 'text-greenTerminal' : 'text-neon'}`;
+      }
+      if (countEl) countEl.textContent = String(detailItems.length);
+      if (iconEl) {
+        iconEl.className = `p-2 rounded-xl shrink-0 ${isActualCash ? 'bg-greenTerminal/10 text-greenTerminal' : 'bg-neon/10 text-neon'}`;
+      }
+
+      if (listEl) {
+        listEl.innerHTML = detailItems.length ? detailItems.map((item, index) => {
+          const stage = item.stageLabel || (currentLang === 'vi' ? 'Hạng mục' : 'Line Item');
+          const statusTag = item.tag || (item.isCollected ? (currentLang === 'vi' ? '✓ ĐÃ THU' : '✓ COLLECTED') : (currentLang === 'vi' ? '⏳ CHỜ THU' : '⏳ DUE'));
+          const amountClass = item.isCollected ? 'text-greenTerminal' : (item.classes || 'text-ink');
+          const action = item.stt !== undefined
+            ? `<button onclick="openVideoModal(${item.stt})" class="p-1.5 rounded-lg bg-surface3 hover:bg-neon hover:text-bg text-inkMuted transition-colors" title="${t('previewBtn')}"><i data-lucide="play" class="w-3.5 h-3.5"></i></button>`
+            : '';
+
+          return `
+            <div class="p-3 sm:p-3.5 bg-surface hover:bg-surface2/70 transition-colors flex items-center gap-2.5 sm:gap-3">
+              <span class="font-mono text-[10px] text-inkDim w-5 shrink-0">#${index + 1}</span>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <button onclick="openVideoModal(${item.stt})" class="font-display font-bold text-xs sm:text-sm text-ink hover:text-neon truncate text-left">${item.video || 'Deliverable'}</button>
+                  ${item.clientName && activeClientId === 'all' ? `<span class="px-1.5 py-0.2 rounded bg-cyanGlow/10 border border-cyanGlow/20 text-cyanGlow text-[8.5px] font-mono font-bold">${item.clientName}</span>` : ''}
+                </div>
+                <div class="mt-1 flex items-center gap-1.5 sm:gap-2 flex-wrap font-mono text-[9px] sm:text-[10px]">
+                  <span class="px-1.5 py-0.5 rounded border ${item.installmentType === 'FINAL' ? 'bg-amberGlow/10 text-amberGlow border-amberGlow/25' : (item.installmentType === 'DEPOSIT' ? 'bg-cyanGlow/10 text-cyanGlow border-cyanGlow/25' : 'bg-surface3 text-inkMuted border-borderSubtle')}">${stage}</span>
+                  <span class="text-inkDim">${item.date || item.dateApproved || item.dateReceived || '--'}</span>
+                  <span class="${item.isCollected ? 'text-greenTerminal' : 'text-amberGlow'}">${statusTag}</span>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <div class="font-mono font-bold text-xs sm:text-sm ${amountClass}">${formatVND(item.amount || 0)}</div>
+                <span class="text-[9px] font-mono text-inkDim">${item.isCollected ? (currentLang === 'vi' ? 'Đã xác nhận' : 'Confirmed') : (currentLang === 'vi' ? 'Chờ thu' : 'Due')}</span>
+              </div>
+              ${action}
+            </div>
+          `;
+        }).join('') : `
+          <div class="py-10 px-4 text-center text-inkMuted font-mono text-xs">
+            ${currentLang === 'vi' ? 'Không có hạng mục phù hợp với tháng và bộ lọc hiện tại.' : 'No items match this month and the current filters.'}
+          </div>
+        `;
+      }
+
+      modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
     }
 
     // -------------------------------------------------------------
