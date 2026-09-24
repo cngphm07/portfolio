@@ -250,7 +250,7 @@ function setupClock(){
 /* ---------- reveal after preloader ---------- */
 function revealIn(){
   if(!hasGsap || reduced){
-    document.querySelectorAll('#siteHeader, #heroTitleWrap, #heroName, #heroLoc, #heroMeta, #heroScroll, .hero-frame, .marquee')
+    document.querySelectorAll('#siteHeader, #heroTitleWrap, #heroName, #heroLoc, #heroAvail, #heroMeta, #heroScroll, .hero-frame, .marquee')
       .forEach(function(el){ el.style.opacity = '1'; });
     runCounters(document.getElementById('heroMeta'));
     return;
@@ -260,11 +260,35 @@ function revealIn(){
     .fromTo('#heroTitleWrap', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1 }, .14)
     .fromTo('#heroName', { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 1.1 }, .3)
     .fromTo('#heroLoc', { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: .9 }, .46)
+    .fromTo('#heroAvail', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: .9 }, .52)
     .fromTo('#heroMeta', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, .58)
     .fromTo('#heroScroll', { opacity: 0 }, { opacity: 1, duration: 1.2 }, .9)
     .fromTo('.hero-frame', { opacity: 0 }, { opacity: 1, duration: 1.4 }, .7)
     .fromTo('.marquee', { yPercent: 100 }, { yPercent: 0, duration: 1, ease: 'power3.out' }, .6)
     .add(function(){ runCounters(document.getElementById('heroMeta')); }, .58);
+}
+
+/* ---------- active nav highlighting ---------- */
+function setupActiveNav(){
+  if(!('IntersectionObserver' in window)) return;
+  var links = Array.prototype.slice.call(document.querySelectorAll('header nav a'));
+  var byId = {};
+  links.forEach(function(a){
+    var id = (a.getAttribute('href') || '').replace('#', '');
+    if(id) byId[id] = a;
+  });
+  var nio = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting && byId[en.target.id]){
+        links.forEach(function(a){ a.classList.remove('active'); });
+        byId[en.target.id].classList.add('active');
+      }
+    });
+  }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+  Object.keys(byId).forEach(function(id){
+    var s = document.getElementById(id);
+    if(s) nio.observe(s);
+  });
 }
 
 function init(){
@@ -275,6 +299,7 @@ function init(){
   setupMagnetic();
   setupCursor();
   setupClock();
+  setupActiveNav();
   bindCards(true);
   document.addEventListener('gallery:render', function(){ bindCards(false); });
   if(hasGsap) ScrollTrigger.refresh();

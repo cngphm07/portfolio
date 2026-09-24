@@ -22,7 +22,7 @@
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
-html{background:var(--bg);scroll-behavior:smooth}
+html{background:var(--bg);scroll-behavior:smooth;overflow-x:clip}
 html.lenis,html.lenis body{height:auto}
 .lenis.lenis-smooth{scroll-behavior:auto!important}
 .lenis.lenis-stopped{overflow:hidden}
@@ -450,4 +450,50 @@ footer{
   html{scroll-behavior:auto}
   .grain,.hs-line::after,.lb-bar .lb-rec{animation:none}
   *{transition-duration:.01ms!important}
+}
+
+/* ============================================================
+   UX/UI UPGRADE LAYER — artist digital standard
+   ============================================================ */
+
+/* anchor offset for fixed header */
+#about,#work,#contact{scroll-margin-top:4.5rem}
+
+/* nav active state */
+header nav a.active{color:var(--ink)}
+header nav a.active::after{transform:scaleX(1)}
+
+/* availability pill */
+.avail{
+  display:inline-flex;align-items:center;gap:.55rem;
+  font-size:.58rem;letter-spacing:.24em;color:var(--g1);
+  border:1px solid var(--line2);border-radius:99px;
+  padding:.5rem 1rem;margin-top:1.4rem;width:fit-content;
+}
+.avail .dot{
+  width:6px;height:6px;border-radius:50%;background:var(--accent);
+  animation:availPulse 2s ease-in-out infinite;
+}
+@keyframes availPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.72)}}
+
+/* giant section watermark */
+.about,main,footer{position:relative}
+.sec-mark{
+  position:absolute;top:clamp(2rem,6vh,4rem);right:-.5rem;z-index:0;
+  font-family:var(--font-d);font-weight:900;font-stretch:118%;
+  font-size:clamp(7rem,18vw,16rem);line-height:.8;
+  color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.055);
+  pointer-events:none;user-select:none;
+}
+.about>*:not(.sec-mark),main>*:not(.sec-mark),footer>*:not(.sec-mark){position:relative;z-index:1}
+
+/* brands hover */
+.brands span{transition:color .25s}
+.brands span::before{transition:background .25s,transform .25s}
+.brands span:hover{color:var(--ink)}
+.brands span:hover::before{background:var(--accent);transform:scale(1.35)}
+
+/* responsive upgrades */
+@media(max-width:760px){
+  .sec-mark{display:none}
 }
