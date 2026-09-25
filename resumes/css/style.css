@@ -885,35 +885,52 @@ header.site-header {
   * { transition-duration: .01ms !important; }
 }
 
-/* ============ print styles — compact single-page A4 résumé ============ */
+/* ============ print styles — dark mono-cinema single-page A4 résumé ============ */
 @media print {
   @page {
     size: A4;
-    margin: 8mm 11mm;
+    margin: 0;
   }
 
   :root {
-    --bg: #ffffff;
-    --surface: #ffffff;
-    --ink: #111111;
-    --g1: #333333;
-    --g2: #666666;
-    --g3: #999999;
-    --line: rgba(0, 0, 0, 0.12);
-    --line2: rgba(0, 0, 0, 0.25);
-    --accent: #111111;
+    --bg: #060606;
+    --surface: #0b0b0b;
+    --ink: #f4f4f4;
+    --g1: #b5b5b5;
+    --g2: #6d6d6d;
+    --g3: #3a3a3a;
+    --line: rgba(255, 255, 255, 0.10);
+    --line2: rgba(255, 255, 255, 0.24);
+    --accent: #c9f24b;
   }
 
   html {
-    color-scheme: light;
-    background: #fff !important;
+    color-scheme: dark;
+    background: var(--bg) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   html, body {
-    background: #fff !important;
-    color: #111 !important;
+    background: var(--bg) !important;
+    color: var(--ink) !important;
     font-size: 7pt;
     line-height: 1.3;
+  }
+
+  body {
+    padding: 8mm 11mm 7mm;
+  }
+
+  /* full-bleed lime film-leader strip */
+  body::before {
+    content: '';
+    display: block;
+    height: 2mm;
+    background: var(--accent);
+    margin: -8mm -11mm 4mm;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   /* ---- hide screen-only decoration ---- */
@@ -958,20 +975,35 @@ header.site-header {
     font-size: 5.5pt !important;
     letter-spacing: .3em;
     margin: 0 0 .25rem !important;
+    color: var(--accent) !important;
   }
 
   .hero-name {
     order: 1;
-    font-size: 16pt !important;
+    font-size: 17pt !important;
     white-space: normal !important;
     line-height: 1 !important;
   }
 
   .hero-title {
     order: 2;
-    font-size: 8.8pt !important;
-    white-space: normal !important;
-    margin-top: .2rem !important;
+    font-size: 8.4pt !important;
+    letter-spacing: .01em !important;
+    white-space: nowrap !important;
+    margin-top: .22rem !important;
+  }
+
+  /* HTML has a <br> between Filmmaker and Media Producer — drop it so
+     the title sits on a single line in print */
+  .hero-title br {
+    display: none;
+  }
+
+  .hero-title .amp {
+    color: var(--accent) !important;
+    font-weight: 300 !important;
+    font-stretch: 80% !important;
+    margin: 0 .14em !important;
   }
 
   .hero-loc {
@@ -980,6 +1012,7 @@ header.site-header {
     letter-spacing: .2em;
     margin-top: .25rem !important;
     line-height: 1.45 !important;
+    color: var(--g1) !important;
   }
 
   .hero-meta {
@@ -987,16 +1020,19 @@ header.site-header {
     margin-top: .38rem !important;
     padding-top: .38rem !important;
     gap: 1.3rem !important;
+    border-top: 1px solid var(--line2) !important;
   }
 
   .hero-meta b {
-    font-size: 10pt !important;
+    font-size: 10.5pt !important;
     margin-bottom: .12rem !important;
+    color: var(--accent) !important;
   }
 
   .hero-meta span {
     font-size: 4.8pt !important;
     letter-spacing: .18em;
+    color: var(--g2) !important;
   }
 
   /* static numbers: JS counters may print "0" — read data attributes instead */
@@ -1006,7 +1042,7 @@ header.site-header {
 
   .hero-meta b span[data-count]::after {
     content: attr(data-count) attr(data-suffix);
-    font-size: 10pt;
+    font-size: 10.5pt;
   }
 
   /* ---- sections: tight rhythm ---- */
@@ -1103,16 +1139,16 @@ header.site-header {
     padding-left: .85rem !important;
   }
 
-  /* ---- skills: 4 plain columns, no cards ---- */
+  /* ---- skills: 4 bordered mono cards (like the website) ---- */
   .skills-grid {
     grid-template-columns: repeat(4, 1fr) !important;
-    gap: .6rem !important;
+    gap: .55rem !important;
   }
 
   .skills-grid .skill-group {
-    background: none !important;
-    border: none !important;
-    padding: 0 !important;
+    background: var(--surface) !important;
+    border: 1px solid var(--line) !important;
+    padding: .45rem .55rem .55rem !important;
     gap: .15rem !important;
   }
 
@@ -1121,11 +1157,13 @@ header.site-header {
     letter-spacing: .2em;
     margin-bottom: .18rem !important;
     padding-bottom: .16rem !important;
+    color: var(--accent) !important;
   }
 
   .skill-group span {
     font-size: 5.8pt !important;
     line-height: 1.32 !important;
+    color: var(--g1) !important;
   }
 
   /* ---- education / honors ---- */
@@ -1160,6 +1198,8 @@ header.site-header {
   .press-link {
     font-size: 5.2pt !important;
     margin-top: .15rem !important;
+    color: var(--accent) !important;
+    border-bottom-color: var(--line2) !important;
   }
 
   /* ---- footer: compact contact bar ---- */
@@ -1167,16 +1207,23 @@ header.site-header {
     grid-template-columns: repeat(4, 1fr) !important;
     gap: .5rem !important;
     padding-top: .3rem !important;
+    border-top: 1px solid var(--line2) !important;
   }
 
   .foot-label {
     font-size: 4.6pt !important;
     margin-bottom: .1rem !important;
+    color: var(--g2) !important;
   }
 
   .foot-col a,
   .foot-col span {
     font-size: 5.6pt !important;
+    color: var(--g1) !important;
+  }
+
+  .foot-col a[href^="mailto"] {
+    color: var(--accent) !important;
   }
 
   .footer-mail::after {
@@ -1487,13 +1534,17 @@ body.has-cursor .cursor { display: block; }
 
   .avail .dot, .hs-line::after { animation: none; }
 
-  /* UX layer card styles must not inflate the printed page */
+  /* keep the compact card size from the print spec, kill hover-only styles */
   .skills-grid .skill-group {
-    background: none !important;
-    border: none !important;
-    padding: 0 !important;
     transform: none !important;
+    border-color: var(--line) !important;
   }
 
+  .skill-group span::before { background: var(--g3) !important; }
+
   .exp-item::before { display: none !important; }
+  .exp-item:hover { background: none !important; }
+
+  /* grain must never print: fixed inset -100% would spawn blank pages */
+  .grain { display: none !important; }
 }
