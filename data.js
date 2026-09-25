@@ -700,6 +700,16 @@ const PORTFOLIO_DATA = {
       "thumb": "https://drive.google.com/thumbnail?id=1XJeeAeR5YPFnCRPMEKkBFNdQ_gdt3X1W&sz=w400"
     },
     {
+      "id": "1dTg7RUMWHyCHF296kdH1LmtOReJO-pSA",
+      "title": "260924 Christopher Chua WL",
+      "thumb": "https://drive.google.com/thumbnail?id=1dTg7RUMWHyCHF296kdH1LmtOReJO-pSA&sz=w400"
+    },
+    {
+      "id": "12_KzkvDhzzlU1VqVbgRSzqkxhYAacBDl",
+      "title": "260925 Christopher Chua WL 02",
+      "thumb": "https://drive.google.com/thumbnail?id=12_KzkvDhzzlU1VqVbgRSzqkxhYAacBDl&sz=w400"
+    },
+    {
       "id": "12jrpiTrqgsiN1prYJ6JG1H5sb1cwFMZg",
       "title": "Hãy cùng gặp một Người chia sẻ trên Kalpha Kelly",
       "thumb": "https://drive.google.com/thumbnail?id=12jrpiTrqgsiN1prYJ6JG1H5sb1cwFMZg&sz=w400"
