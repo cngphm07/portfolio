@@ -1659,8 +1659,8 @@ input:focus, select:focus, textarea:focus {
   .hero-head { margin-bottom: 2.5rem; }
 
   .hero-title {
-    font-size: clamp(2rem, 8.9vw, 3.2rem);
-    line-height: 1.12;
+    font-size: clamp(1.9rem, 8.3vw, 3rem);
+    line-height: 1.14;
   }
 
   .hero-title .text-accent { display: block; }
@@ -1707,8 +1707,16 @@ input:focus, select:focus, textarea:focus {
   }
 
   .section-title {
-    font-size: clamp(1.75rem, 7.6vw, 2.4rem);
-    line-height: 1.16;
+    font-size: clamp(1.4rem, 6.1vw, 1.55rem);
+    line-height: 1.22;
+  }
+
+  /* Neutralize desktop sidebar title overrides inside sticky columns */
+  .process-sticky .section-title,
+  .deliverables-sidebar .section-title,
+  .faq-header .section-title {
+    font-size: clamp(1.4rem, 6.1vw, 1.55rem);
+    line-height: 1.22;
   }
 
   .section-header { margin-bottom: 3rem; }
@@ -1737,7 +1745,7 @@ input:focus, select:focus, textarea:focus {
   .app-row.is-reversed { gap: 1.6rem; }
 
   .app-title {
-    font-size: clamp(1.7rem, 7.7vw, 2.3rem);
+    font-size: clamp(1.5rem, 6.9vw, 1.7rem);
   }
 
   .app-desc { font-size: 0.92rem; }
@@ -1805,8 +1813,8 @@ input:focus, select:focus, textarea:focus {
   .contact-header { margin-bottom: 2.75rem; }
 
   .contact-heading-title {
-    font-size: clamp(2rem, 9vw, 2.9rem);
-    line-height: 1.1;
+    font-size: clamp(1.6rem, 8.5vw, 2.1rem);
+    line-height: 1.18;
   }
 
   .contact-lead { font-size: 0.95rem; }
@@ -1827,6 +1835,24 @@ input:focus, select:focus, textarea:focus {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
+  }
+
+  /* English headlines run longer — tighten further to keep the 2-line lockup */
+  html[lang="en"] .section-title,
+  html[lang="en"] .process-sticky .section-title,
+  html[lang="en"] .deliverables-sidebar .section-title,
+  html[lang="en"] .faq-header .section-title {
+    font-size: clamp(1.25rem, 5.2vw, 1.4rem);
+    line-height: 1.26;
+  }
+
+  html[lang="en"] .contact-heading-title {
+    font-size: clamp(1.5rem, 7.4vw, 1.9rem);
+    line-height: 1.2;
+  }
+
+  html[lang="en"] .hero-title {
+    font-size: clamp(1.8rem, 7.9vw, 2.8rem);
   }
 
   /* ---- Footer ---- */

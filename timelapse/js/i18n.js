@@ -134,7 +134,7 @@ window.I18N_DATA = {
     showcase: {
       eyebrow: "HÌNH ẢNH MÔ PHỎNG",
       title_light: "Nhìn thấy thời gian",
-      title_bold: "tạo nên những công\u00A0trình vĩ\u00A0đại.",
+      title_bold: "tạo nên công\u00A0trình vĩ\u00A0đại.",
       disclaimer: "<span>[ MINH HỌA ]</span> Tư liệu stock có bản quyền minh chứng cho ngôn ngữ hình ảnh và năng lực ghi hình dài hạn.",
       cap1_left: "CONSTRUCTION INFRASTRUCTURE // STUDY 01",
       cap1_right: "LONG-TERM EVOLUTION",
