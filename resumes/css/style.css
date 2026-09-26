@@ -878,6 +878,30 @@ header.site-header {
   .foot-grid { grid-template-columns: 1fr; gap: 1.8rem; }
 }
 
+/* ============ short desktop viewports ============
+   browser chrome (tabs + address bar) leaves ~600px of a 768px
+   laptop screen — the absolute title lockup collides with the
+   bottom-anchored identity cluster. Switch the hero to normal
+   flow below 750px of viewport height (full 768 stays untouched). */
+@media (min-width: 761px) and (max-height: 750px) {
+  .hero {
+    justify-content: flex-start;
+    padding-top: 6.5rem;
+    padding-bottom: clamp(2.5rem, 6vh, 4rem);
+  }
+  .hero-title-wrap {
+    position: static;
+    margin-bottom: clamp(1.4rem, 4vh, 2.4rem);
+  }
+  .hero-title,
+  .hero-name {
+    white-space: normal;
+  }
+  .hero-scroll {
+    bottom: clamp(2rem, 6vh, 3.5rem);
+  }
+}
+
 /* ============ reduced motion ============ */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
