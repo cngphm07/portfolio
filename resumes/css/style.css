@@ -234,19 +234,16 @@ header.site-header {
   right: 0;
   overflow: hidden;
   padding: .5rem 0;
-  border-top: 1px solid rgba(255,255,255,.16);
-  border-bottom: 1px solid rgba(255,255,255,.16);
-  background: rgba(255,255,255,.045);
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity .16s steps(3,end), transform .34s var(--ease);
+  transform: translateY(24px);
+  transition: opacity .45s ease, transform .55s var(--ease);
 }
 
 .film-strip .track {
   display: inline-flex;
   white-space: nowrap;
   will-change: transform;
-  animation: stripScroll 13s linear infinite;
+  animation: stripScroll 18s linear infinite;
   font-size: .62rem;
   letter-spacing: .32em;
   color: var(--g1);
@@ -257,52 +254,21 @@ header.site-header {
 .film-strip .track .dot { color: var(--accent); margin-right: 2.8rem; }
 
 .film-strip.rev .track { animation-direction: reverse; }
-.film-strip.limebar { background: var(--accent); border-color: transparent; }
+.film-strip.limebar { background: var(--accent); }
 .film-strip.limebar .track { color: #000; font-weight: 500; }
 .film-strip.limebar .track .dot { color: #000; opacity: .55; }
 
 .film-strip.s1 { top: 23%; }
-.film-strip.s2 { bottom: 23%; }
-.film-strip.s3 { top: 14%; }
-.film-strip.s3 .track { animation-duration: 19s; }
+.film-strip.s2 { bottom: 22%; }
+.film-strip.s2 .track { animation-duration: 14s; }
 
 @keyframes stripScroll { to { transform: translateX(-50%); } }
 
-/* strips enter/exit per scene (hard steps = kinetic snap) */
-.motion-film[data-scene="1"] .film-strip.s1,
+/* strips glide in/out per scene */
 .motion-film[data-scene="2"] .film-strip.s1,
-.motion-film[data-scene="3"] .film-strip.s2,
+.motion-film[data-scene="3"] .film-strip.s1,
 .motion-film[data-scene="4"] .film-strip.s2,
-.motion-film[data-scene="5"] .film-strip.s2,
-.motion-film[data-scene="4"] .film-strip.s3,
-.motion-film[data-scene="5"] .film-strip.s3,
-.motion-film[data-scene="7"] .film-strip.s3 { opacity: 1; transform: translateY(0); }
-
-/* ---- giant outlined scene counter ---- */
-.film-idx {
-  position: absolute;
-  right: var(--pad);
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  font-size: clamp(4rem, 10vw, 9rem);
-  line-height: 1;
-  color: transparent;
-  -webkit-text-stroke: 1px rgba(255,255,255,.3);
-  opacity: 0;
-  transition: opacity .2s;
-  pointer-events: none;
-  user-select: none;
-}
-
-.motion-film[data-scene="4"] .film-idx,
-.motion-film[data-scene="5"] .film-idx,
-.motion-film[data-scene="6"] .film-idx,
-.motion-film[data-scene="7"] .film-idx,
-.motion-film[data-scene="8"] .film-idx { opacity: 1; }
-
-.film-idx.snap { animation: idxSnap .3s var(--ease); }
-@keyframes idxSnap { 0% { transform: translateY(-50%) scale(1.14); opacity: .4; } }
+.motion-film[data-scene="5"] .film-strip.s2 { opacity: 1; transform: translateY(0); }
 
 /* outlined letters while the wordmark is deconstructed */
 .motion-film[data-scene="4"] .film-title i,
@@ -312,11 +278,6 @@ header.site-header {
 }
 .motion-film[data-scene="4"] .film-title i.lm,
 .motion-film[data-scene="5"] .film-title i.lm { -webkit-text-stroke-color: var(--accent); }
-
-/* chromatic hard-offset on the word-cycle */
-.film-word.chroma {
-  text-shadow: .05em .035em 0 rgba(201,242,75,.85), -.045em -.03em 0 rgba(255,255,255,.28);
-}
 
 .motion-film::before,
 .motion-film::after {
@@ -334,7 +295,7 @@ header.site-header {
 }
 
 .motion-film::after {
-  opacity: calc(.14 + var(--film-shift, 0) * .12);
+  opacity: .14;
   background-image:
     linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
@@ -464,34 +425,18 @@ html.js .film-title i { opacity: 0; }
 
 .film-word.lm { color: var(--accent); }
 
-/* tagline stamps under the assembled lockup */
-.film-tag {
+/* rule sweeps under each word-cycle word */
+.film-word::after {
+  content: '';
   position: absolute;
-  left: 50%;
-  bottom: calc(50% - clamp(3.2rem, 9vw, 10.5rem));
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .75rem;
-  color: var(--g1);
-  font-size: clamp(.58rem, .8vw, .78rem);
-  letter-spacing: .44em;
-  text-indent: .44em;
-  white-space: nowrap;
-  pointer-events: none;
-}
-
-html.js .film-tag { opacity: 0; }
-
-.ft-line {
-  width: 7.5em;
-  height: 1px;
+  left: 12%;
+  right: 12%;
+  bottom: -.16em;
+  height: 2px;
   background: var(--accent);
+  transform: scaleX(var(--wrule, 0));
   transform-origin: left;
 }
-
-html.js .ft-line { transform: scaleX(0); }
 
 .film-bottom {
   position: absolute;
@@ -1183,16 +1128,13 @@ html.js .ft-line { transform: scaleX(0); }
   .film-title { font-size: clamp(3.4rem, 19vw, 6.2rem); }
   .film-stage::before { font-size: clamp(3.4rem, 19vw, 6.2rem); }
   .film-word { font-size: clamp(2.4rem, 14vw, 5rem); }
-  .film-tag { font-size: .5rem; letter-spacing: .3em; text-indent: .3em; bottom: calc(50% - clamp(3rem, 14.5vw, 5rem)); }
   .film-bottom { left: 1.25rem; right: 1.25rem; bottom: 1.55rem; font-size: .46rem; letter-spacing: .16em; }
   .film-bottom > span { display: none; }
   .motion-film::after { background-size: 3rem 3rem; }
   .film-strip .track { font-size: .5rem; letter-spacing: .22em; }
   .film-strip .track span, .film-strip .track .dot { margin-right: 1.7rem; }
   .film-strip.s1 { top: 21%; }
-  .film-strip.s2 { bottom: 21%; }
-  .film-strip.s3 { top: 12%; }
-  .film-idx { right: 1.25rem; font-size: clamp(3.4rem, 13vw, 5.6rem); }
+  .film-strip.s2 { bottom: 20%; }
 }
 
 /* ============ responsive ============ */
@@ -1262,11 +1204,9 @@ html.js .ft-line { transform: scaleX(0); }
   html { scroll-behavior: auto; }
   .grain, .film-hud i, .film-enter b { animation: none; }
   /* static designed end-card instead of an empty frame */
-  #filmCanvas, .film-flash, .film-word, .film-strips, .film-idx { display: none; }
+  #filmCanvas, .film-flash, .film-word, .film-strips { display: none; }
   html.js .film-title i { opacity: 1 !important; transform: none !important; }
   html.js .film-eyebrow { opacity: 1 !important; }
-  html.js .film-tag { opacity: 1 !important; }
-  html.js .ft-line { transform: scaleX(1) !important; }
   * { transition-duration: .01ms !important; }
 }
 
