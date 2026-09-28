@@ -56,11 +56,11 @@ function update(now){
   h.setFilmTime(clock);
   var t = clock / 1000;
 
-  /* CNGPHM appears once: the settled globe's logo payoff at 3.2s - 4.6s */
-  var p = phase(t, 3.2, 3.8) * (1-easeIn(phase(t, 4.3, 4.8)));
+  /* CNGPHM appears once the globe forms: logo payoff from 2.2s - 4.2s */
+  var p = phase(t, 2.2, 2.8) * (1-easeIn(phase(t, 3.8, 4.4)));
   if(logo){
     logo.style.opacity = p.toFixed(3);
-    logo.style.transform = 'translate(-50%,-50%) scale(' + (1.16 - .16*easeOut(phase(t,3.2,3.7))).toFixed(3) + ')';
+    logo.style.transform = 'translate(-50%,-50%) scale(' + (1.16 - .16*easeOut(phase(t,2.2,2.7))).toFixed(3) + ')';
   }
   if(timeEl) timeEl.textContent = '00:00:' + pad(Math.floor(t)%60) + ':' + pad(Math.floor(t*24)%24);
 
