@@ -280,36 +280,6 @@ html.film-wait .hero .intro-fade { animation-play-state: paused !important; }
 .film-overlay[data-seq="1"] .film-strip.s1 { opacity: 1; transform: translateY(0); }
 .film-overlay[data-seq="4"] .film-strip.s2 { opacity: 1; transform: translateY(0); }
 
-/* --- seq 3 · blueprint: outlined letters, stronger grid --- */
-.film-overlay[data-seq="3"] .film-title i {
-  color: transparent;
-  -webkit-text-stroke: .035em rgba(255,255,255,.92);
-}
-.film-overlay[data-seq="3"] .film-title i.lm { -webkit-text-stroke-color: var(--accent); }
-.film-overlay[data-seq="3"]::after { opacity: .32; }
-
-/* --- seq 4 · glitch: echo shadow + scanlines --- */
-.film-overlay[data-seq="4"] .film-title i {
-  text-shadow: .045em 0 rgba(201,242,75,.55);
-}
-.film-overlay[data-seq="4"] .film-title i.lm {
-  text-shadow: .045em 0 rgba(255,255,255,.5);
-}
-
-.film-scan {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .3s ease;
-  background: repeating-linear-gradient(0deg, rgba(0,0,0,.4) 0 2px, transparent 2px 5px);
-}
-.film-overlay[data-seq="4"] .film-scan { opacity: .45; }
-
-/* --- seq 1 · editorial type-cut under the lockup --- */
-.film-overlay[data-seq="1"] .film-word { opacity: .96; }
-
 .film-overlay::before,
 .film-overlay::after {
   content: '';
@@ -436,7 +406,7 @@ html.js .film-title i { opacity: 0; }
   user-select: none;
 }
 
-/* beat-cut word */
+/* beat-cut word — center stage of seq 01 */
 .film-word {
   position: absolute;
   left: 50%;
@@ -454,26 +424,6 @@ html.js .film-title i { opacity: 0; }
 }
 
 .film-word.lm { color: var(--accent); }
-
-.film-word::after {
-  content: '';
-  position: absolute;
-  left: 12%;
-  right: 12%;
-  bottom: -.16em;
-  height: 2px;
-  background: var(--accent);
-  transform: scaleX(var(--wrule, 0));
-  transform-origin: left;
-}
-
-/* seq 1 editorial: word sits below the lockup */
-.film-overlay[data-seq="1"] .film-word,
-.film-overlay[data-seq="0"] .film-word {
-  top: auto;
-  bottom: 18%;
-  transform: translateX(-50%);
-}
 
 /* rule sweeps under each word-cycle word */
 .film-word::after {

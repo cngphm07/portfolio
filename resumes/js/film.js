@@ -1,17 +1,15 @@
 /* ============================================================
    CNGPHM MOTION FILM — 15-second showreel, 4 sub-sequences
-   Each sequence demos a different motion-design style on the
-   same wordmark, then everything resolves into the résumé hero
-   (deployed end frame: globe + lockup). Letters are DOM (crisp),
-   per-style backdrops live on canvas. Skippable at any moment.
+   Seq 1–3 are pure motion styles (type / forms / techviz); the
+   CNGPHM wordmark appears ONLY in the final logo reveal, then
+   everything hands off to the résumé hero (deployed end frame).
+   Letters are DOM (crisp); backdrops live on canvas. Skippable.
    ============================================================ */
 (function(){
 'use strict';
 window.__filmStarted = true;
 var film = document.getElementById('filmOverlay');
 var canvas = document.getElementById('filmCanvas');
-var title = document.getElementById('filmTitle');
-var eyebrow = document.querySelector('.film-eyebrow');
 var letters = Array.prototype.slice.call(document.querySelectorAll('.film-title i'));
 var word = document.getElementById('filmWord');
 var flashEl = document.querySelector('.film-flash');
@@ -56,21 +54,25 @@ var raf = 0, inView = true;
 var flashV = 0, flashLime = false, prevT = 0, evIdx = 0;
 var lastWordIdx = -1, lastSeq = -1;
 
-/* ---------- timeline ---------- */
-/* sub-sequence boundaries: 0 pre-roll · 1 swiss · 2 fluid · 3 blueprint · 4 glitch · 5 resolve */
-var SEQ_B = [0.4, 4.2, 7.6, 11.0, 14.0];
-var WORDS1 = ['DESIGN', 'DIRECT', 'EDIT', 'FINISH'];
-var WORDS2 = ['MOTION', 'DESIGN', 'FILM', 'BRAND'];
-var LABELS = ['CNGPHM — MOTION SHOWREEL', 'SEQ 01 · SWISS EDITORIAL', 'SEQ 02 · FLUID MOTION',
-              'SEQ 03 · BLUEPRINT HUD', 'SEQ 04 · GLITCH CUTS', 'CNGPHM — 2026'];
-/* letter slam windows (seq 1) */
-var ENTER = [[0.5, 0.95], [0.75, 1.2], [1.0, 1.45], [1.25, 1.7], [1.5, 1.95], [1.75, 2.2]];
+/* ---------- timeline ----------
+   0   pre-roll (black + label)
+   1   0.4–4.2   · kinetic type — word cuts, rules
+   2   4.2–7.6   · fluid forms — silk curves + lime orb + ring
+   3   7.6–11.0  · blueprint HUD — ticks, crosshair, wireframe globe
+   4   11.0–14.2 · logo reveal — CNGPHM slams, holds, exits
+   5   14.2–15   · resolve into the hero                        */
+var SEQ_B = [0.4, 4.2, 7.6, 11.0, 14.2];
+var WORDS1 = ['MOTION', 'DESIGN', 'DIRECT', 'EDIT'];
+/* logo reveal: staggered slams at 11.2–13.0 */
+var ENTER = [[11.2, 11.7], [11.45, 11.95], [11.7, 12.2], [11.95, 12.45], [12.2, 12.7], [12.45, 12.95]];
+var LABELS = ['CNGPHM — MOTION SHOWREEL', 'SEQ 01 · KINETIC TYPE', 'SEQ 02 · FLUID FORMS',
+              'SEQ 03 · BLUEPRINT HUD', 'CNGPHM', 'CNGPHM — 2026'];
 /* flash pulses — rare and purposeful */
 var EVENTS = [
-  [2.25, .22, 0],    /* wordmark assembled            */
-  [11.05, .25, 0],   /* glitch cut in                 */
-  [13.7, .3, 0],     /* final slam                    */
-  [14.62, .7, 1]     /* lime frame before the handoff */
+  [4.2, .18, 0],     /* type → forms cut     */
+  [7.6, .18, 0],     /* forms → blueprint    */
+  [12.98, .3, 0],    /* wordmark assembled   */
+  [14.55, .7, 1]     /* lime frame handoff   */
 ];
 
 function seqOf(t){
@@ -98,64 +100,36 @@ function seeded(n){ return Math.abs((Math.sin(n * 127.1) * 43758.5453) % 1); }
   });
 })();
 
-/* ---------- letters: shared element, per-sequence choreography ---------- */
+/* ---------- letters: hidden until the logo reveal ---------- */
 function drawLetters(t){
   var seq = seqOf(t);
-  var out = easeIn(phase(t, 14.25, 14.8));
+  var reveal = seq >= 4 && t < 14.7;
   for(var i = 0; i < 6; i++){
-    var o = 1, x = 0, y = 0, s = 1, r = 0;
-
-    if(seq === 0 || (seq === 1 && t < ENTER[i][0])){
-      /* not arrived yet */
-      o = 0;
-    }else if(seq === 1){
-      /* swiss slam: C N G drop, P H M rise, staggered */
+    var o = 0, x = 0, y = 0, s = 1;
+    if(reveal){
       var e = ENTER[i];
       var pe = phase(t, e[0], e[1]);
       var fromY = i < 3 ? -H * .62 : H * .62;
       y = (1 - backOut(pe)) * fromY;
-      s = 1 + (1 - pe) * .35;
+      s = 1 + (1 - pe) * .3;
       o = pe > 0 ? 1 : 0;
-    }else if(seq === 2){
-      /* fluid bob */
-      y = Math.sin((t - 4.2) * 2.2 + i * .9) * 10;
-    }else if(seq === 3){
-      /* blueprint: settle left, room for the wireframe globe */
-      x = -W * .05;
-      s = .94;
-    }else if(seq === 4){
-      /* glitch jumps, then the final slam back */
-      var slam = easeOut(phase(t, 13.5, 13.95));
-      var slot = Math.floor((t - 11) / .33);
-      var jx = (seeded(slot * 13 + i * 7) - .5) * 44;
-      var jy = (seeded(slot * 29 + i * 3) - .5) * 26;
-      x = jx * (1 - slam);
-      y = jy * (1 - slam);
-      s = 1 + .06 * (1 - slam) * (slot % 2 ? 1 : -1);
+      /* gentle breath while the lockup holds */
+      if(t > 13.0) s *= 1 + .008 * Math.sin((t - 13) * 2.2);
+      /* exit: wipe up */
+      var exit = easeIn(phase(t, 14.15, 14.6));
+      y -= exit * H * .38;
+      o *= 1 - exit;
     }
-
-    /* resolve hold → slight lift while the overlay dissolves */
-    y -= out * H * .3;
-    o *= 1 - out;
-
     var st = letters[i].style;
     st.opacity = o.toFixed(3);
-    st.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)' +
-      ' rotate(' + r.toFixed(2) + 'deg) scale(' + s.toFixed(3) + ')';
-  }
-
-  /* fluid tracking breathes only in seq 2 */
-  if(seq === 2){
-    title.style.letterSpacing = (-.095 + Math.sin((t - 4.2) * 1.5) * .018).toFixed(4) + 'em';
-  }else if(title.style.letterSpacing){
-    title.style.letterSpacing = '';
+    st.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0) scale(' + s.toFixed(3) + ')';
   }
 }
 
-/* ---------- editorial word cuts (seq 1) ---------- */
+/* ---------- kinetic type cuts (seq 1) ---------- */
 function drawWord(t){
   var seq = seqOf(t);
-  var on = seq === 1 && t >= 2.6;
+  var on = seq === 1 && t >= 0.7;
   if(!on){
     if(lastWordIdx !== -1){
       word.style.opacity = '0';
@@ -164,19 +138,20 @@ function drawWord(t){
     }
     return;
   }
-  var idx = clamp(Math.floor((t - 2.6) / .4), 0, 3);
+  var idx = clamp(Math.floor((t - 0.7) / .825), 0, 3);
   if(idx !== lastWordIdx){
     word.textContent = WORDS1[idx];
+    word.classList.toggle('lm', idx % 2 === 1);
     lastWordIdx = idx;
   }
-  var cut = (t - 2.6) % .4;
-  var punch = easeOut(Math.min(1, cut / .16));
+  var cut = (t - 0.7) % .825;
+  var punch = easeOut(Math.min(1, cut / .22));
   word.style.opacity = '.96';
-  word.style.transform = 'translateX(' + ((1 - punch) * -18).toFixed(1) + 'px)';
-  word.style.setProperty('--wrule', easeOut(Math.min(1, cut / .3)).toFixed(3));
+  word.style.transform = 'translate(-50%,-50%) scale(' + (1.1 - .1 * punch).toFixed(3) + ')';
+  word.style.setProperty('--wrule', easeOut(Math.min(1, cut / .45)).toFixed(3));
 }
 
-/* ---------- canvas backdrops per style ---------- */
+/* ---------- canvas backdrops per sequence ---------- */
 function drawGlobe(cx, cy, rad, rot){
   ctx.beginPath();
   ctx.arc(cx, cy, rad, 0, 6.283);
@@ -208,7 +183,7 @@ function drawCanvas(t){
   ctx.globalCompositeOperation = 'lighter';
 
   if(seq <= 1){
-    /* faint ambient nodes (swiss keeps the field quiet) */
+    /* faint ambient nodes + editorial rules under the word cuts */
     for(var i = 0; i < 42; i++){
       var sx = seeded(i) * W, sy = seeded(i + 50) * H;
       var px = (sx + t * (12 + seeded(i + 9) * 22)) % W;
@@ -218,10 +193,9 @@ function drawCanvas(t){
       ctx.fillStyle = i % 9 === 0 ? 'rgba(201,242,75,.28)' : 'rgba(255,255,255,.14)';
       ctx.fill();
     }
-    /* editorial rules drawing across at the slams */
-    var rp = easeInOut(phase(t, 1.0, 2.6));
+    var rp = easeInOut(phase(t, 1.1, 2.9)) * (1 - easeIn(phase(t, 3.8, 4.2)));
     if(rp > 0){
-      [0.34, 0.66].forEach(function(fy, k){
+      [0.3, 0.7].forEach(function(fy, k){
         var w = W * .34 * rp;
         var x0 = k === 0 ? W * .06 : W - W * .06 - w;
         ctx.beginPath();
@@ -234,7 +208,7 @@ function drawCanvas(t){
   }
 
   if(seq === 2){
-    /* fluid: silk curves + drifting lime orb */
+    /* fluid: silk curves + drifting lime orb + expanding ring */
     var tt = t - 4.2;
     for(var c = 0; c < 6; c++){
       var base = H * (.18 + c * .13);
@@ -258,10 +232,18 @@ function drawCanvas(t){
     og.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = og;
     ctx.fillRect(ox - orr, oy - orr, orr * 2, orr * 2);
+    var ring = easeInOut(phase(tt, .4, 2.6));
+    if(ring > 0 && ring < 1){
+      ctx.beginPath();
+      ctx.arc(W / 2, H / 2, Math.min(W, H) * (.08 + ring * .3), 0, 6.283);
+      ctx.strokeStyle = 'rgba(255,255,255,' + (.3 * (1 - ring)).toFixed(3) + ')';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
   }
 
   if(seq === 3){
-    /* blueprint: measurement ticks + center crosshair + wireframe globe */
+    /* blueprint: measurement ticks + crosshair + wireframe globe */
     var bt = t - 7.6;
     ctx.strokeStyle = 'rgba(255,255,255,.3)';
     ctx.lineWidth = 1;
@@ -282,37 +264,43 @@ function drawCanvas(t){
     drawGlobe(W * .72, H * .44, Math.min(W, H) * (.13 + grow * .1), bt * .9);
   }
 
-  if(seq === 4){
-    /* glitch: jumping bars, seeded per slot */
-    var slot = Math.floor((t - 11) / .33);
-    for(var g = 0; g < 9; g++){
-      var gy = seeded(slot * 3 + g) * H;
-      var gh = 2 + seeded(slot * 9 + g) * 9;
-      var gx = seeded(slot * 5 + g * 2) * W;
-      var gw = W * (.1 + seeded(g * 7) * .5);
-      ctx.fillStyle = g % 4 === 0 ? 'rgba(201,242,75,' + (.14 + seeded(slot + g) * .12).toFixed(3) + ')'
-                                  : 'rgba(255,255,255,' + (.08 + seeded(g * 3) * .1).toFixed(3) + ')';
-      ctx.fillRect(gx, gy, gw, gh);
-    }
-    var ly2 = seeded(slot * 17) * H;
-    ctx.fillStyle = 'rgba(255,255,255,.25)';
-    ctx.fillRect(0, ly2, W, 1);
-  }
-
-  /* finale: full-bleed speed lines into the handoff */
-  var sweep = t >= 14 ? phase(t, 14, 15) : 0;
-  if(sweep > 0){
-    for(var l = 0; l < 26; l++){
-      var sy2 = seeded(l + 7) * H;
-      var prog = (sweep * (1.3 + seeded(l) * .9) + seeded(l + 2)) % 1;
-      var lx = prog * (W + 300) - 150;
-      var len = 90 + seeded(l + 5) * 190;
+  if(seq >= 4){
+    /* logo moment: quiet field so the wordmark carries */
+    for(var j = 0; j < 30; j++){
+      var qx = seeded(j) * W, qy = seeded(j + 80) * H;
       ctx.beginPath();
-      ctx.moveTo(lx, sy2); ctx.lineTo(lx + len, sy2);
-      ctx.strokeStyle = l % 6 === 0 ? 'rgba(201,242,75,' + (.32 - sweep * .12).toFixed(3) + ')'
-                                     : 'rgba(255,255,255,' + (.18 - sweep * .08).toFixed(3) + ')';
-      ctx.lineWidth = 1 + seeded(l + 8) * 1.2;
-      ctx.stroke();
+      ctx.arc((qx + t * 8) % W, qy, 1 + seeded(j + 3) * 1.2, 0, 6.283);
+      ctx.fillStyle = 'rgba(255,255,255,.12)';
+      ctx.fill();
+    }
+    /* short speed-line burst as the letters land */
+    var land = (t >= 12.9 && t < 13.8) ? phase(t, 12.9, 13.8) : 0;
+    if(land > 0){
+      for(var l = 0; l < 18; l++){
+        var ly = seeded(l + 7) * H;
+        var prog = (land * (1.2 + seeded(l) * .8) + seeded(l + 2)) % 1;
+        var lx = prog * (W + 260) - 130;
+        ctx.beginPath();
+        ctx.moveTo(lx, ly); ctx.lineTo(lx + 120 + seeded(l + 5) * 140, ly);
+        ctx.strokeStyle = 'rgba(255,255,255,' + (.2 - land * .1).toFixed(3) + ')';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+    /* finale sweep into the handoff */
+    var fin = t >= 14.3 ? phase(t, 14.3, 15) : 0;
+    if(fin > 0){
+      for(var f = 0; f < 26; f++){
+        var fy2 = seeded(f + 7) * H;
+        var pr = (fin * (1.3 + seeded(f) * .9) + seeded(f + 2)) % 1;
+        var fx = pr * (W + 300) - 150;
+        ctx.beginPath();
+        ctx.moveTo(fx, fy2); ctx.lineTo(fx + 90 + seeded(f + 5) * 190, fy2);
+        ctx.strokeStyle = f % 6 === 0 ? 'rgba(201,242,75,' + (.32 - fin * .12).toFixed(3) + ')'
+                                       : 'rgba(255,255,255,' + (.18 - fin * .08).toFixed(3) + ')';
+        ctx.lineWidth = 1 + seeded(f + 8) * 1.2;
+        ctx.stroke();
+      }
     }
   }
 
