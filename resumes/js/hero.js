@@ -140,6 +140,7 @@ var EDGE_VERT = [
   'uniform float uRotY;',
   'uniform float uFormed;',
   'uniform float uScroll;',
+  'uniform float uFilmTime;',
   'varying float vAlpha;',
   'varying float vTint;',
   GLSL_ROT,
@@ -149,10 +150,11 @@ var EDGE_VERT = [
   '  float per = 1.0 + p.z * 0.16;',
   '  float px = uGlobe.x + p.x * uGlobe.z * per;',
   '  float py = uGlobe.y - p.y * uGlobe.z * per - uScroll * 60.0;',
-  '  gl_Position = vec4((px / uRes.x) * 2.0 - 1.0, 1.0 - (py / uRes.y) * 2.0, 0.0, 1.0);',
   '  float rnd = hash(dot(aPos, vec3(12.9898, 78.233, 37.719)));',
-  '  vAlpha = (0.04 + 0.26 * z01) * (0.7 + 0.3 * rnd) * uFormed;',
+  '  float edgeGate = uFilmTime < 0.0 ? 1.0 : smoothstep(9.0, 10.5, uFilmTime);',
+  '  vAlpha = (0.04 + 0.26 * z01) * (0.7 + 0.3 * rnd) * uFormed * edgeGate;',
   '  vTint = step(0.93, fract(rnd * 13.7)) * 0.85;',
+  '  gl_Position = vec4((px / uRes.x) * 2.0 - 1.0, 1.0 - (py / uRes.y) * 2.0, 0.0, 1.0);',
   '}'
 ].join('\n');
 
@@ -164,6 +166,7 @@ var RING_VERT = [
   'uniform float uTime;',
   'uniform float uFormed;',
   'uniform float uScroll;',
+  'uniform float uFilmTime;',
   'varying float vAlpha;',
   'varying float vTint;',
   GLSL_ROT,
@@ -179,7 +182,8 @@ var RING_VERT = [
   '  float px = uGlobe.x + p.x;',
   '  float py = uGlobe.y - p.y - uScroll * 60.0;',
   '  gl_Position = vec4((px / uRes.x) * 2.0 - 1.0, 1.0 - (py / uRes.y) * 2.0, 0.0, 1.0);',
-  '  vAlpha = (0.05 + 0.11 * z01) * (0.6 + 0.4 * hash(u * 5.0)) * uFormed;',
+  '  float ringGate = uFilmTime < 0.0 ? 1.0 : smoothstep(9.6, 11.0, uFilmTime);',
+  '  vAlpha = (0.05 + 0.11 * z01) * (0.6 + 0.4 * hash(u * 5.0)) * uFormed * ringGate;',
   '  vTint = step(0.93, hash(u * 11.0)) * 0.85;',
   '}'
 ].join('\n');
@@ -196,22 +200,44 @@ var NODE_VERT = [
   'uniform float uFormed;',
   'uniform float uScroll;',
   'uniform float uDPR;',
+  'uniform float uFilmTime;',
   'varying float vAlpha;',
   'varying float vTint;',
   GLSL_ROT,
   'void main(){',
-  '  vec3 p = rotX(rotY(aPos, uRotY), uRotX);',
-  '  float z01 = (p.z + 1.0) * 0.5;',
-  '  float per = 1.0 + p.z * 0.16;',
-  '  float px = uGlobe.x + p.x * uGlobe.z * per;',
-  '  float py = uGlobe.y - p.y * uGlobe.z * per - uScroll * 60.0;',
+  '  vec3 sphere = rotX(rotY(aPos, uRotY), uRotX);',
+  '  float z01 = (sphere.z + 1.0) * 0.5;',
+  '  float per = 1.0 + sphere.z * 0.16;',
+  '  float sphereX = uGlobe.x + sphere.x * uGlobe.z * per;',
+  '  float sphereY = uGlobe.y - sphere.y * uGlobe.z * per - uScroll * 60.0;',
+  '  float film = max(uFilmTime, 0.0);',
+  '  float fx = (hash(aSeed.x*91.7) * 1.06 - 0.03) * uRes.x;',
+  '  float fy = (hash(aSeed.y*45.3) * 1.06 - 0.03) * uRes.y;',
+  '  float gridX = floor(fx / 28.0) * 28.0 + 14.0;',
+  '  float gridY = floor(fy / 28.0) * 28.0 + 14.0;',
+  '  float scan = sin(gridY*0.045 - uTime*6.0) * 18.0;',
+  '  vec2 grid = vec2(gridX + scan, gridY);',
+  '  float waveP = smoothstep(3.2, 6.7, film);',
+  '  float vortexP = smoothstep(6.5, 10.5, film);',
+  '  float ang = atan(gridY-uGlobe.y, gridX-uGlobe.x) + uTime*(0.9 + hash(aSeed.z*7.0));',
+  '  float rad = mix(length(grid-vec2(uGlobe.x,uGlobe.y)), uGlobe.z*(1.8+0.35*sin(aSeed.w*6.28)), vortexP);',
+  '  vec2 wave = vec2(grid.x, grid.y + sin(grid.x*0.018+uTime*2.5+aSeed.z*6.28)*75.0);',
+  '  vec2 vortex = vec2(uGlobe.x,uGlobe.y) + vec2(cos(ang),sin(ang))*rad;',
+  '  vec2 kinetic = mix(grid, wave, waveP);',
+  '  kinetic = mix(kinetic, vortex, vortexP);',
+  '  float settle = smoothstep(9.5, 11.0, film);',
+  '  float px = mix(kinetic.x, sphereX, settle);',
+  '  float py = mix(kinetic.y, sphereY, settle);',
   '  gl_Position = vec4((px / uRes.x) * 2.0 - 1.0, 1.0 - (py / uRes.y) * 2.0, 0.0, 1.0);',
   '  float depth = 0.7 + 0.3 * hash(aSeed.x * 9.7);',
   '  float orb = step(0.94, hash(aSeed.y * 7.7));',
   '  float tw = 0.85 + 0.15 * sin(uTime * (1.2 + hash(aSeed.z * 3.3) * 2.0) + aSeed.w * 40.0);',
-  '  gl_PointSize = ((1.5 + z01 * 2.0) * depth + orb * 3.4) * uDPR * (0.6 + 0.4 * uFormed);',
-  '  vAlpha = (0.3 + 0.7 * z01) * tw * uFormed;',
-  '  vTint = step(0.93, hash(aSeed.w * 3.7)) * 0.9;',
+  '  float filmOn = step(0.0, uFilmTime) * (1.0-settle);',
+  '  float filmSize = (3.0 + orb*4.5) * uDPR;',
+  '  gl_PointSize = mix(((1.5 + z01 * 2.0) * depth + orb * 3.4) * uDPR * (0.6 + 0.4 * uFormed), filmSize, filmOn);',
+  '  float filmAlpha = (0.68 + 0.28*tw) * (0.82 + 0.18*sin(gridY*0.045-uTime*6.0));',
+  '  vAlpha = mix((0.3 + 0.7 * z01) * tw * uFormed, filmAlpha, filmOn);',
+  '  vTint = mix(step(0.93, hash(aSeed.w * 3.7)) * 0.9, step(0.9, hash(aSeed.w*3.7))*0.9, filmOn);',
   '}'
 ].join('\n');
 
@@ -252,9 +278,9 @@ var DUST_VERT = [
 ].join('\n');
 
 var silk = makeProgram(SILK_VERT, FLAT_FRAG, ['aGrid'], ['uRes','uTime','uFormed','uScroll','uMouse','uForce']);
-var edges = makeProgram(EDGE_VERT, FLAT_FRAG, ['aPos'], ['uRes','uGlobe','uRotX','uRotY','uFormed','uScroll']);
-var rings = makeProgram(RING_VERT, FLAT_FRAG, ['aRing'], ['uRes','uGlobe','uTime','uFormed','uScroll']);
-var nodes = makeProgram(NODE_VERT, GLOW_FRAG, ['aPos','aSeed'], ['uRes','uGlobe','uRotX','uRotY','uTime','uFormed','uScroll','uDPR']);
+var edges = makeProgram(EDGE_VERT, FLAT_FRAG, ['aPos'], ['uRes','uGlobe','uRotX','uRotY','uFormed','uScroll','uFilmTime']);
+var rings = makeProgram(RING_VERT, FLAT_FRAG, ['aRing'], ['uRes','uGlobe','uTime','uFormed','uScroll','uFilmTime']);
+var nodes = makeProgram(NODE_VERT, GLOW_FRAG, ['aPos','aSeed'], ['uRes','uGlobe','uRotX','uRotY','uTime','uFormed','uScroll','uDPR','uFilmTime']);
 var dust = makeProgram(DUST_VERT, GLOW_FRAG, ['aSeed'], ['uRes','uTime','uFormed','uScroll','uMouse','uForce','uDPR']);
 if(!silk || !edges || !rings || !nodes || !dust) return;
 
@@ -349,6 +375,8 @@ dust.buf = bindBuf(dseeds);
 /* ---------- state ---------- */
 var W = 1, H = 1;
 var morph = 1;
+/* negative = normal deployed hero; 0..15 = dot-film clock */
+var filmTime = document.documentElement.classList.contains('film-wait') ? 0 : -1;
 var scroll = 0;
 var mouse = { x: 0, y: -2, force: 0, last: -1e9 };
 var smx = 0, smy = 0;
@@ -439,6 +467,7 @@ function tick(now){
   gl.uniform1f(edges.u.uRotY, rotY);
   gl.uniform1f(edges.u.uFormed, formed);
   gl.uniform1f(edges.u.uScroll, scroll);
+  gl.uniform1f(edges.u.uFilmTime, filmTime);
   gl.drawArrays(gl.LINES, 0, edgeVerts);
 
   /* orbit rings */
@@ -451,6 +480,7 @@ function tick(now){
   gl.uniform1f(rings.u.uTime, t);
   gl.uniform1f(rings.u.uFormed, formed);
   gl.uniform1f(rings.u.uScroll, scroll);
+  gl.uniform1f(rings.u.uFilmTime, filmTime);
   gl.drawArrays(gl.LINES, 0, ringVerts);
 
   /* globe nodes */
@@ -469,6 +499,7 @@ function tick(now){
   gl.uniform1f(nodes.u.uFormed, formed);
   gl.uniform1f(nodes.u.uScroll, scroll);
   gl.uniform1f(nodes.u.uDPR, dpr);
+  gl.uniform1f(nodes.u.uFilmTime, filmTime);
   gl.drawArrays(gl.POINTS, 0, NODES);
 
   /* dust */
@@ -503,5 +534,9 @@ canvas.addEventListener('webglcontextlost', function(e){
   cancelAnimationFrame(raf);
 });
 
+window.__resumeHero = {
+  setFilmTime: function(ms){ filmTime = Math.max(0, Math.min(15, ms / 1000)); },
+  finishFilm: function(){ filmTime = -1; }
+};
 raf = requestAnimationFrame(tick);
 })();
