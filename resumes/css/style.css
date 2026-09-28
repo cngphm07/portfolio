@@ -279,7 +279,7 @@ html.film-wait .hero .intro-fade { animation-play-state: paused !important; }
 /* strips are the continuous tempo connector, not scene decoration */
 .film-overlay[data-seq="1"] .film-strip.s1,
 .film-overlay[data-seq="2"] .film-strip.s1,
-.film-overlay[data-seq="3"] .film-strip.s1 { opacity: .62; transform: translateY(0); }
+.film-overlay[data-seq="3"] .film-strip.s1 { opacity: .82; transform: translateY(0); }
 /* pre-roll strip lime before logo; it accelerates only during the landing */
 .film-overlay.logo-approach .film-strip.s2,
 .film-overlay[data-seq="4"] .film-strip.s2 { opacity: 1; transform: translateY(0); }
@@ -299,15 +299,15 @@ html.film-wait .hero .intro-fade { animation-play-state: paused !important; }
 
 .film-overlay::before {
   background:
-    radial-gradient(ellipse 72% 66% at 50% 50%, transparent 32%, rgba(4,4,4,.4) 80%, rgba(4,4,4,.62) 100%),
-    linear-gradient(90deg, rgba(4,4,4,.5) 0%, transparent 42%, rgba(4,4,4,.5) 100%);
+    radial-gradient(ellipse 72% 66% at 50% 50%, transparent 32%, rgba(4,4,4,.28) 80%, rgba(4,4,4,.48) 100%),
+    linear-gradient(90deg, rgba(4,4,4,.36) 0%, transparent 42%, rgba(4,4,4,.36) 100%);
 }
 
 .film-overlay::after {
-  opacity: .14;
+  opacity: .2;
   background-image:
-    linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px);
   background-size: 4.5vw 4.5vw;
   mask-image: radial-gradient(ellipse 62% 62% at 50% 50%, #000 18%, transparent 76%);
 }
