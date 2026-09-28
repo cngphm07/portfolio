@@ -34,9 +34,10 @@
     <p class="tc mono" id="tcClock" aria-hidden="true">TC 00:00:00:00</p>
   </header>
 
-  <!-- motion film: browser-native 15-second showreel opener -->
+  <!-- motion film: browser-native 15-second kinetic logo showreel -->
   <section class="motion-film" id="top" aria-labelledby="filmTitle">
     <canvas id="filmCanvas" aria-hidden="true"></canvas>
+    <div class="film-flash" aria-hidden="true"></div>
     <div class="film-frame" aria-hidden="true">
       <span class="film-corner film-corner-tl"></span><span class="film-corner film-corner-tr"></span>
       <span class="film-corner film-corner-bl"></span><span class="film-corner film-corner-br"></span>
@@ -46,15 +47,16 @@
       <span id="filmTime">00:00:00:00</span>
       <span>REC <i></i></span>
     </div>
-    <div class="film-copy">
-      <p class="film-eyebrow mono">CNGPHM / MOTION STUDY 001</p>
-      <h1 class="film-title display" id="filmTitle"><span>CNG</span><em>PHM</em></h1>
-      <p class="film-discipline mono">MOTION DESIGN <span>×</span> FILM <span>×</span> BRAND SYSTEMS</p>
+
+    <div class="film-stage">
+      <p class="film-eyebrow mono" aria-hidden="true">CNGPHM — MOTION STUDY 001</p>
+      <h1 class="film-title display" id="filmTitle" aria-label="CNGPHM">
+        <i aria-hidden="true">C</i><i aria-hidden="true">N</i><i aria-hidden="true">G</i><i aria-hidden="true" class="lm">P</i><i aria-hidden="true" class="lm">H</i><i aria-hidden="true" class="lm">M</i>
+      </h1>
+      <p class="film-word display" id="filmWord" aria-hidden="true">MOTION</p>
+      <p class="film-tag mono" id="filmTag">MOTION DESIGNER<span class="ft-line" aria-hidden="true"></span></p>
     </div>
-    <div class="film-branding" aria-label="Selected brand collaborations">
-      <span class="mono">GOOGLE</span><span class="mono">HONDA</span><span class="mono">LAZADA</span>
-      <span class="mono">SHOPEE</span><span class="mono">PEPSICO</span><span class="mono">UNILEVER</span>
-    </div>
+
     <div class="film-bottom mono">
       <span>DESIGN / DIRECT / EDIT / FINISH</span>
       <a href="#profile" class="film-enter">ENTER RÉSUMÉ <b>↓</b></a>
