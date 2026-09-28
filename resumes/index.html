@@ -96,10 +96,11 @@
       SCROLL<span class="hs-line"></span>
     </a>
 
-    <!-- motion film overlay: 15-second kinetic logo showreel that resolves into this hero -->
-    <div class="film-overlay" id="filmOverlay" data-scene="1">
+    <!-- motion film overlay: 4 sub-sequences, 4 motion styles → resolves into this hero -->
+    <div class="film-overlay" id="filmOverlay" data-seq="0">
       <canvas id="filmCanvas" aria-hidden="true"></canvas>
       <div class="film-flash" aria-hidden="true"></div>
+      <div class="film-scan" aria-hidden="true"></div>
       <div class="film-strips" aria-hidden="true">
         <div class="film-strip s1"><div class="track mono" id="filmStrip1"></div></div>
         <div class="film-strip s2 limebar rev"><div class="track mono" id="filmStrip2"></div></div>
@@ -115,11 +116,11 @@
       </div>
 
       <div class="film-stage">
-        <p class="film-eyebrow mono" aria-hidden="true">CNGPHM — MOTION STUDY 001</p>
+        <p class="film-eyebrow mono" aria-hidden="true">CNGPHM — MOTION SHOWREEL</p>
         <h1 class="film-title display" id="filmTitle" aria-label="CNGPHM">
           <i aria-hidden="true">C</i><i aria-hidden="true">N</i><i aria-hidden="true">G</i><i aria-hidden="true" class="lm">P</i><i aria-hidden="true" class="lm">H</i><i aria-hidden="true" class="lm">M</i>
         </h1>
-        <p class="film-word display" id="filmWord" aria-hidden="true">MOTION</p>
+        <p class="film-word display" id="filmWord" aria-hidden="true">DESIGN</p>
       </div>
 
       <div class="film-bottom mono">

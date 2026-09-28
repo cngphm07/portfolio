@@ -1,15 +1,16 @@
 /* ============================================================
-   CNGPHM MOTION FILM — 15-second kinetic logo showreel
-   Plays as an overlay INSIDE the résumé hero. When it ends, the
-   overlay dissolves and the hero intro plays — every animation
-   resolves on the deployed end frame (globe + lockup).
-   Skippable at any moment; scrolling away simply pauses it.
+   CNGPHM MOTION FILM — 15-second showreel, 4 sub-sequences
+   Each sequence demos a different motion-design style on the
+   same wordmark, then everything resolves into the résumé hero
+   (deployed end frame: globe + lockup). Letters are DOM (crisp),
+   per-style backdrops live on canvas. Skippable at any moment.
    ============================================================ */
 (function(){
 'use strict';
 window.__filmStarted = true;
 var film = document.getElementById('filmOverlay');
 var canvas = document.getElementById('filmCanvas');
+var title = document.getElementById('filmTitle');
 var eyebrow = document.querySelector('.film-eyebrow');
 var letters = Array.prototype.slice.call(document.querySelectorAll('.film-title i'));
 var word = document.getElementById('filmWord');
@@ -48,37 +49,33 @@ if(!ctx){
 }
 
 var dpr = 1, W = 1, H = 1;
-var DUR = 15000;            /* ms, loop length          */
-var clock = 0, last = 0;    /* timeline clock            */
-var lastNow = 0;            /* last real draw timestamp  */
+var DUR = 15000;
+var clock = 0, last = 0;
+var lastNow = 0;
 var raf = 0, inView = true;
-var scatter = [];           /* per-letter scatter targets */
 var flashV = 0, flashLime = false, prevT = 0, evIdx = 0;
-var lastWordIdx = -1;
-var lastScene = 0;
+var lastWordIdx = -1, lastSeq = -1;
 
-var WORDS = ['MOTION', 'DESIGN', 'FILM', 'BRAND'];
-/* flash pulses — rare and purposeful: PHM landing + lime loop frame */
+/* ---------- timeline ---------- */
+/* sub-sequence boundaries: 0 pre-roll · 1 swiss · 2 fluid · 3 blueprint · 4 glitch · 5 resolve */
+var SEQ_B = [0.4, 4.2, 7.6, 11.0, 14.0];
+var WORDS1 = ['DESIGN', 'DIRECT', 'EDIT', 'FINISH'];
+var WORDS2 = ['MOTION', 'DESIGN', 'FILM', 'BRAND'];
+var LABELS = ['CNGPHM — MOTION SHOWREEL', 'SEQ 01 · SWISS EDITORIAL', 'SEQ 02 · FLUID MOTION',
+              'SEQ 03 · BLUEPRINT HUD', 'SEQ 04 · GLITCH CUTS', 'CNGPHM — 2026'];
+/* letter slam windows (seq 1) */
+var ENTER = [[0.5, 0.95], [0.75, 1.2], [1.0, 1.45], [1.25, 1.7], [1.5, 1.95], [1.75, 2.2]];
+/* flash pulses — rare and purposeful */
 var EVENTS = [
-  [2.9, .35, 0],
-  [14.55, .7, 1]
+  [2.25, .22, 0],    /* wordmark assembled            */
+  [11.05, .25, 0],   /* glitch cut in                 */
+  [13.7, .3, 0],     /* final slam                    */
+  [14.62, .7, 1]     /* lime frame before the handoff */
 ];
-/* scene boundaries → 8 scenes over 15s */
-var SCENE_B = [1.5, 2.2, 4.6, 6.2, 9.2, 11.0, 13.2];
 
-/* ticker strip content: identical halves so translateX(-50%) loops clean */
-(function buildStrips(){
-  var words = ['CNGPHM', 'MOTION', 'DESIGN', 'FILM', 'BRAND', 'DIRECT', 'EDIT', 'FINISH'];
-  var seq = words.map(function(w){ return '<span>' + w + '</span><span class="dot">✦</span>'; }).join('');
-  [1, 2, 3].forEach(function(n){
-    var el = document.getElementById('filmStrip' + n);
-    if(el) el.innerHTML = '<span class="half">' + seq.repeat(3) + '</span><span class="half">' + seq.repeat(3) + '</span>';
-  });
-})();
-
-function sceneOf(t){
-  var s = 1;
-  for(var i = 0; i < SCENE_B.length; i++){ if(t >= SCENE_B[i]) s = i + 2; }
+function seqOf(t){
+  var s = 0;
+  for(var i = 0; i < SEQ_B.length; i++){ if(t >= SEQ_B[i]) s = i + 1; }
   return s;
 }
 
@@ -87,68 +84,78 @@ function phase(t, a, b){ return clamp((t - a) / (b - a), 0, 1); }
 function easeOut(t){ return 1 - Math.pow(1 - t, 3); }
 function easeIn(t){ return t * t * t; }
 function easeInOut(t){ return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2; }
-function backOut(t){ var c = 1.70158; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); }
+function backOut(t){ var c = 1.2; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); }
 function pad(n){ return String(n).padStart(2, '0'); }
+function seeded(n){ return Math.abs((Math.sin(n * 127.1) * 43758.5453) % 1); }
 
-function resize(){
-  var r = film.getBoundingClientRect();
-  W = Math.max(1, r.width);
-  H = Math.max(1, r.height);
-  if(ctx){
-    dpr = Math.min(window.devicePixelRatio || 1, 1.75);
-    canvas.width = Math.round(W * dpr);
-    canvas.height = Math.round(H * dpr);
-    canvas.style.width = W + 'px';
-    canvas.style.height = H + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  /* letters fly toward screen edges on deconstruct */
-  var tx = [-.34, -.47, .36, .42, -.30, .38];
-  var ty = [-.30, .33, -.37, .30, .41, -.43];
-  var tr = [-24, 18, 26, -18, 14, -22];
-  var m = W < 760 ? .68 : 1;
-  scatter = letters.map(function(_, i){
-    return { x: tx[i] * W * m, y: ty[i] * H * m, r: tr[i] * Math.PI / 180 };
+/* ---------- ticker strips ---------- */
+(function buildStrips(){
+  var words = ['CNGPHM', 'MOTION', 'DESIGN', 'FILM', 'BRAND', 'DIRECT', 'EDIT', 'FINISH'];
+  var seq = words.map(function(w){ return '<span>' + w + '</span><span class="dot">✦</span>'; }).join('');
+  [1, 2].forEach(function(n){
+    var el = document.getElementById('filmStrip' + n);
+    if(el) el.innerHTML = '<span class="half">' + seq.repeat(3) + '</span><span class="half">' + seq.repeat(3) + '</span>';
   });
-}
+})();
 
-/* ---------- per-letter timeline ---------- */
-var ENTER = [[0.15, 0.85], [0.62, 1.22], [1.02, 1.62], [2.2, 2.85], [2.35, 3.0], [2.5, 3.15]];
-
+/* ---------- letters: shared element, per-sequence choreography ---------- */
 function drawLetters(t){
-  var out = easeIn(phase(t, 13.5, 14.75));   /* global wipe-up   */
-  var sc = easeIn(phase(t, 4.6, 5.6)) * (1 - easeOut(phase(t, 9.2, 10.4)));
+  var seq = seqOf(t);
+  var out = easeIn(phase(t, 14.25, 14.8));
   for(var i = 0; i < 6; i++){
-    var e = ENTER[i];
-    var pe = phase(t, e[0], e[1]);
-    var o, x = 0, y = 0, s = 1, r = 0;
-    if(i < 3){ /* C N G — slam from left with back-out */
-      x = (1 - backOut(pe)) * -(W * .3 + i * W * .06);
-      s = 1 + (1 - pe) * 1.15;
-      o = phase(t, e[0], e[0] + .1);
-    }else{ /* P H M — drop from above, lime */
-      y = (1 - easeOut(pe)) * -(H * .62);
-      s = 1 + (1 - pe) * .32;
-      r = (1 - pe) * -9;
-      o = phase(t, e[0], e[0] + .08);
+    var o = 1, x = 0, y = 0, s = 1, r = 0;
+
+    if(seq === 0 || (seq === 1 && t < ENTER[i][0])){
+      /* not arrived yet */
+      o = 0;
+    }else if(seq === 1){
+      /* swiss slam: C N G drop, P H M rise, staggered */
+      var e = ENTER[i];
+      var pe = phase(t, e[0], e[1]);
+      var fromY = i < 3 ? -H * .62 : H * .62;
+      y = (1 - backOut(pe)) * fromY;
+      s = 1 + (1 - pe) * .35;
+      o = pe > 0 ? 1 : 0;
+    }else if(seq === 2){
+      /* fluid bob */
+      y = Math.sin((t - 4.2) * 2.2 + i * .9) * 10;
+    }else if(seq === 3){
+      /* blueprint: settle left, room for the wireframe globe */
+      x = -W * .05;
+      s = .94;
+    }else if(seq === 4){
+      /* glitch jumps, then the final slam back */
+      var slam = easeOut(phase(t, 13.5, 13.95));
+      var slot = Math.floor((t - 11) / .33);
+      var jx = (seeded(slot * 13 + i * 7) - .5) * 44;
+      var jy = (seeded(slot * 29 + i * 3) - .5) * 26;
+      x = jx * (1 - slam);
+      y = jy * (1 - slam);
+      s = 1 + .06 * (1 - slam) * (slot % 2 ? 1 : -1);
     }
-    x += sc * scatter[i].x;
-    y += sc * scatter[i].y;
-    r += sc * scatter[i].r;
-    s *= 1 - sc * .18;
-    y -= out * H * .55;
+
+    /* resolve hold → slight lift while the overlay dissolves */
+    y -= out * H * .3;
     o *= 1 - out;
+
     var st = letters[i].style;
     st.opacity = o.toFixed(3);
     st.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)' +
       ' rotate(' + r.toFixed(2) + 'deg) scale(' + s.toFixed(3) + ')';
   }
-  eyebrow.style.opacity = phase(t, .3, 1.2).toFixed(3);
+
+  /* fluid tracking breathes only in seq 2 */
+  if(seq === 2){
+    title.style.letterSpacing = (-.095 + Math.sin((t - 4.2) * 1.5) * .018).toFixed(4) + 'em';
+  }else if(title.style.letterSpacing){
+    title.style.letterSpacing = '';
+  }
 }
 
-/* ---------- word cycle 6.2–9.2 ---------- */
+/* ---------- editorial word cuts (seq 1) ---------- */
 function drawWord(t){
-  var on = t >= 6.2 && t < 9.2;
+  var seq = seqOf(t);
+  var on = seq === 1 && t >= 2.6;
   if(!on){
     if(lastWordIdx !== -1){
       word.style.opacity = '0';
@@ -157,53 +164,151 @@ function drawWord(t){
     }
     return;
   }
-  var idx = clamp(Math.floor((t - 6.2) / .75), 0, 3);
+  var idx = clamp(Math.floor((t - 2.6) / .4), 0, 3);
   if(idx !== lastWordIdx){
-    word.textContent = WORDS[idx];
-    word.classList.toggle('lm', idx % 2 === 1);
+    word.textContent = WORDS1[idx];
     lastWordIdx = idx;
   }
-  var cut = (t - 6.2) % .75;
-  var punch = easeOut(Math.min(1, cut / .18));
-  var xoff = (idx % 2 ? 1 : -1) * 14 * (1 - punch);
+  var cut = (t - 2.6) % .4;
+  var punch = easeOut(Math.min(1, cut / .16));
   word.style.opacity = '.96';
-  word.style.transform = 'translate(calc(-50% + ' + xoff.toFixed(1) + 'px),-50%) scale(' + (1.12 - .12 * punch).toFixed(3) + ')';
-  word.style.setProperty('--wrule', easeOut(Math.min(1, cut / .4)).toFixed(3));
+  word.style.transform = 'translateX(' + ((1 - punch) * -18).toFixed(1) + 'px)';
+  word.style.setProperty('--wrule', easeOut(Math.min(1, cut / .3)).toFixed(3));
 }
 
-/* ---------- canvas layer ---------- */
-function seeded(n){ return Math.abs((Math.sin(n * 127.1) * 43758.5453) % 1); }
+/* ---------- canvas backdrops per style ---------- */
+function drawGlobe(cx, cy, rad, rot){
+  ctx.beginPath();
+  ctx.arc(cx, cy, rad, 0, 6.283);
+  ctx.strokeStyle = 'rgba(255,255,255,.4)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  for(var m = 0; m < 3; m++){
+    var rx = rad * Math.abs(Math.cos(rot + m * 1.047));
+    ctx.beginPath();
+    ctx.ellipse(cx, cy, Math.max(1, rx), rad, 0, 0, 6.283);
+    ctx.strokeStyle = m === 1 ? 'rgba(201,242,75,.35)' : 'rgba(255,255,255,.22)';
+    ctx.stroke();
+  }
+  for(var lat = -1; lat <= 1; lat++){
+    var ly = cy + lat * rad * .5;
+    var lw = rad * Math.sqrt(1 - lat * lat * .25);
+    ctx.beginPath();
+    ctx.moveTo(cx - lw, ly); ctx.lineTo(cx + lw, ly);
+    ctx.strokeStyle = 'rgba(255,255,255,.18)';
+    ctx.stroke();
+  }
+}
 
 function drawCanvas(t){
   if(!ctx) return;
+  var seq = seqOf(t);
   ctx.clearRect(0, 0, W, H);
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
 
-  /* ambient node field, always faintly alive */
-  for(var i = 0; i < 42; i++){
-    var sx = seeded(i) * W, sy = seeded(i + 50) * H;
-    var px = (sx + t * (12 + seeded(i + 9) * 22)) % W;
-    var py = (sy + Math.sin(t * .5 + i) * 14 + H) % H;
-    ctx.beginPath();
-    ctx.arc(px, py, 1 + seeded(i + 3) * 1.6, 0, 6.283);
-    ctx.fillStyle = i % 9 === 0 ? 'rgba(201,242,75,.3)' : 'rgba(255,255,255,.16)';
-    ctx.fill();
+  if(seq <= 1){
+    /* faint ambient nodes (swiss keeps the field quiet) */
+    for(var i = 0; i < 42; i++){
+      var sx = seeded(i) * W, sy = seeded(i + 50) * H;
+      var px = (sx + t * (12 + seeded(i + 9) * 22)) % W;
+      var py = (sy + Math.sin(t * .5 + i) * 14 + H) % H;
+      ctx.beginPath();
+      ctx.arc(px, py, 1 + seeded(i + 3) * 1.4, 0, 6.283);
+      ctx.fillStyle = i % 9 === 0 ? 'rgba(201,242,75,.28)' : 'rgba(255,255,255,.14)';
+      ctx.fill();
+    }
+    /* editorial rules drawing across at the slams */
+    var rp = easeInOut(phase(t, 1.0, 2.6));
+    if(rp > 0){
+      [0.34, 0.66].forEach(function(fy, k){
+        var w = W * .34 * rp;
+        var x0 = k === 0 ? W * .06 : W - W * .06 - w;
+        ctx.beginPath();
+        ctx.moveTo(x0, H * fy); ctx.lineTo(x0 + w, H * fy);
+        ctx.strokeStyle = 'rgba(255,255,255,' + (.25 * rp).toFixed(3) + ')';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+    }
   }
 
-  /* speed-line sweeps only at scene transitions */
-  var sweep = (t < 1.7 ? phase(t, 0, 1.7) : 0) ||
-              (t >= 4.6 && t < 5.8 ? phase(t, 4.6, 5.8) : 0) ||
-              (t >= 9.2 && t < 10.5 ? phase(t, 9.2, 10.5) : 0) ||
-              (t >= 13.2 ? phase(t, 13.2, 15) : 0);
+  if(seq === 2){
+    /* fluid: silk curves + drifting lime orb */
+    var tt = t - 4.2;
+    for(var c = 0; c < 6; c++){
+      var base = H * (.18 + c * .13);
+      ctx.beginPath();
+      for(var x = 0; x <= W; x += Math.max(8, W / 90)){
+        var y = base + Math.sin(x * .006 + tt * 1.4 + c * 1.3) * H * .05
+                     + Math.sin(x * .0025 - tt * .8 + c) * H * .03;
+        if(x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = c === 2 || c === 4 ? 'rgba(201,242,75,' + (.3 - c * .02).toFixed(3) + ')'
+                                           : 'rgba(255,255,255,' + (.2 - c * .02).toFixed(3) + ')';
+      ctx.lineWidth = c % 3 === 0 ? 1.4 : .8;
+      ctx.stroke();
+    }
+    var ox = W * (.5 + Math.sin(tt * .8) * .24);
+    var oy = H * (.42 + Math.cos(tt * .6) * .08);
+    var orr = Math.min(W, H) * .17;
+    var og = ctx.createRadialGradient(ox, oy, 0, ox, oy, orr);
+    og.addColorStop(0, 'rgba(201,242,75,.5)');
+    og.addColorStop(.35, 'rgba(201,242,75,.16)');
+    og.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = og;
+    ctx.fillRect(ox - orr, oy - orr, orr * 2, orr * 2);
+  }
+
+  if(seq === 3){
+    /* blueprint: measurement ticks + center crosshair + wireframe globe */
+    var bt = t - 7.6;
+    ctx.strokeStyle = 'rgba(255,255,255,.3)';
+    ctx.lineWidth = 1;
+    for(var m2 = 0; m2 < 12; m2++){
+      var my = H * .1 + m2 * (H * .8 / 11);
+      var ml = m2 % 3 === 0 ? 10 : 5;
+      ctx.beginPath();
+      ctx.moveTo(0, my); ctx.lineTo(ml, my);
+      ctx.moveTo(W, my); ctx.lineTo(W - ml, my);
+      ctx.stroke();
+    }
+    ctx.beginPath();
+    ctx.moveTo(W / 2 - 14, H / 2); ctx.lineTo(W / 2 + 14, H / 2);
+    ctx.moveTo(W / 2, H / 2 - 14); ctx.lineTo(W / 2, H / 2 + 14);
+    ctx.strokeStyle = 'rgba(201,242,75,.4)';
+    ctx.stroke();
+    var grow = easeOut(phase(bt, .3, 1.6));
+    drawGlobe(W * .72, H * .44, Math.min(W, H) * (.13 + grow * .1), bt * .9);
+  }
+
+  if(seq === 4){
+    /* glitch: jumping bars, seeded per slot */
+    var slot = Math.floor((t - 11) / .33);
+    for(var g = 0; g < 9; g++){
+      var gy = seeded(slot * 3 + g) * H;
+      var gh = 2 + seeded(slot * 9 + g) * 9;
+      var gx = seeded(slot * 5 + g * 2) * W;
+      var gw = W * (.1 + seeded(g * 7) * .5);
+      ctx.fillStyle = g % 4 === 0 ? 'rgba(201,242,75,' + (.14 + seeded(slot + g) * .12).toFixed(3) + ')'
+                                  : 'rgba(255,255,255,' + (.08 + seeded(g * 3) * .1).toFixed(3) + ')';
+      ctx.fillRect(gx, gy, gw, gh);
+    }
+    var ly2 = seeded(slot * 17) * H;
+    ctx.fillStyle = 'rgba(255,255,255,.25)';
+    ctx.fillRect(0, ly2, W, 1);
+  }
+
+  /* finale: full-bleed speed lines into the handoff */
+  var sweep = t >= 14 ? phase(t, 14, 15) : 0;
   if(sweep > 0){
     for(var l = 0; l < 26; l++){
-      var ly = seeded(l + 7) * H;
+      var sy2 = seeded(l + 7) * H;
       var prog = (sweep * (1.3 + seeded(l) * .9) + seeded(l + 2)) % 1;
       var lx = prog * (W + 300) - 150;
       var len = 90 + seeded(l + 5) * 190;
       ctx.beginPath();
-      ctx.moveTo(lx, ly); ctx.lineTo(lx + len, ly);
+      ctx.moveTo(lx, sy2); ctx.lineTo(lx + len, sy2);
       ctx.strokeStyle = l % 6 === 0 ? 'rgba(201,242,75,' + (.32 - sweep * .12).toFixed(3) + ')'
                                      : 'rgba(255,255,255,' + (.18 - sweep * .08).toFixed(3) + ')';
       ctx.lineWidth = 1 + seeded(l + 8) * 1.2;
@@ -241,11 +346,11 @@ function draw(now){
   clock = (clock + dt) % DUR;
   var t = clock / 1000;
 
-  /* scene engine: data-scene drives CSS (strips, outline) */
-  var sc = sceneOf(t);
-  if(sc !== lastScene){
-    lastScene = sc;
-    film.setAttribute('data-scene', String(sc));
+  var seq = seqOf(t);
+  if(seq !== lastSeq){
+    lastSeq = seq;
+    film.setAttribute('data-seq', String(seq));
+    if(eyebrow) eyebrow.textContent = LABELS[seq];
   }
 
   drawLetters(t);
@@ -287,6 +392,20 @@ if('IntersectionObserver' in window){
 document.addEventListener('visibilitychange', function(){
   if(document.hidden) pause(); else if(inView) play();
 });
+
+function resize(){
+  var r = film.getBoundingClientRect();
+  W = Math.max(1, r.width);
+  H = Math.max(1, r.height);
+  if(ctx){
+    dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+}
 
 resize();
 window.addEventListener('resize', resize, { passive: true });
