@@ -18,7 +18,7 @@ if(!film){
 }
 
 var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-var DUR = 15000, clock = 0, last = 0, raf = 0, ended = false;
+var DUR = 5000, clock = 0, last = 0, raf = 0, ended = false;
 var readyWait = 0;
 
 function hero(){ return window.__resumeHero; }
@@ -37,8 +37,8 @@ function finish(){
   document.documentElement.classList.remove('film-wait');
   setTimeout(function(){
     film.classList.add('film-end');
-    setTimeout(function(){ film.style.display = 'none'; }, 950);
-  }, 620);
+    setTimeout(function(){ film.style.display = 'none'; }, 700);
+  }, 480);
 }
 
 function update(now){
@@ -56,11 +56,11 @@ function update(now){
   h.setFilmTime(clock);
   var t = clock / 1000;
 
-  /* CNGPHM appears once: the settled globe's logo payoff */
-  var p = phase(t, 10.8, 12.1) * (1-easeIn(phase(t, 13.45, 14.1)));
+  /* CNGPHM appears once: the settled globe's logo payoff at 3.2s - 4.6s */
+  var p = phase(t, 3.2, 3.8) * (1-easeIn(phase(t, 4.3, 4.8)));
   if(logo){
     logo.style.opacity = p.toFixed(3);
-    logo.style.transform = 'translate(-50%,-50%) scale(' + (1.16 - .16*easeOut(phase(t,10.8,11.6))).toFixed(3) + ')';
+    logo.style.transform = 'translate(-50%,-50%) scale(' + (1.16 - .16*easeOut(phase(t,3.2,3.7))).toFixed(3) + ')';
   }
   if(timeEl) timeEl.textContent = '00:00:' + pad(Math.floor(t)%60) + ':' + pad(Math.floor(t*24)%24);
 

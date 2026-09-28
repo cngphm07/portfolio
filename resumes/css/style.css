@@ -283,7 +283,7 @@ html.film-wait .hero .intro-fade { animation-play-state: paused !important; }
   background: var(--accent);
   box-shadow: 0 0 24px rgba(201,242,75,.65);
 }
-.film-overlay.film-wipe-run .film-wipe span { animation: dotWipe .62s cubic-bezier(.65,0,.35,1) forwards; }
+.film-overlay.film-wipe-run .film-wipe span { animation: dotWipe .48s cubic-bezier(.65,0,.35,1) forwards; }
 @keyframes dotWipe {
   0% { width: 0; height: 8px; }
   42% { width: 100vw; height: 8px; }

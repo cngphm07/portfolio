@@ -151,7 +151,7 @@ var EDGE_VERT = [
   '  float px = uGlobe.x + p.x * uGlobe.z * per;',
   '  float py = uGlobe.y - p.y * uGlobe.z * per - uScroll * 60.0;',
   '  float rnd = hash(dot(aPos, vec3(12.9898, 78.233, 37.719)));',
-  '  float edgeGate = uFilmTime < 0.0 ? 1.0 : smoothstep(9.0, 10.5, uFilmTime);',
+  '  float edgeGate = uFilmTime < 0.0 ? 1.0 : smoothstep(3.0, 3.8, uFilmTime);',
   '  vAlpha = (0.04 + 0.26 * z01) * (0.7 + 0.3 * rnd) * uFormed * edgeGate;',
   '  vTint = step(0.93, fract(rnd * 13.7)) * 0.85;',
   '  gl_Position = vec4((px / uRes.x) * 2.0 - 1.0, 1.0 - (py / uRes.y) * 2.0, 0.0, 1.0);',
@@ -182,7 +182,7 @@ var RING_VERT = [
   '  float px = uGlobe.x + p.x;',
   '  float py = uGlobe.y - p.y - uScroll * 60.0;',
   '  gl_Position = vec4((px / uRes.x) * 2.0 - 1.0, 1.0 - (py / uRes.y) * 2.0, 0.0, 1.0);',
-  '  float ringGate = uFilmTime < 0.0 ? 1.0 : smoothstep(9.6, 11.0, uFilmTime);',
+  '  float ringGate = uFilmTime < 0.0 ? 1.0 : smoothstep(3.2, 3.9, uFilmTime);',
   '  vAlpha = (0.05 + 0.11 * z01) * (0.6 + 0.4 * hash(u * 5.0)) * uFormed * ringGate;',
   '  vTint = step(0.93, hash(u * 11.0)) * 0.85;',
   '}'
@@ -217,15 +217,15 @@ var NODE_VERT = [
   '  float gridY = floor(fy / 28.0) * 28.0 + 14.0;',
   '  float scan = sin(gridY*0.045 - uTime*6.0) * 18.0;',
   '  vec2 grid = vec2(gridX + scan, gridY);',
-  '  float waveP = smoothstep(3.2, 6.7, film);',
-  '  float vortexP = smoothstep(6.5, 10.5, film);',
+  '  float waveP = smoothstep(1.0, 2.3, film);',
+  '  float vortexP = smoothstep(2.0, 3.5, film);',
   '  float ang = atan(gridY-uGlobe.y, gridX-uGlobe.x) + uTime*(0.9 + hash(aSeed.z*7.0));',
   '  float rad = mix(length(grid-vec2(uGlobe.x,uGlobe.y)), uGlobe.z*(1.8+0.35*sin(aSeed.w*6.28)), vortexP);',
   '  vec2 wave = vec2(grid.x, grid.y + sin(grid.x*0.018+uTime*2.5+aSeed.z*6.28)*75.0);',
   '  vec2 vortex = vec2(uGlobe.x,uGlobe.y) + vec2(cos(ang),sin(ang))*rad;',
   '  vec2 kinetic = mix(grid, wave, waveP);',
   '  kinetic = mix(kinetic, vortex, vortexP);',
-  '  float settle = smoothstep(9.5, 11.0, film);',
+  '  float settle = smoothstep(3.2, 3.9, film);',
   '  float px = mix(kinetic.x, sphereX, settle);',
   '  float py = mix(kinetic.y, sphereY, settle);',
   '  gl_Position = vec4((px / uRes.x) * 2.0 - 1.0, 1.0 - (py / uRes.y) * 2.0, 0.0, 1.0);',
@@ -535,7 +535,7 @@ canvas.addEventListener('webglcontextlost', function(e){
 });
 
 window.__resumeHero = {
-  setFilmTime: function(ms){ filmTime = Math.max(0, Math.min(15, ms / 1000)); },
+  setFilmTime: function(ms){ filmTime = Math.max(0, Math.min(5.0, ms / 1000)); },
   finishFilm: function(){ filmTime = -1; }
 };
 raf = requestAnimationFrame(tick);
