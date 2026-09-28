@@ -16,6 +16,8 @@ var tag = document.getElementById('filmTag');
 var tagLine = tag ? tag.querySelector('.ft-line') : null;
 var flashEl = document.querySelector('.film-flash');
 var timeEl = document.getElementById('filmTime');
+var sceneEl = document.getElementById('filmScene');
+var idxEl = document.getElementById('filmIdx');
 if(!film || !canvas || letters.length !== 6) return;
 
 var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -41,6 +43,8 @@ var scatter = [];           /* per-letter scatter targets */
 var flashV = 0, flashLime = false, prevT = 0, evIdx = 0;
 var lastWordIdx = -1, shaking = false;
 var rings = [];             /* beat rings {t0}           */
+var pluses = [];            /* beat plus-marks {x,y,t0}  */
+var lastScene = 0;
 
 var WORDS = ['MOTION', 'DESIGN', 'FILM', 'BRAND'];
 /* flash pulses: [time s, strength, lime] */
@@ -51,6 +55,24 @@ var EVENTS = [
   [11.1, .22, 0],                                   /* tag stamp            */
   [14.55, .85, 1]                                   /* lime loop frame      */
 ];
+/* scene boundaries → 8 scenes over 15s */
+var SCENE_B = [1.5, 3, 4.5, 6, 9, 11, 13];
+
+/* ticker strip content: identical halves so translateX(-50%) loops clean */
+(function buildStrips(){
+  var words = ['CNGPHM', 'MOTION', 'DESIGN', 'FILM', 'BRAND', 'DIRECT', 'EDIT', 'FINISH'];
+  var seq = words.map(function(w){ return '<span>' + w + '</span><span class="dot">✦</span>'; }).join('');
+  [1, 2, 3].forEach(function(n){
+    var el = document.getElementById('filmStrip' + n);
+    if(el) el.innerHTML = '<span class="half">' + seq.repeat(3) + '</span><span class="half">' + seq.repeat(3) + '</span>';
+  });
+})();
+
+function sceneOf(t){
+  var s = 1;
+  for(var i = 0; i < SCENE_B.length; i++){ if(t >= SCENE_B[i]) s = i + 2; }
+  return s;
+}
 
 function clamp(n, a, b){ return n < a ? a : n > b ? b : n; }
 function phase(t, a, b){ return clamp((t - a) / (b - a), 0, 1); }
@@ -120,7 +142,7 @@ function drawLetters(t){
 function drawWord(t){
   var on = t >= 6.0 && t < 9.0;
   if(!on){
-    if(lastWordIdx !== -1){ word.style.opacity = '0'; lastWordIdx = -1; }
+    if(lastWordIdx !== -1){ word.style.opacity = '0'; word.classList.remove('chroma'); lastWordIdx = -1; }
     return;
   }
   var idx = clamp(Math.floor((t - 6.0) / .75), 0, 3);
@@ -129,6 +151,7 @@ function drawWord(t){
     word.classList.toggle('lm', idx % 2 === 1);
     lastWordIdx = idx;
   }
+  word.classList.add('chroma');
   var cut = (t - 6.0) % .75;
   var punch = easeOut(Math.min(1, cut / .14));
   var xoff = (idx % 2 ? 1 : -1) * 16 * (1 - punch);
@@ -176,8 +199,13 @@ function drawCanvas(t, dt){
     ctx.fill();
   }
 
-  /* beat rings — spawn on every beat */
-  if(last && dt > 0 && Math.floor((clock - dt) / 750) !== Math.floor(clock / 750)) rings.push({ t0: t });
+  /* beat rings + plus marks — spawn on every beat */
+  if(last && dt > 0 && Math.floor((clock - dt) / 750) !== Math.floor(clock / 750)){
+    rings.push({ t0: t });
+    for(var pm = 0; pm < 3; pm++){
+      if(pluses.length < 24) pluses.push({ x: seeded(t * 7 + pm * 13) * W, y: H * (.2 + seeded(t * 11 + pm) * .6), t0: t });
+    }
+  }
   for(var r = rings.length - 1; r >= 0; r--){
     var age = t - rings[r].t0;
     if(age < 0 || age > .7){ rings.splice(r, 1); continue; }
@@ -187,6 +215,31 @@ function drawCanvas(t, dt){
     ctx.strokeStyle = 'rgba(255,255,255,' + (.22 * (1 - rr)).toFixed(3) + ')';
     ctx.lineWidth = 1;
     ctx.stroke();
+  }
+  for(var p = pluses.length - 1; p >= 0; p--){
+    var pa = t - pluses[p].t0;
+    if(pa < 0 || pa > .5){ pluses.splice(p, 1); continue; }
+    var pf = 1 - pa / .5;
+    var ps = 5 + seeded(pluses[p].x) * 4;
+    ctx.strokeStyle = 'rgba(201,242,75,' + (.5 * pf).toFixed(3) + ')';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pluses[p].x - ps, pluses[p].y); ctx.lineTo(pluses[p].x + ps, pluses[p].y);
+    ctx.moveTo(pluses[p].x, pluses[p].y - ps); ctx.lineTo(pluses[p].x, pluses[p].y + ps);
+    ctx.stroke();
+  }
+
+  /* vertical column lines sweep during reassemble */
+  var vsw = easeInOut(phase(t, 9.0, 10.3));
+  if(vsw > 0){
+    for(var v = 0; v < 5; v++){
+      var vx = W * (.12 + v * .19) + Math.sin(t * 2 + v) * W * .01;
+      ctx.beginPath();
+      ctx.moveTo(vx, 0); ctx.lineTo(vx, H);
+      ctx.strokeStyle = 'rgba(255,255,255,' + (.16 * (1 - vsw) + .04).toFixed(3) + ')';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
   }
 
   /* speed-line sweeps on cuts / deconstruct / reassemble */
@@ -272,6 +325,20 @@ function draw(now){
   last = now; lastNow = now;
   clock = (clock + dt) % DUR;
   var t = clock / 1000;
+
+  /* scene engine: data-scene drives CSS (strips, outline, idx) */
+  var sc = sceneOf(t);
+  if(sc !== lastScene){
+    lastScene = sc;
+    film.setAttribute('data-scene', String(sc));
+    if(sceneEl) sceneEl.textContent = 'SC ' + pad(sc) + '/08';
+    if(idxEl){
+      idxEl.textContent = pad(sc);
+      idxEl.classList.remove('snap');
+      void idxEl.offsetWidth;
+      idxEl.classList.add('snap');
+    }
+  }
 
   drawLetters(t);
   drawWord(t);

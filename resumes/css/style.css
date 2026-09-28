@@ -225,6 +225,99 @@ header.site-header {
 
 .film-flash.lime { background: var(--accent); }
 
+/* ---- kinetic line strips: ticker bars sweeping across ---- */
+.film-strips { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+
+.film-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  padding: .5rem 0;
+  border-top: 1px solid rgba(255,255,255,.16);
+  border-bottom: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.045);
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity .16s steps(3,end), transform .34s var(--ease);
+}
+
+.film-strip .track {
+  display: inline-flex;
+  white-space: nowrap;
+  will-change: transform;
+  animation: stripScroll 13s linear infinite;
+  font-size: .62rem;
+  letter-spacing: .32em;
+  color: var(--g1);
+}
+
+.film-strip .track .half { display: inline-flex; }
+.film-strip .track span { margin-right: 2.8rem; }
+.film-strip .track .dot { color: var(--accent); margin-right: 2.8rem; }
+
+.film-strip.rev .track { animation-direction: reverse; }
+.film-strip.limebar { background: var(--accent); border-color: transparent; }
+.film-strip.limebar .track { color: #000; font-weight: 500; }
+.film-strip.limebar .track .dot { color: #000; opacity: .55; }
+
+.film-strip.s1 { top: 23%; }
+.film-strip.s2 { bottom: 23%; }
+.film-strip.s3 { top: 14%; }
+.film-strip.s3 .track { animation-duration: 19s; }
+
+@keyframes stripScroll { to { transform: translateX(-50%); } }
+
+/* strips enter/exit per scene (hard steps = kinetic snap) */
+.motion-film[data-scene="1"] .film-strip.s1,
+.motion-film[data-scene="2"] .film-strip.s1,
+.motion-film[data-scene="3"] .film-strip.s2,
+.motion-film[data-scene="4"] .film-strip.s2,
+.motion-film[data-scene="5"] .film-strip.s2,
+.motion-film[data-scene="4"] .film-strip.s3,
+.motion-film[data-scene="5"] .film-strip.s3,
+.motion-film[data-scene="7"] .film-strip.s3 { opacity: 1; transform: translateY(0); }
+
+/* ---- giant outlined scene counter ---- */
+.film-idx {
+  position: absolute;
+  right: var(--pad);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  font-size: clamp(4rem, 10vw, 9rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,.3);
+  opacity: 0;
+  transition: opacity .2s;
+  pointer-events: none;
+  user-select: none;
+}
+
+.motion-film[data-scene="4"] .film-idx,
+.motion-film[data-scene="5"] .film-idx,
+.motion-film[data-scene="6"] .film-idx,
+.motion-film[data-scene="7"] .film-idx,
+.motion-film[data-scene="8"] .film-idx { opacity: 1; }
+
+.film-idx.snap { animation: idxSnap .3s var(--ease); }
+@keyframes idxSnap { 0% { transform: translateY(-50%) scale(1.14); opacity: .4; } }
+
+/* outlined letters while the wordmark is deconstructed */
+.motion-film[data-scene="4"] .film-title i,
+.motion-film[data-scene="5"] .film-title i {
+  color: transparent;
+  -webkit-text-stroke: .035em rgba(255,255,255,.92);
+}
+.motion-film[data-scene="4"] .film-title i.lm,
+.motion-film[data-scene="5"] .film-title i.lm { -webkit-text-stroke-color: var(--accent); }
+
+/* chromatic hard-offset on the word-cycle */
+.film-word.chroma {
+  text-shadow: .05em .035em 0 rgba(201,242,75,.85), -.045em -.03em 0 rgba(255,255,255,.28);
+}
+
 .motion-film::before,
 .motion-film::after {
   content: '';
@@ -1094,6 +1187,12 @@ html.js .ft-line { transform: scaleX(0); }
   .film-bottom { left: 1.25rem; right: 1.25rem; bottom: 1.55rem; font-size: .46rem; letter-spacing: .16em; }
   .film-bottom > span { display: none; }
   .motion-film::after { background-size: 3rem 3rem; }
+  .film-strip .track { font-size: .5rem; letter-spacing: .22em; }
+  .film-strip .track span, .film-strip .track .dot { margin-right: 1.7rem; }
+  .film-strip.s1 { top: 21%; }
+  .film-strip.s2 { bottom: 21%; }
+  .film-strip.s3 { top: 12%; }
+  .film-idx { right: 1.25rem; font-size: clamp(3.4rem, 13vw, 5.6rem); }
 }
 
 /* ============ responsive ============ */
@@ -1163,7 +1262,7 @@ html.js .ft-line { transform: scaleX(0); }
   html { scroll-behavior: auto; }
   .grain, .film-hud i, .film-enter b { animation: none; }
   /* static designed end-card instead of an empty frame */
-  #filmCanvas, .film-flash, .film-word { display: none; }
+  #filmCanvas, .film-flash, .film-word, .film-strips, .film-idx { display: none; }
   html.js .film-title i { opacity: 1 !important; transform: none !important; }
   html.js .film-eyebrow { opacity: 1 !important; }
   html.js .film-tag { opacity: 1 !important; }
