@@ -8,6 +8,15 @@
 var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 var fine = window.matchMedia('(pointer: fine)').matches;
 
+/* safety: if the film script never started, release the hero anyway */
+setTimeout(function(){
+  if(!window.__filmStarted){
+    document.documentElement.classList.remove('film-wait');
+    var ov = document.getElementById('filmOverlay');
+    if(ov) ov.style.display = 'none';
+  }
+}, 2500);
+
 /* ---------- stagger delays inside [data-stagger] groups ---------- */
 document.querySelectorAll('[data-stagger]').forEach(function(c){
   c.querySelectorAll('[data-reveal]').forEach(function(el, i){

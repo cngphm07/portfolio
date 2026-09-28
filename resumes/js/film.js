@@ -1,26 +1,43 @@
 /* ============================================================
    CNGPHM MOTION FILM — 15-second kinetic logo showreel
-   Pure motion graphics at ~120BPM: type slams, deconstruct /
-   reassemble, word-cycle, line strips. Letters are DOM (crisp);
-   speed-lines live on canvas. Smooth and held, never strobing.
-   Loop is non-blocking: ENTER RÉSUMÉ works at any moment.
+   Plays as an overlay INSIDE the résumé hero. When it ends, the
+   overlay dissolves and the hero intro plays — every animation
+   resolves on the deployed end frame (globe + lockup).
+   Skippable at any moment; scrolling away simply pauses it.
    ============================================================ */
 (function(){
 'use strict';
-var film = document.querySelector('.motion-film');
+window.__filmStarted = true;
+var film = document.getElementById('filmOverlay');
 var canvas = document.getElementById('filmCanvas');
 var eyebrow = document.querySelector('.film-eyebrow');
 var letters = Array.prototype.slice.call(document.querySelectorAll('.film-title i'));
 var word = document.getElementById('filmWord');
 var flashEl = document.querySelector('.film-flash');
 var timeEl = document.getElementById('filmTime');
-if(!film || !canvas || letters.length !== 6) return;
+var skipBtn = document.getElementById('filmSkip');
+if(!film || !canvas || letters.length !== 6){
+  document.documentElement.classList.remove('film-wait');
+  return;
+}
+
+var ended = false;
+function endFilm(){
+  if(ended) return;
+  ended = true;
+  pause();
+  if(flashEl) flashEl.style.opacity = '0';
+  film.classList.add('film-end');
+  /* hero intro takes over and resolves on the end frame */
+  document.documentElement.classList.remove('film-wait');
+  setTimeout(function(){ film.style.display = 'none'; }, 1150);
+}
 
 var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(reduced){
-  /* designed static end-card: lockup + tagline, no canvas, no loop */
-  if(canvas.parentNode) canvas.parentNode.removeChild(canvas);
-  if(flashEl && flashEl.parentNode) flashEl.parentNode.removeChild(flashEl);
+  /* no film: hero shows immediately */
+  if(film.parentNode) film.parentNode.removeChild(film);
+  document.documentElement.classList.remove('film-wait');
   return;
 }
 
@@ -200,7 +217,7 @@ function drawCanvas(t){
 /* ---------- flash ---------- */
 function drawFx(t, dt){
   var ts = t;
-  if(ts < prevT) evIdx = 0;               /* loop wrapped */
+  if(ts < prevT){ endFilm(); return; }     /* loop wrapped → resolve into the hero */
   while(evIdx < EVENTS.length && ts >= EVENTS[evIdx][0]){
     if(EVENTS[evIdx][0] > prevT || prevT === 0 || ts < prevT){
       flashV = Math.max(flashV, EVENTS[evIdx][1]);
@@ -273,5 +290,6 @@ document.addEventListener('visibilitychange', function(){
 
 resize();
 window.addEventListener('resize', resize, { passive: true });
+if(skipBtn) skipBtn.addEventListener('click', endFilm);
 play();
 })();

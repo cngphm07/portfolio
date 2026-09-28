@@ -194,16 +194,28 @@ header.site-header {
   text-align: right;
 }
 
-/* ============ motion film — kinetic logo showreel ============ */
-.motion-film {
-  position: relative;
-  isolation: isolate;
-  min-height: 100vh;
-  min-height: 100svh;
+/* ============ motion film — kinetic logo showreel overlay ============
+   Lives INSIDE the hero: plays 15s, then fades out so the hero intro
+   ends exactly on the deployed end frame (globe + lockup). */
+.film-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
   overflow: hidden;
-  background: #040404;
-  color: var(--ink);
+  background: #050505;
+  transition: opacity .9s ease .1s;
 }
+
+html:not(.js) .film-overlay { display: none; }
+
+.film-overlay.film-end {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* hero intro waits for the film, then plays into the end frame */
+html.film-wait .hero .intro,
+html.film-wait .hero .intro-fade { animation-play-state: paused !important; }
 
 #filmCanvas {
   position: absolute;
@@ -265,22 +277,22 @@ header.site-header {
 @keyframes stripScroll { to { transform: translateX(-50%); } }
 
 /* strips glide in/out per scene */
-.motion-film[data-scene="2"] .film-strip.s1,
-.motion-film[data-scene="3"] .film-strip.s1,
-.motion-film[data-scene="4"] .film-strip.s2,
-.motion-film[data-scene="5"] .film-strip.s2 { opacity: 1; transform: translateY(0); }
+.film-overlay[data-scene="2"] .film-strip.s1,
+.film-overlay[data-scene="3"] .film-strip.s1,
+.film-overlay[data-scene="4"] .film-strip.s2,
+.film-overlay[data-scene="5"] .film-strip.s2 { opacity: 1; transform: translateY(0); }
 
 /* outlined letters while the wordmark is deconstructed */
-.motion-film[data-scene="4"] .film-title i,
-.motion-film[data-scene="5"] .film-title i {
+.film-overlay[data-scene="4"] .film-title i,
+.film-overlay[data-scene="5"] .film-title i {
   color: transparent;
   -webkit-text-stroke: .035em rgba(255,255,255,.92);
 }
-.motion-film[data-scene="4"] .film-title i.lm,
-.motion-film[data-scene="5"] .film-title i.lm { -webkit-text-stroke-color: var(--accent); }
+.film-overlay[data-scene="4"] .film-title i.lm,
+.film-overlay[data-scene="5"] .film-title i.lm { -webkit-text-stroke-color: var(--accent); }
 
-.motion-film::before,
-.motion-film::after {
+.film-overlay::before,
+.film-overlay::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -288,13 +300,13 @@ header.site-header {
   pointer-events: none;
 }
 
-.motion-film::before {
+.film-overlay::before {
   background:
     radial-gradient(ellipse 72% 66% at 50% 50%, transparent 32%, rgba(4,4,4,.4) 80%, rgba(4,4,4,.62) 100%),
     linear-gradient(90deg, rgba(4,4,4,.5) 0%, transparent 42%, rgba(4,4,4,.5) 100%);
 }
 
-.motion-film::after {
+.film-overlay::after {
   opacity: .14;
   background-image:
     linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
@@ -453,18 +465,18 @@ html.js .film-title i { opacity: 0; }
   letter-spacing: .25em;
 }
 
-.film-enter {
+.film-skip {
   display: inline-flex;
   align-items: center;
   gap: .8rem;
   color: var(--ink);
-  text-decoration: none;
+  letter-spacing: inherit;
   transition: color .3s;
 }
 
-.film-enter b { color: var(--accent); font-size: 1.15rem; font-weight: 400; animation: filmArrow 1.6s var(--ease) infinite; }
-.film-enter:hover { color: var(--accent); }
-@keyframes filmArrow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+.film-skip b { color: var(--accent); font-size: 1.05rem; font-weight: 400; font-style: normal; }
+.film-skip:hover { color: var(--accent); }
+.film-skip:hover b { color: var(--ink); }
 
 /* ============ hero ============ */
 .hero {
@@ -1120,7 +1132,9 @@ html.js .film-title i { opacity: 0; }
 }
 
 @media (max-width: 760px) {
-  .motion-film { min-height: 100svh; }
+  .film-overlay { overflow: hidden; }
+  /* during the film the hero must fill the phone screen so the overlay reads fullscreen */
+  html.film-wait .hero { min-height: 100svh; }
   .film-frame { inset: 1rem; }
   .film-hud { top: 1.55rem; left: 1.25rem; right: 1.25rem; font-size: .48rem; letter-spacing: .18em; }
   .film-hud span:first-child { display: none; }
@@ -1130,7 +1144,7 @@ html.js .film-title i { opacity: 0; }
   .film-word { font-size: clamp(2.4rem, 14vw, 5rem); }
   .film-bottom { left: 1.25rem; right: 1.25rem; bottom: 1.55rem; font-size: .46rem; letter-spacing: .16em; }
   .film-bottom > span { display: none; }
-  .motion-film::after { background-size: 3rem 3rem; }
+  .film-overlay::after { background-size: 3rem 3rem; }
   .film-strip .track { font-size: .5rem; letter-spacing: .22em; }
   .film-strip .track span, .film-strip .track .dot { margin-right: 1.7rem; }
   .film-strip.s1 { top: 21%; }
@@ -1202,11 +1216,11 @@ html.js .film-title i { opacity: 0; }
 /* ============ reduced motion ============ */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .grain, .film-hud i, .film-enter b { animation: none; }
-  /* static designed end-card instead of an empty frame */
-  #filmCanvas, .film-flash, .film-word, .film-strips { display: none; }
-  html.js .film-title i { opacity: 1 !important; transform: none !important; }
-  html.js .film-eyebrow { opacity: 1 !important; }
+  .grain, .film-hud i { animation: none; }
+  /* no film: hero shows immediately */
+  .film-overlay { display: none; }
+  html.film-wait .hero .intro,
+  html.film-wait .hero .intro-fade { animation-play-state: running !important; }
   * { transition-duration: .01ms !important; }
 }
 
@@ -1261,7 +1275,7 @@ html.js .film-title i { opacity: 0; }
   /* ---- hide screen-only decoration ---- */
   .grain,
   .site-header,
-  .motion-film,
+  .film-overlay,
   .hero::after,
   #heroCanvas,
   .hero-frame,
