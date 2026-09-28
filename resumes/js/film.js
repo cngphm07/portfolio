@@ -10,6 +10,7 @@
 window.__filmStarted = true;
 var film = document.getElementById('filmOverlay');
 var canvas = document.getElementById('filmCanvas');
+var eyebrow = document.querySelector('.film-eyebrow');
 var letters = Array.prototype.slice.call(document.querySelectorAll('.film-title i'));
 var word = document.getElementById('filmWord');
 var flashEl = document.querySelector('.film-flash');
@@ -56,23 +57,21 @@ var lastWordIdx = -1, lastSeq = -1;
 
 /* ---------- timeline ----------
    0   pre-roll (black + label)
-   1   0.4–4.2   · kinetic type — word cuts, rules
-   2   4.2–7.6   · fluid forms — silk curves + lime orb + ring
-   3   7.6–11.0  · blueprint HUD — ticks, crosshair, wireframe globe
-   4   11.0–14.2 · logo reveal — CNGPHM slams, holds, exits
-   5   14.2–15   · resolve into the hero                        */
-var SEQ_B = [0.4, 4.2, 7.6, 11.0, 14.2];
+   1   0.4–4.2    · kinetic type — tense word cuts / rules
+   2   4.2–7.6    · fluid forms — overlap begins before the cut
+   3   7.6–11.0   · blueprint HUD — ring measures into globe
+   4   11.0–14.12 · logo reveal — dense slam, single accelerating exit
+   5   14.12–15   · resolve into the hero                         */
+var SEQ_B = [0.4, 4.2, 7.6, 11.0, 14.12];
 var WORDS1 = ['MOTION', 'DESIGN', 'DIRECT', 'EDIT'];
-/* logo reveal: staggered slams at 11.2–13.0 */
-var ENTER = [[11.2, 11.7], [11.45, 11.95], [11.7, 12.2], [11.95, 12.45], [12.2, 12.7], [12.45, 12.95]];
+/* logo reveal: denser land; final letter completes by 12.48 */
+var ENTER = [[11.05, 11.48], [11.25, 11.68], [11.45, 11.88], [11.65, 12.08], [11.85, 12.28], [12.05, 12.48]];
 var LABELS = ['CNGPHM — MOTION SHOWREEL', 'SEQ 01 · KINETIC TYPE', 'SEQ 02 · FLUID FORMS',
               'SEQ 03 · BLUEPRINT HUD', 'CNGPHM', 'CNGPHM — 2026'];
-/* flash pulses — rare and purposeful */
+/* only structural flashes; never per-word strobe */
 var EVENTS = [
-  [4.2, .18, 0],     /* type → forms cut     */
-  [7.6, .18, 0],     /* forms → blueprint    */
-  [12.98, .3, 0],    /* wordmark assembled   */
-  [14.55, .7, 1]     /* lime frame handoff   */
+  [12.52, .2, 0],    /* wordmark locks       */
+  [14.05, .7, 1]     /* final sweep/handoff  */
 ];
 
 function seqOf(t){
@@ -115,9 +114,9 @@ function drawLetters(t){
       o = pe > 0 ? 1 : 0;
       /* gentle breath while the lockup holds */
       if(t > 13.0) s *= 1 + .008 * Math.sin((t - 13) * 2.2);
-      /* exit: wipe up */
-      var exit = easeIn(phase(t, 14.15, 14.6));
-      y -= exit * H * .38;
+      /* exit and final sweep begin together — one accelerating gesture */
+      var exit = easeIn(phase(t, 13.98, 14.42));
+      y -= exit * H * .48;
       o *= 1 - exit;
     }
     var st = letters[i].style;
@@ -138,13 +137,14 @@ function drawWord(t){
     }
     return;
   }
-  var idx = clamp(Math.floor((t - 0.7) / .825), 0, 3);
+  /* 4 cuts land closer to the 4.2s boundary; no dead hold */
+  var idx = clamp(Math.floor((t - 0.7) / .75), 0, 3);
   if(idx !== lastWordIdx){
     word.textContent = WORDS1[idx];
     word.classList.toggle('lm', idx % 2 === 1);
     lastWordIdx = idx;
   }
-  var cut = (t - 0.7) % .825;
+  var cut = (t - 0.7) % .75;
   var punch = easeOut(Math.min(1, cut / .22));
   word.style.opacity = '.96';
   word.style.transform = 'translate(-50%,-50%) scale(' + (1.1 - .1 * punch).toFixed(3) + ')';
@@ -182,7 +182,10 @@ function drawCanvas(t){
   ctx.save();
   ctx.globalCompositeOperation = 'lighter';
 
-  if(seq <= 1){
+  /* editorial is held 350ms into fluid: its rules become silk baselines */
+  var editorial = t < 4.55;
+  var editorialFade = t > 4.2 ? 1 - phase(t, 4.2, 4.55) : 1;
+  if(editorial){
     /* faint ambient nodes + editorial rules under the word cuts */
     for(var i = 0; i < 42; i++){
       var sx = seeded(i) * W, sy = seeded(i + 50) * H;
@@ -190,26 +193,29 @@ function drawCanvas(t){
       var py = (sy + Math.sin(t * .5 + i) * 14 + H) % H;
       ctx.beginPath();
       ctx.arc(px, py, 1 + seeded(i + 3) * 1.4, 0, 6.283);
-      ctx.fillStyle = i % 9 === 0 ? 'rgba(201,242,75,.28)' : 'rgba(255,255,255,.14)';
+      ctx.fillStyle = i % 9 === 0 ? 'rgba(201,242,75,' + (.28 * editorialFade).toFixed(3) + ')' : 'rgba(255,255,255,' + (.14 * editorialFade).toFixed(3) + ')';
       ctx.fill();
     }
-    var rp = easeInOut(phase(t, 1.1, 2.9)) * (1 - easeIn(phase(t, 3.8, 4.2)));
+    var rp = easeInOut(phase(t, 1.1, 2.9)) * (t > 4.2 ? editorialFade : 1);
     if(rp > 0){
       [0.3, 0.7].forEach(function(fy, k){
         var w = W * .34 * rp;
         var x0 = k === 0 ? W * .06 : W - W * .06 - w;
         ctx.beginPath();
         ctx.moveTo(x0, H * fy); ctx.lineTo(x0 + w, H * fy);
-        ctx.strokeStyle = 'rgba(255,255,255,' + (.25 * rp).toFixed(3) + ')';
+        ctx.strokeStyle = 'rgba(255,255,255,' + (.25 * rp * editorialFade).toFixed(3) + ')';
         ctx.lineWidth = 1;
         ctx.stroke();
       });
     }
   }
 
-  if(seq === 2){
+  /* fluid begins 350ms before its nominal cut, overlapping editorial */
+  var fluid = t >= 3.85 && t < 7.95;
+  if(fluid){
     /* fluid: silk curves + drifting lime orb + expanding ring */
-    var tt = t - 4.2;
+    var tt = Math.max(0, t - 4.2);
+    var fluidFade = t < 4.2 ? phase(t, 3.85, 4.2) : (t > 7.6 ? 1 - phase(t, 7.6, 7.95) : 1);
     for(var c = 0; c < 6; c++){
       var base = H * (.18 + c * .13);
       ctx.beginPath();
@@ -218,8 +224,8 @@ function drawCanvas(t){
                      + Math.sin(x * .0025 - tt * .8 + c) * H * .03;
         if(x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
-      ctx.strokeStyle = c === 2 || c === 4 ? 'rgba(201,242,75,' + (.3 - c * .02).toFixed(3) + ')'
-                                           : 'rgba(255,255,255,' + (.2 - c * .02).toFixed(3) + ')';
+      ctx.strokeStyle = c === 2 || c === 4 ? 'rgba(201,242,75,' + ((.3 - c * .02) * fluidFade).toFixed(3) + ')'
+                                           : 'rgba(255,255,255,' + ((.2 - c * .02) * fluidFade).toFixed(3) + ')';
       ctx.lineWidth = c % 3 === 0 ? 1.4 : .8;
       ctx.stroke();
     }
@@ -227,8 +233,8 @@ function drawCanvas(t){
     var oy = H * (.42 + Math.cos(tt * .6) * .08);
     var orr = Math.min(W, H) * .17;
     var og = ctx.createRadialGradient(ox, oy, 0, ox, oy, orr);
-    og.addColorStop(0, 'rgba(201,242,75,.5)');
-    og.addColorStop(.35, 'rgba(201,242,75,.16)');
+    og.addColorStop(0, 'rgba(201,242,75,' + (.5 * fluidFade).toFixed(3) + ')');
+    og.addColorStop(.35, 'rgba(201,242,75,' + (.16 * fluidFade).toFixed(3) + ')');
     og.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = og;
     ctx.fillRect(ox - orr, oy - orr, orr * 2, orr * 2);
@@ -236,16 +242,19 @@ function drawCanvas(t){
     if(ring > 0 && ring < 1){
       ctx.beginPath();
       ctx.arc(W / 2, H / 2, Math.min(W, H) * (.08 + ring * .3), 0, 6.283);
-      ctx.strokeStyle = 'rgba(255,255,255,' + (.3 * (1 - ring)).toFixed(3) + ')';
+      ctx.strokeStyle = 'rgba(255,255,255,' + (.3 * (1 - ring) * fluidFade).toFixed(3) + ')';
       ctx.lineWidth = 1;
       ctx.stroke();
     }
   }
 
-  if(seq === 3){
+  /* blueprint starts 300ms early while the fluid ring becomes its globe */
+  var blueprint = t >= 7.3 && t < 11.0;
+  if(blueprint){
     /* blueprint: measurement ticks + crosshair + wireframe globe */
-    var bt = t - 7.6;
-    ctx.strokeStyle = 'rgba(255,255,255,.3)';
+    var bt = Math.max(0, t - 7.6);
+    var blueFade = t < 7.6 ? phase(t, 7.3, 7.6) : 1;
+    ctx.strokeStyle = 'rgba(255,255,255,' + (.3 * blueFade).toFixed(3) + ')';
     ctx.lineWidth = 1;
     for(var m2 = 0; m2 < 12; m2++){
       var my = H * .1 + m2 * (H * .8 / 11);
@@ -258,9 +267,10 @@ function drawCanvas(t){
     ctx.beginPath();
     ctx.moveTo(W / 2 - 14, H / 2); ctx.lineTo(W / 2 + 14, H / 2);
     ctx.moveTo(W / 2, H / 2 - 14); ctx.lineTo(W / 2, H / 2 + 14);
-    ctx.strokeStyle = 'rgba(201,242,75,.4)';
+    ctx.strokeStyle = 'rgba(201,242,75,' + (.4 * blueFade).toFixed(3) + ')';
     ctx.stroke();
-    var grow = easeOut(phase(bt, .3, 1.6));
+    var grow = easeOut(phase(bt, .3, 1.6)) * blueFade;
+    /* start at the same radius as the outgoing fluid ring */
     drawGlobe(W * .72, H * .44, Math.min(W, H) * (.13 + grow * .1), bt * .9);
   }
 
@@ -340,6 +350,8 @@ function draw(now){
     film.setAttribute('data-seq', String(seq));
     if(eyebrow) eyebrow.textContent = LABELS[seq];
   }
+  /* lime strip arrives before the logo itself, so the landing has momentum */
+  film.classList.toggle('logo-approach', t >= 10.72 && t < 11.0);
 
   drawLetters(t);
   drawWord(t);

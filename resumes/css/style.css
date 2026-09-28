@@ -276,9 +276,17 @@ html.film-wait .hero .intro-fade { animation-play-state: paused !important; }
 
 @keyframes stripScroll { to { transform: translateX(-50%); } }
 
-/* strips glide in/out per sub-sequence */
-.film-overlay[data-seq="1"] .film-strip.s1 { opacity: 1; transform: translateY(0); }
+/* strips are the continuous tempo connector, not scene decoration */
+.film-overlay[data-seq="1"] .film-strip.s1,
+.film-overlay[data-seq="2"] .film-strip.s1,
+.film-overlay[data-seq="3"] .film-strip.s1 { opacity: .62; transform: translateY(0); }
+/* pre-roll strip lime before logo; it accelerates only during the landing */
+.film-overlay.logo-approach .film-strip.s2,
 .film-overlay[data-seq="4"] .film-strip.s2 { opacity: 1; transform: translateY(0); }
+.film-overlay[data-seq="4"] .film-strip.s1 .track { animation-duration: 11s; }
+.film-overlay[data-seq="4"] .film-strip.s2 .track { animation-duration: 7.5s; }
+/* corners intensify as the final sweep crosses into the real hero frame */
+.film-overlay[data-seq="5"] .film-corner { border-color: var(--accent); }
 
 .film-overlay::before,
 .film-overlay::after {
