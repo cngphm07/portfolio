@@ -64,6 +64,28 @@ allBtn.dataset.cat = 'all';
 allBtn.innerHTML = 'All<span class="count">' + orderedCats.reduce(function(s, c){ return s + countOf(c); }, 0) + '</span>';
 filtersEl.appendChild(allBtn);
 
+/* color / mono grid toggle — livelier resting thumbnails by default,
+   full-grayscale cinematic look one click away (persisted) */
+var colorOn = true;
+try{ colorOn = localStorage.getItem('cngphmGridColor') !== '0'; }catch(e){}
+var colorToggle = document.createElement('button');
+colorToggle.type = 'button';
+colorToggle.className = 'filter-btn color-toggle';
+colorToggle.setAttribute('aria-pressed', String(colorOn));
+colorToggle.innerHTML = '<span class="sw" aria-hidden="true"></span>COLOR';
+function applyGridColor(){
+  document.body.classList.toggle('grid-mono', !colorOn);
+  colorToggle.classList.toggle('on', colorOn);
+  colorToggle.setAttribute('aria-pressed', String(colorOn));
+}
+colorToggle.addEventListener('click', function(){
+  colorOn = !colorOn;
+  try{ localStorage.setItem('cngphmGridColor', colorOn ? '1' : '0'); }catch(e){}
+  applyGridColor();
+});
+filtersEl.appendChild(colorToggle);
+applyGridColor();
+
 /* initial category from URL (?cat=&sub=) for shareable filtered views */
 var params = new URLSearchParams(location.search);
 var urlCat = params.get('cat');

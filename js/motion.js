@@ -21,7 +21,10 @@ function pad(n){ return String(n).padStart(2, '0'); }
 /* ---------- lenis ---------- */
 function setupLenis(){
   if(!window.Lenis || reduced) return;
-  lenis = new Lenis({ duration: 1.15, smoothWheel: true });
+  /* wheel smoothing off — macOS trackpad already has native momentum, so
+     Lenis lerp read as heavy lag. Native scroll stays crisp; Lenis keeps
+     its smooth scrollTo for anchor links only. */
+  lenis = new Lenis({ duration: 1.15, smoothWheel: false });
   if(hasGsap){
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add(function(time){ lenis.raf(time * 1000); });
