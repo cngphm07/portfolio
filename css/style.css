@@ -22,10 +22,90 @@
 }
 
 *{margin:0;padding:0;box-sizing:border-box}
-html{background:var(--bg);scroll-behavior:smooth;overflow-x:clip}
+html{background:var(--bg);overflow-x:clip}
 html.lenis,html.lenis body{height:auto}
 .lenis.lenis-smooth{scroll-behavior:auto!important}
 .lenis.lenis-stopped{overflow:hidden}
+
+/* ============ dot film intro (homepage) ============
+   WebGL nodes grid → wave → vortex → globe, then a lime line
+   wipe reveals the hero. Overlay owns HUD + logo + skip only. */
+html.film-hold .hero-title-wrap,
+html.film-hold .hero-content,
+html.film-hold .hero-scroll,
+html.film-hold .hero-frame,
+html.film-hold .marquee{ opacity:0 }
+
+.film-overlay{
+  position:absolute; inset:0; z-index:10; overflow:hidden;
+  background:transparent;
+  transition:opacity .8s ease .1s;
+}
+html:not(.js) .film-overlay{ display:none }
+.film-overlay.film-end{ opacity:0; pointer-events:none }
+
+.film-hud{
+  position:absolute; z-index:4; top:clamp(1.5rem,4vw,3.5rem);
+  left:var(--pad); right:var(--pad);
+  display:flex; justify-content:space-between; align-items:center; gap:1rem;
+  color:var(--g1); font-size:.58rem; letter-spacing:.28em;
+}
+.film-hud span:nth-child(2){ font-variant-numeric:tabular-nums; opacity:.85 }
+.film-hud span:last-child{ display:inline-flex; align-items:center; gap:.45rem; color:var(--accent) }
+.film-hud i{ width:6px; height:6px; border-radius:50%; background:currentColor; animation:filmRec 1.1s steps(1,end) infinite }
+@keyframes filmRec{ 50%{ opacity:.15 } }
+
+.film-logo{
+  position:absolute; z-index:5; left:50%; top:50%;
+  transform:translate(-50%,-50%) scale(1.16);
+  font-size:clamp(4rem,17vw,20rem);
+  line-height:.8; letter-spacing:-.095em;
+  color:var(--ink); opacity:0; white-space:nowrap;
+  pointer-events:none; user-select:none;
+  transition:opacity .12s linear;
+}
+.film-logo em{ color:var(--accent); font-style:normal }
+
+.film-bottom{
+  position:absolute; z-index:4; bottom:clamp(1.5rem,4vw,3.5rem);
+  left:var(--pad); right:var(--pad);
+  display:flex; justify-content:space-between; align-items:center; gap:1rem;
+  color:var(--g2); font-size:.57rem; letter-spacing:.25em;
+}
+.film-skip{
+  display:inline-flex; align-items:center; gap:.8rem;
+  color:var(--ink); letter-spacing:inherit;
+  transition:color .3s;
+}
+.film-skip b{ color:var(--accent); font-weight:400; font-style:normal }
+.film-skip:hover{ color:var(--accent) }
+
+.film-wipe{
+  position:absolute; inset:0; z-index:12; pointer-events:none;
+  display:flex; align-items:center; justify-content:center;
+}
+.film-wipe span{
+  display:block; width:0; height:8px;
+  background:var(--accent);
+  box-shadow:0 0 24px rgba(201,242,75,.65);
+}
+.film-overlay.film-wipe-run .film-wipe span{ animation:dotWipe .48s cubic-bezier(.65,0,.35,1) forwards }
+@keyframes dotWipe{
+  0%{ width:0; height:8px }
+  42%{ width:100vw; height:8px }
+  100%{ width:100vw; height:100vh }
+}
+@media (max-width:760px){
+  html.film-hold .hero{ min-height:100svh }
+  .film-hud{ top:1.55rem; left:1.25rem; right:1.25rem; font-size:.48rem; letter-spacing:.18em }
+  .film-hud span:first-child{ display:none }
+  .film-logo{ font-size:clamp(3.4rem,19vw,6.2rem) }
+  .film-bottom{ left:1.25rem; right:1.25rem; bottom:1.55rem; font-size:.46rem; letter-spacing:.16em }
+  .film-bottom > span{ display:none }
+}
+@media (prefers-reduced-motion: reduce){
+  .film-overlay{ display:none }
+}
 body{
   background:var(--bg);
   color:var(--ink);

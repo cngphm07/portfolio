@@ -5,6 +5,72 @@
 (function(){
 'use strict';
 
+/* generated dot-poster for dark/missing thumbnails — each video gets a
+   unique deterministic pattern (wave / rings / diagonal grid) drawn in
+   brand colors, so a black first-frame never reads as an empty card */
+function hashId(s){
+  var h = 2166136261;
+  for(var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+var posterCache = {};
+function makePoster(id){
+  var key = String(id);
+  if(posterCache[key]) return posterCache[key];
+  var w = 320, h = 180;
+  var c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  var p = c.getContext('2d');
+  if(!p) return '';
+  var seed = hashId(key) || 1;
+  function rnd(){ seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; }
+  function dot(x, y, r, col){ p.beginPath(); p.arc(x, y, r, 0, 6.283); p.fillStyle = col; p.fill(); }
+
+  var gx = w * (.3 + rnd() * .4), gy = h * (.3 + rnd() * .4), gr = w * (.18 + rnd() * .12);
+  var g = p.createRadialGradient(gx, gy, 0, gx, gy, gr);
+  g.addColorStop(0, 'rgba(201,242,75,.18)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  p.fillStyle = g;
+  p.fillRect(0, 0, w, h);
+
+  var variant = Math.floor(rnd() * 3);
+  if(variant === 0){
+    /* wave rows */
+    for(var r = 0; r < 7; r++){
+      var by = h * (.14 + r * .12);
+      for(var x = 6; x < w; x += 13){
+        var y = by + Math.sin(x * .05 + r * 1.7) * 7;
+        var lime = rnd() < .1;
+        dot(x, y, lime ? 2.4 : 1.5, lime ? 'rgba(201,242,75,.9)' : 'rgba(255,255,255,' + (.4 + rnd() * .45).toFixed(2) + ')');
+      }
+    }
+  }else if(variant === 1){
+    /* concentric rings */
+    var cx = w * (.4 + rnd() * .2), cy = h * (.42 + rnd() * .16);
+    for(var ring = 1; ring <= 5; ring++){
+      var rad = ring * 16 + 4, n = Math.floor(rad * 1.2);
+      for(var k = 0; k < n; k++){
+        var a = k / n * 6.283 + ring;
+        var lime2 = rnd() < .12;
+        dot(cx + Math.cos(a) * rad, cy + Math.sin(a) * rad * .86, lime2 ? 2.4 : 1.4,
+            lime2 ? 'rgba(201,242,75,.9)' : 'rgba(255,255,255,' + (.35 + rnd() * .4).toFixed(2) + ')');
+      }
+    }
+  }else{
+    /* diagonal dot grid */
+    for(var yy = 8; yy < h; yy += 15){
+      for(var xx = 8; xx < w; xx += 15){
+        var ox = ((yy / 15) | 0) % 2 ? 7 : 0;
+        var lime3 = rnd() < .09;
+        dot(xx + ox, yy, lime3 ? 2.4 : 1.3, lime3 ? 'rgba(201,242,75,.85)' : 'rgba(255,255,255,' + (.3 + rnd() * .45).toFixed(2) + ')');
+      }
+    }
+  }
+  var url = c.toDataURL('image/png');
+  posterCache[key] = url;
+  return url;
+}
+
 var grid = document.getElementById('grid');
 var filtersEl = document.getElementById('filters');
 var subFiltersEl = document.getElementById('subFilters');
@@ -165,8 +231,10 @@ function fillGrid(){
     card.tabIndex = 0;
     card.dataset.cursor = 'PLAY';
     card.setAttribute('aria-label', 'Play: ' + v.title);
+    var usePoster = !v.thumb || v.thumbDark;
+    var src = usePoster ? makePoster(v.id || String(i)) : v.thumb;
     card.innerHTML =
-      (v.thumb && !v.thumbDark ? '<div class="card-media"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="' + v.thumb + '" alt=""></div>' : '<div class="card-media"></div>') +
+      '<div class="card-media"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="' + src + '" alt=""></div>' +
       '<span class="card-tag mono">' + v.cat + '</span>' +
       '<span class="card-play" aria-hidden="true"></span>' +
       '<figcaption class="card-label">' + v.title + '</figcaption>';
@@ -175,10 +243,12 @@ function fillGrid(){
       if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(i); }
     });
     var img = card.querySelector('img');
-    if(img){
-      wireThumb(card, img, v);
-    }else{
+    if(usePoster){
+      /* generated dot-poster: always ready, keeps the dimmed play affordance */
       card.classList.add('no-thumb');
+      img.classList.add('ld');
+    }else{
+      wireThumb(card, img, v);
     }
     frag.appendChild(card);
   });

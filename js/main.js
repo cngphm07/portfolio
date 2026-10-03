@@ -28,6 +28,8 @@ function hardOpen(){
   opened = true;
   if(pre) pre.style.display = 'none';
   document.body.classList.remove('is-loading');
+  /* during the dot film the film controller owns the reveal */
+  if(window.__filmGate) return;
   if(window.__hero) window.__hero.playIntro();
   if(window.Motion) Motion.revealIn();
 }
