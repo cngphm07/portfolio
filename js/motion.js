@@ -405,27 +405,39 @@ function setupScrollRail(){
   function secTop(el){ return el.getBoundingClientRect().top + window.scrollY; }
   function layoutSections(){
     var max = metrics().max;
+    var railH = rail.clientHeight;
     secEls.forEach(function(s){
       s.top = secTop(s.el);
       var pct = Math.min(99.4, Math.max(0, s.top / max * 100));
-      s.chip.style.top = pct.toFixed(2) + '%';
+      s.homeY = pct / 100 * railH;
     });
   }
   var lastLayoutKey = '';
   function maybeRelayout(){
     var docH = document.documentElement.scrollHeight;
     var max = metrics().max;
-    var key = docH + 'x' + Math.round(max);
+    var key = docH + 'x' + Math.round(max) + 'x' + rail.clientHeight;
     if(key !== lastLayoutKey){
       lastLayoutKey = key;
       layoutSections();
     }
   }
-  function markActive(){
-    var cur = null;
+  /* filmcraft queue: chips start gathered as one clump at the rail top and
+     run out to their own scroll position only once that section is reached;
+     scrolling back up tucks them back into the clump */
+  var CLUMP_TOP = 12, CLUMP_SLOT = 24;
+  function positionChips(){
+    var k = 0;
     var probe = window.scrollY + window.innerHeight * .35;
+    var cur = null;
     secEls.forEach(function(s){ if(s.top <= probe) cur = s; });
-    secEls.forEach(function(s){ s.chip.classList.toggle('active', s === cur); });
+    secEls.forEach(function(s){
+      var out = s.top <= probe;
+      var y = out ? s.homeY : CLUMP_TOP + k * CLUMP_SLOT;
+      k += out ? 0 : 1;
+      s.chip.classList.toggle('active', s === cur);
+      s.chip.style.transform = 'translateY(' + y.toFixed(1) + 'px)';
+    });
   }
 
   var prevDigits = [-1, -1, -1], prevPct = -1;
@@ -453,10 +465,11 @@ function setupScrollRail(){
       }
     }
     maybeRelayout();
-    markActive();
+    positionChips();
   }
   update();
   layoutSections();
+  positionChips();
 
   function targetFromY(clientY){
     var r = rail.getBoundingClientRect();
@@ -530,8 +543,11 @@ function setupScrollRail(){
     release();
   });
 
+  /* native scroll is the single source of truth on this site (Lenis runs
+     with smoothWheel:false); listening natively keeps the ruler correct
+     even when Lenis's own emit path is mid-animation or suspended */
   if(lenis) lenis.on('scroll', update);
-  else window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('scroll', update, { passive: true });
   window.addEventListener('resize', update);
   document.addEventListener('gallery:render', update);
 }

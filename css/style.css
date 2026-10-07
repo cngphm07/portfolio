@@ -729,6 +729,7 @@ main{padding-top:clamp(2.5rem,6vh,4rem)}
 .scroll-rail.scrubbing{cursor:ns-resize}
 @media(prefers-reduced-motion:reduce){
   .sr-digit-col{transition:none}
+  .sr-seclabel{transition:color .3s,border-color .3s,background-color .3s}
 }
 
 /* section labels docked on the ruler (right-aligned, at their scroll %) */
@@ -738,14 +739,15 @@ main{padding-top:clamp(2.5rem,6vh,4rem)}
 }
 @media(min-width:1024px){ .scroll-sections{display:block} }
 .sr-seclabel{
-  pointer-events:auto;position:absolute;right:0;transform:translateY(-50%);
+  pointer-events:auto;position:absolute;right:0;top:0;transform:translateY(12px);
   display:inline-flex;align-items:baseline;gap:.55em;
   font-family:var(--font-m);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
   padding:4px 9px 4px 10px;
   background:rgba(6,6,6,.8);
   border:1px solid var(--line);border-right:0;
   color:var(--g1);cursor:pointer;white-space:nowrap;user-select:none;
-  transition:color .3s,border-color .3s,background-color .3s;
+  transition:transform .8s var(--ease),color .3s,border-color .3s,background-color .3s;
+  will-change:transform;
 }
 .sr-seclabel i{font-style:normal;font-size:8px;color:var(--g3);transition:color .3s}
 .sr-seclabel:hover{color:var(--ink);background:rgba(6,6,6,.92)}
