@@ -425,18 +425,32 @@ function setupScrollRail(){
   /* filmcraft queue: chips start gathered as one clump at the rail top and
      run out to their own scroll position only once that section is reached;
      scrolling back up tucks them back into the clump */
-  var CLUMP_TOP = 12, CLUMP_SLOT = 24;
+  /* unreached chips gather as one clump at the rail's bottom end (like the
+     filmcraft reference) — below the hero-scroll link, clear of the header
+     and the pinned filter bar — and run upward to their own scroll
+     position once that section is reached */
+  var CLUMP_BOTTOM = 170, CLUMP_SLOT = 26, CHIP_H = 26;
   function positionChips(){
-    var k = 0;
+    var railH = rail.clientHeight;
     var probe = window.scrollY + window.innerHeight * .35;
     var cur = null;
     secEls.forEach(function(s){ if(s.top <= probe) cur = s; });
+    var clumped = [];
     secEls.forEach(function(s){
-      var out = s.top <= probe;
-      var y = out ? s.homeY : CLUMP_TOP + k * CLUMP_SLOT;
-      k += out ? 0 : 1;
-      s.chip.classList.toggle('active', s === cur);
-      s.chip.style.transform = 'translateY(' + y.toFixed(1) + 'px)';
+      s.out = s.top <= probe;
+      if(!s.out) clumped.push(s);
+    });
+    var n = clumped.length, k = 0;
+    secEls.forEach(function(s){
+      if(s.out){
+        s.chip.classList.toggle('active', s === cur);
+        s.chip.style.transform = 'translateY(' + s.homeY.toFixed(1) + 'px)';
+      }else{
+        var y = railH - CLUMP_BOTTOM - CHIP_H - (n - 1 - k) * CLUMP_SLOT;
+        s.chip.style.transform = 'translateY(' + y.toFixed(1) + 'px)';
+        s.chip.classList.remove('active');
+        k++;
+      }
     });
   }
 

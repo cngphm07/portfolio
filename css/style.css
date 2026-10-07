@@ -739,11 +739,11 @@ main{padding-top:clamp(2.5rem,6vh,4rem)}
 }
 @media(min-width:1024px){ .scroll-sections{display:block} }
 .sr-seclabel{
-  pointer-events:auto;position:absolute;right:0;top:0;transform:translateY(12px);
-  display:inline-flex;align-items:baseline;gap:.55em;
-  font-family:var(--font-m);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
-  padding:4px 9px 4px 10px;
-  background:rgba(6,6,6,.8);
+  pointer-events:auto;position:absolute;right:0;top:0;transform:translateY(96px);
+  display:inline-flex;align-items:baseline;gap:.6em;
+  font-family:var(--font-m);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  padding:6px 11px 6px 12px;min-height:26px;box-sizing:border-box;
+  background:rgba(6,6,6,.86);
   border:1px solid var(--line);border-right:0;
   color:var(--g1);cursor:pointer;white-space:nowrap;user-select:none;
   transition:transform .8s var(--ease),color .3s,border-color .3s,background-color .3s;
