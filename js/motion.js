@@ -334,6 +334,143 @@ function setupActiveNav(){
   });
 }
 
+/* ---------- scroll ruler (right edge, adapted from filmcraft) ----------
+   Percentage tick tape + accent needle with odometer readout.
+   Click = jump (expo), press-drag = scrub the page through Lenis. */
+function setupScrollRail(){
+  var rail = document.getElementById('scrollRail');
+  if(!rail) return;
+  var track = document.getElementById('srTrack');
+  var needle = document.getElementById('srNeedle');
+  var ghost = document.getElementById('srGhost');
+  var digitsWrap = document.getElementById('srDigits');
+  var readout = needle.querySelector('.sr-readout');
+
+  var cols = [];
+  for(var c = 0; c < 3; c++){
+    var col = document.createElement('span');
+    col.className = 'sr-digit-col';
+    for(var d = 0; d < 10; d++){
+      var ds = document.createElement('span');
+      ds.textContent = String(d);
+      col.appendChild(ds);
+    }
+    digitsWrap.appendChild(col);
+    cols.push(col);
+  }
+
+  var frag = document.createDocumentFragment();
+  for(var p = 0; p <= 100; p++){
+    var major = p % 5 === 0;
+    var tick = document.createElement('span');
+    tick.className = 'sr-tick ' + (major ? 'major' : 'minor');
+    tick.style.top = 'calc(' + p + '% - .5px)';
+    frag.appendChild(tick);
+    if(major && p > 0 && p < 100){
+      var lab = document.createElement('span');
+      lab.className = 'sr-tick-label';
+      lab.style.top = p + '%';
+      lab.textContent = String(p).padStart(2, '0');
+      frag.appendChild(lab);
+    }
+  }
+  track.appendChild(frag);
+
+  var prevDigits = [-1, -1, -1], prevPct = -1;
+  function metrics(){
+    var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    return { max: max, h: rail.clientHeight };
+  }
+  function update(){
+    var m = metrics();
+    var f = Math.min(1, Math.max(0, window.scrollY / m.max));
+    var y = f * (m.h - 2) + 1;
+    needle.style.transform = 'translate3d(0,' + y.toFixed(1) + 'px,0)';
+    readout.style.top = (m.h - y < 34) ? '-15px' : '5px';
+    var pct = Math.round(f * 100);
+    if(pct !== prevPct){
+      prevPct = pct;
+      rail.setAttribute('aria-valuenow', String(pct));
+      var str = String(pct).padStart(3, '0');
+      for(var i = 0; i < 3; i++){
+        var d = str.charCodeAt(i) - 48;
+        if(d !== prevDigits[i]){
+          prevDigits[i] = d;
+          cols[i].style.transform = 'translateY(' + (-d) + 'em)';
+        }
+      }
+    }
+  }
+  update();
+
+  function targetFromY(clientY){
+    var r = rail.getBoundingClientRect();
+    var f = Math.min(1, Math.max(0, (clientY - r.top) / r.height));
+    return f * metrics().max;
+  }
+  /* drive native scroll through gsap — independent of Lenis internals; native
+     scroll events keep Lenis synced and fire the rail's own update() */
+  var scrollTween = null;
+  function scrollToTarget(target, scrub){
+    if(scrollTween){ scrollTween.kill(); scrollTween = null; }
+    if(scrub || !hasGsap || reduced){
+      window.scrollTo(0, target);
+      return;
+    }
+    var dist = Math.abs(target - window.scrollY);
+    if(dist < 2) return;
+    var dur = Math.max(.5, .9 * (.4 + .6 * Math.min(1, dist / (2.5 * window.innerHeight))));
+    var proxy = { y: window.scrollY };
+    scrollTween = gsap.to(proxy, {
+      y: target, duration: dur, ease: 'power4.out',
+      onUpdate: function(){ window.scrollTo(0, proxy.y); },
+      onComplete: function(){ scrollTween = null; }
+    });
+  }
+
+  var dragging = false, dragMoved = 0, lastY = 0;
+  rail.addEventListener('pointerdown', function(e){
+    e.preventDefault();
+    dragging = true; dragMoved = 0; lastY = e.clientY;
+    rail.classList.add('scrubbing');
+    ghost.style.opacity = '0';
+    try{ if(rail.setPointerCapture) rail.setPointerCapture(e.pointerId); }catch(err){}
+    scrollToTarget(targetFromY(e.clientY), true);
+  });
+  rail.addEventListener('pointermove', function(e){
+    if(dragging){
+      dragMoved = Math.max(dragMoved, Math.abs(e.clientY - lastY));
+      lastY = e.clientY;
+      scrollToTarget(targetFromY(e.clientY), true);
+    }else{
+      var r = rail.getBoundingClientRect();
+      var y = Math.min(r.height - 1, Math.max(1, e.clientY - r.top));
+      ghost.style.transform = 'translate3d(0,' + y.toFixed(1) + 'px,0)';
+      ghost.style.opacity = '1';
+    }
+  });
+  function release(){
+    if(!dragging) return;
+    dragging = false;
+    rail.classList.remove('scrubbing');
+  }
+  rail.addEventListener('pointerup', function(e){
+    var wasDrag = dragging && dragMoved >= 4;
+    release();
+    if(!wasDrag) scrollToTarget(targetFromY(e.clientY), false);
+  });
+  rail.addEventListener('pointercancel', release);
+  rail.addEventListener('pointerleave', function(){
+    ghost.style.opacity = '0';
+    release();
+  });
+
+  if(lenis) lenis.on('scroll', update);
+  else window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  document.addEventListener('gallery:render', update);
+}
+
 function init(){
   setupLenis();
   setupHeader();
@@ -344,6 +481,7 @@ function init(){
   setupCursor();
   setupClock();
   setupActiveNav();
+  setupScrollRail();
   bindCards(true);
   document.addEventListener('gallery:render', function(){ bindCards(false); });
   if(hasGsap) ScrollTrigger.refresh();
