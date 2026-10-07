@@ -402,14 +402,24 @@ function setupScrollRail(){
       secEls.push({ el: el, chip: chip, top: 0 });
     });
   }
-  function secTop(el){ return el.getBoundingClientRect().top + window.scrollY; }
+  /* a pinned sticky element reports its STUCK position from both rect and
+     offsetTop — derive #work from its non-sticky sibling main instead */
+  function secTop(el){
+    if(el.id === 'work'){
+      var m = document.querySelector('main');
+      if(m) return m.offsetTop - el.offsetHeight;
+    }
+    var y = 0, n = el;
+    while(n){ y += n.offsetTop; n = n.offsetParent; }
+    return y;
+  }
   function layoutSections(){
     var max = metrics().max;
     var railH = rail.clientHeight;
     secEls.forEach(function(s){
       s.top = secTop(s.el);
       var pct = Math.min(99.4, Math.max(0, s.top / max * 100));
-      s.homeY = pct / 100 * railH;
+      s.homeY = Math.min(pct / 100 * railH, railH - 30);
     });
   }
   var lastLayoutKey = '';
