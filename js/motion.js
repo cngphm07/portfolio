@@ -376,6 +376,58 @@ function setupScrollRail(){
   }
   track.appendChild(frag);
 
+  /* section labels docked on the ruler: right-aligned chips at each
+     section's scroll %, lit while that section is in view, click = jump */
+  var secWrap = document.getElementById('srSections');
+  var secEls = [];
+  if(secWrap){
+    var SECTIONS = [
+      { id: 'about', num: '01', name: 'ABOUT' },
+      { id: 'work', num: '02', name: 'WORKS' },
+      { id: 'contact', num: '03', name: 'CONTACT' }
+    ];
+    SECTIONS.forEach(function(s){
+      var el = document.getElementById(s.id);
+      if(!el) return;
+      var chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'sr-seclabel';
+      chip.innerHTML = '<i>' + s.num + '</i>' + s.name;
+      chip.setAttribute('aria-label', 'Jump to ' + s.name);
+      chip.addEventListener('click', function(e){
+        e.stopPropagation();
+        scrollToTarget(secTop(el), false);
+      });
+      secWrap.appendChild(chip);
+      secEls.push({ el: el, chip: chip, top: 0 });
+    });
+  }
+  function secTop(el){ return el.getBoundingClientRect().top + window.scrollY; }
+  function layoutSections(){
+    var max = metrics().max;
+    secEls.forEach(function(s){
+      s.top = secTop(s.el);
+      var pct = Math.min(99.4, Math.max(0, s.top / max * 100));
+      s.chip.style.top = pct.toFixed(2) + '%';
+    });
+  }
+  var lastLayoutKey = '';
+  function maybeRelayout(){
+    var docH = document.documentElement.scrollHeight;
+    var max = metrics().max;
+    var key = docH + 'x' + Math.round(max);
+    if(key !== lastLayoutKey){
+      lastLayoutKey = key;
+      layoutSections();
+    }
+  }
+  function markActive(){
+    var cur = null;
+    var probe = window.scrollY + window.innerHeight * .35;
+    secEls.forEach(function(s){ if(s.top <= probe) cur = s; });
+    secEls.forEach(function(s){ s.chip.classList.toggle('active', s === cur); });
+  }
+
   var prevDigits = [-1, -1, -1], prevPct = -1;
   function metrics(){
     var max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
@@ -400,8 +452,11 @@ function setupScrollRail(){
         }
       }
     }
+    maybeRelayout();
+    markActive();
   }
   update();
+  layoutSections();
 
   function targetFromY(clientY){
     var r = rail.getBoundingClientRect();
@@ -421,11 +476,21 @@ function setupScrollRail(){
     if(dist < 2) return;
     var dur = Math.max(.5, .9 * (.4 + .6 * Math.min(1, dist / (2.5 * window.innerHeight))));
     var proxy = { y: window.scrollY };
+    var startY = proxy.y;
     scrollTween = gsap.to(proxy, {
       y: target, duration: dur, ease: 'power4.out',
       onUpdate: function(){ window.scrollTo(0, proxy.y); },
       onComplete: function(){ scrollTween = null; }
     });
+    /* rAF-throttled environments (background panes) never tick the tween —
+       if nothing moved shortly after start, snap straight to the target */
+    setTimeout(function(){
+      if(scrollTween && Math.abs(proxy.y - startY) < 1){
+        scrollTween.kill();
+        scrollTween = null;
+        window.scrollTo(0, target);
+      }
+    }, 350);
   }
 
   var dragging = false, dragMoved = 0, lastY = 0;
