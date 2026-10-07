@@ -439,8 +439,11 @@ function setupScrollRail(){
      filmcraft reference) — below the hero-scroll link, clear of the header
      and the pinned filter bar — and run upward to their own scroll
      position once that section is reached */
-  var CLUMP_BOTTOM = 170, CLUMP_SLOT = 26, CHIP_H = 26;
-  function positionChips(){
+  var CLUMP_BOTTOM = 170, CLUMP_SLOT = 26, HALF = 14;
+  /* three chip states (filmcraft-style): the current section's chip RIDES
+     the accent needle at larger scale; passed chips dock at their own
+     scroll position; unreached ones wait in the bottom clump, smaller */
+  function positionChips(needleY){
     var railH = rail.clientHeight;
     var probe = window.scrollY + window.innerHeight * .35;
     var cur = null;
@@ -451,16 +454,27 @@ function setupScrollRail(){
       if(!s.out) clumped.push(s);
     });
     var n = clumped.length, k = 0;
-    secEls.forEach(function(s){
-      if(s.out){
-        s.chip.classList.toggle('active', s === cur);
-        s.chip.style.transform = 'translateY(' + s.homeY.toFixed(1) + 'px)';
+    secEls.forEach(function(s, i){
+      var nextEdge = (i + 1 < secEls.length) ? secEls[i + 1].homeY : (railH - 30);
+      var tf;
+      if(s === cur){
+        var c = Math.min(Math.max(needleY, s.homeY + HALF), nextEdge - HALF);
+        var riding = c > s.homeY + HALF + 1 && c < nextEdge - HALF - 1;
+        tf = 'translateY(' + (c - HALF).toFixed(1) + 'px) scale(1.32)';
+        s.chip.classList.add('active');
+        s.chip.classList.toggle('is-riding', riding);
       }else{
-        var y = railH - CLUMP_BOTTOM - CHIP_H - (n - 1 - k) * CLUMP_SLOT;
-        s.chip.style.transform = 'translateY(' + y.toFixed(1) + 'px)';
+        if(s.out){
+          tf = 'translateY(' + s.homeY.toFixed(1) + 'px) scale(1)';
+        }else{
+          var y = railH - CLUMP_BOTTOM - 30 - (n - 1 - k) * CLUMP_SLOT;
+          tf = 'translateY(' + y.toFixed(1) + 'px) scale(.92)';
+          k++;
+        }
         s.chip.classList.remove('active');
-        k++;
+        s.chip.classList.remove('is-riding');
       }
+      s.chip.style.transform = tf;
     });
   }
 
@@ -489,11 +503,10 @@ function setupScrollRail(){
       }
     }
     maybeRelayout();
-    positionChips();
+    positionChips(y);
   }
   update();
   layoutSections();
-  positionChips();
 
   function targetFromY(clientY){
     var r = rail.getBoundingClientRect();

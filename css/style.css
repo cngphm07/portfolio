@@ -747,8 +747,11 @@ main{padding-top:clamp(2.5rem,6vh,4rem)}
   border:1px solid var(--line);border-right:0;
   color:var(--g1);cursor:pointer;white-space:nowrap;user-select:none;
   transition:transform .8s var(--ease),color .3s,border-color .3s,background-color .3s;
+  transform-origin:right center;
   will-change:transform;
 }
+/* riding chip follows the needle 1:1 — no transform transition, only skin */
+.sr-seclabel.is-riding{ transition:color .3s,border-color .3s,background-color .3s }
 .sr-seclabel i{font-style:normal;font-size:8px;color:var(--g3);transition:color .3s}
 .sr-seclabel:hover{color:var(--ink);background:rgba(6,6,6,.92)}
 .sr-seclabel.active{color:var(--accent);border-color:rgba(201,242,71,.4);background:rgba(6,6,6,.92)}
