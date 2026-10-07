@@ -56,14 +56,27 @@ function start(){
 function setupHeader(){
   var header = document.getElementById('siteHeader');
   if(!header) return;
-  var lastY = 0;
+  var lastY = 0, hidden = false, away = false;
+  var acc = 0, accT = 0;
   header.style.transition = 'transform .55s cubic-bezier(.19,1,.22,1)';
+  /* direction judged on a ~90ms delta window so a single jittery scroll
+     event can't flip hide/show (and with it the sticky HUD bar offset) */
   function onY(y){
-    var d = y - lastY;
-    if(y < 90){ header.style.transform = ''; }
-    else if(d > 3 && y > 140){ header.style.transform = 'translateY(-110%)'; }
-    else if(d < -3){ header.style.transform = ''; }
+    var now = performance.now();
+    acc += y - lastY;
     lastY = y;
+    if(now - accT < 90) return;
+    accT = now;
+    var d = acc;
+    acc = 0;
+    if(y < 90){ hidden = false; }
+    else if(d > 3 && y > 140){ hidden = true; }
+    else if(d < -3){ hidden = false; }
+    if(hidden !== away){
+      away = hidden;
+      document.body.classList.toggle('nav-away', away);
+    }
+    header.style.transform = hidden ? 'translateY(-110%)' : '';
   }
   if(lenis) lenis.on('scroll', function(e){ onY(e.scroll); });
   else window.addEventListener('scroll', function(){ onY(window.scrollY); }, { passive: true });
@@ -89,22 +102,52 @@ function setupMarquee(){
   });
 }
 
+/* ---------- section choreography (adapted from getartcraft/filmcraft) ----------
+   Per [data-choreo] section, on first entry (top 88%):
+   top hairline draws in (scaleX) → HUD bar lifts out of blur → corner "+" marks pop */
+function setupChoreo(){
+  if(!hasGsap || reduced) return;
+  document.querySelectorAll('[data-choreo]').forEach(function(sec){
+    var rule = sec.querySelector('.sec-topline');
+    var ticks = sec.querySelectorAll('.sec-tick');
+    var hud = sec.querySelector('.sec-head');
+    if(rule) gsap.set(rule, { scaleX: 0 });
+    if(ticks.length) gsap.set(ticks, { scale: 0, opacity: 0 });
+    if(hud) gsap.set(hud, { autoAlpha: 0, y: 28, filter: 'blur(8px)' });
+    ScrollTrigger.create({
+      trigger: sec, start: 'top 88%', once: true,
+      onEnter: function(){
+        var tl = gsap.timeline();
+        if(rule) tl.to(rule, { scaleX: 1, duration: .7, ease: 'power2.out', clearProps: 'all' }, 0);
+        if(hud) tl.to(hud, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .9, ease: 'power3.out', clearProps: 'all' }, .15);
+        if(ticks.length) tl.to(ticks, { scale: 1, opacity: 1, duration: .35, ease: 'power3.out', stagger: .06, clearProps: 'all' }, .35);
+      }
+    });
+  });
+}
+
 /* ---------- reveals ---------- */
 function setupReveals(){
   if(!hasGsap || reduced) return;
 
-  document.querySelectorAll('.sec-head').forEach(function(h){
-    var rule = h.querySelector('.sec-rule');
-    var texts = h.querySelectorAll('.sec-num, .sec-title, .sec-count');
-    gsap.from(rule, {
-      scaleX: 0, duration: 1.2, ease: 'power3.inOut',
-      scrollTrigger: { trigger: h, start: 'top 88%' }
+  /* [data-reveal-group]: children cascade left→right by x position within the
+     group (filmcraft's horizontal stagger), instead of a flat index stagger */
+  function groupReveal(groupSel, childSel){
+    var group = document.querySelector(groupSel);
+    if(!group) return;
+    var gw = group.getBoundingClientRect().width;
+    group.querySelectorAll(childSel).forEach(function(el){
+      var relX = gw > 0 ? (el.getBoundingClientRect().left - group.getBoundingClientRect().left) / gw : 0;
+      gsap.from(el, {
+        autoAlpha: 0, y: 24, filter: 'blur(8px)', duration: .9, ease: 'power3.out',
+        delay: relX * .18,
+        scrollTrigger: { trigger: group, start: 'top 90%', once: true },
+        clearProps: 'filter'
+      });
     });
-    gsap.from(texts, {
-      opacity: 0, y: 14, duration: .8, stagger: .09, ease: 'power3.out',
-      scrollTrigger: { trigger: h, start: 'top 88%' }
-    });
-  });
+  }
+  groupReveal('#brandsRow', 'span');
+  groupReveal('.foot-grid', '.foot-col');
 
   if(window.SplitText){
     var lead = new SplitText('#aboutLead', { type: 'lines' });
@@ -124,17 +167,14 @@ function setupReveals(){
       scrollTrigger: { trigger: '#footerH', start: 'top 85%' } });
   }
 
-  gsap.from('#brandsRow span', {
-    opacity: 0, y: 16, duration: .7, stagger: .06, ease: 'power3.out',
-    scrollTrigger: { trigger: '#brandsRow', start: 'top 90%' }
-  });
   gsap.from('#aboutContact', {
-    opacity: 0, y: 18, duration: .9, ease: 'power3.out',
-    scrollTrigger: { trigger: '#aboutContact', start: 'top 92%' }
+    autoAlpha: 0, y: 18, filter: 'blur(6px)', duration: .9, ease: 'power3.out',
+    clearProps: 'filter',
+    scrollTrigger: { trigger: '#aboutContact', start: 'top 92%', once: true }
   });
-  gsap.from('.foot-grid, .foot-base', {
-    opacity: 0, y: 24, duration: 1, stagger: .12, ease: 'power3.out',
-    scrollTrigger: { trigger: '.foot-grid', start: 'top 92%' }
+  gsap.from('.foot-base', {
+    autoAlpha: 0, y: 16, duration: 1, ease: 'power3.out',
+    scrollTrigger: { trigger: '.foot-base', start: 'top 96%', once: true }
   });
 }
 
@@ -298,6 +338,7 @@ function init(){
   setupLenis();
   setupHeader();
   setupMarquee();
+  setupChoreo();
   setupReveals();
   setupMagnetic();
   setupCursor();

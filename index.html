@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=20261003">
+<link rel="stylesheet" href="css/style.css?v=scrollcraft1">
 <script>document.documentElement.classList.add('js', 'film-hold');</script>
 </head>
 <body>
@@ -97,12 +97,16 @@
 </div>
 
 <!-- about -->
-<section class="about" id="about">
+<section class="about" id="about" data-choreo>
   <span class="sec-mark" aria-hidden="true">01</span>
-  <div class="sec-head">
+  <span class="sec-topline" aria-hidden="true"></span>
+  <span class="sec-tick l" aria-hidden="true"></span>
+  <span class="sec-tick r" aria-hidden="true"></span>
+  <div class="sec-head hud-bar">
     <span class="sec-num mono">01</span>
     <span class="sec-rule"></span>
     <span class="sec-title mono">ABOUT ME</span>
+    <span class="sec-meta mono">FILMMAKER &amp; VIDEOGRAPHER</span>
   </div>
   <p class="about-lead" id="aboutLead">
     I'm <b>Cuong Pham Quoc</b> — a filmmaker &amp; media producer with nearly a decade
@@ -122,30 +126,36 @@
 </section>
 
 <!-- work -->
-<div class="filters-wrap" id="work">
+<div class="filters-wrap" id="work" data-choreo>
+  <span class="sec-topline" aria-hidden="true"></span>
+  <span class="sec-tick l" aria-hidden="true"></span>
+  <span class="sec-tick r" aria-hidden="true"></span>
+  <div class="sec-head hud-row">
+    <span class="sec-num mono">02</span>
+    <span class="sec-rule"></span>
+    <span class="sec-title mono">SELECTED WORKS</span>
+    <span class="sec-count mono" id="secCount"></span>
+  </div>
   <div class="filters" id="filters"></div>
   <div class="filters sub-filters" id="subFilters" style="display:none"></div>
 </div>
 
 <main>
   <span class="sec-mark" aria-hidden="true">02</span>
-  <div class="sec-head in-main">
-    <span class="sec-num mono">02</span>
-    <span class="sec-rule"></span>
-    <span class="sec-title mono">SELECTED WORKS</span>
-    <span class="sec-count mono" id="secCount"></span>
-  </div>
   <div class="grid" id="grid"></div>
   <div class="empty-note mono" id="emptyNote">NO FILMS IN THIS CATEGORY.</div>
 </main>
 
 <!-- footer / contact -->
-<footer id="contact">
+<footer id="contact" data-choreo>
   <span class="sec-mark" aria-hidden="true">03</span>
-  <div class="sec-head">
+  <span class="sec-tick l" aria-hidden="true"></span>
+  <span class="sec-tick r" aria-hidden="true"></span>
+  <div class="sec-head hud-bar">
     <span class="sec-num mono">03</span>
     <span class="sec-rule"></span>
     <span class="sec-title mono">CONTACT</span>
+    <span class="sec-meta mono">HO CHI MINH CITY — VIETNAM</span>
   </div>
   <h2 class="footer-h display" id="footerH">
     Let's make<br>something <a class="footer-mail" href="mailto:cuongphamworks@gmail.com" data-magnetic>together</a>
@@ -191,7 +201,7 @@
 <script defer src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js"></script>
 <script defer src="js/hero.js?v=20261003"></script>
 <script defer src="js/film.js?v=20261003"></script>
-<script defer src="js/motion.js?v=20261003"></script>
+<script defer src="js/motion.js?v=scrollcraft3"></script>
 <script defer src="js/gallery.js?v=20261003"></script>
 <script defer src="js/main.js?v=20261003"></script>
 </body>

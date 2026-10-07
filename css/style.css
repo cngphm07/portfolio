@@ -629,3 +629,55 @@ html.js .card:not(.has-thumb):not(.no-thumb) .card-media::after{
 @media(max-width:760px){
   .sec-mark{display:none}
 }
+
+/* ============ filmcraft-style scroll choreography ============ */
+/* section top hairline that draws in, corner "+" registration marks */
+:root{ --navH:68px }
+.sec-topline{
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:var(--line2);transform-origin:left;z-index:2;pointer-events:none;
+}
+.sec-tick{
+  position:absolute;top:-6px;width:11px;height:11px;z-index:3;
+  pointer-events:none;
+}
+.sec-tick::before,.sec-tick::after{content:'';position:absolute;background:var(--line2)}
+.sec-tick::before{width:1px;top:0;bottom:0;left:5px}
+.sec-tick::after{height:1px;top:5px;left:0;right:0}
+.sec-tick.l{left:var(--pad)}
+.sec-tick.r{right:var(--pad)}
+/* beat `.about>*:not(.sec-mark){position:relative}` — these must stay absolute */
+.sec-topline.sec-topline,.sec-tick.sec-tick{position:absolute}
+
+/* sticky section HUD bars — pin under the header while their section scrolls;
+   when the header hides on scroll-down the bar slides up to hug the top edge */
+.sec-head.hud-bar{
+  position:sticky;top:var(--navH);z-index:700;
+  margin-inline:calc(var(--pad) * -1);
+  padding:.85rem var(--pad);
+  margin-bottom:clamp(2rem,5vh,3.4rem);
+  background:rgba(6,6,6,.72);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  transition:top .5s var(--ease);
+}
+body.nav-away .sec-head.hud-bar{top:0}
+.sec-meta{
+  margin-left:auto;font-size:.6rem;color:var(--g2);
+  letter-spacing:.22em;text-align:right;white-space:nowrap;
+}
+
+/* works section: HUD row lives inside the sticky filters bar */
+.sec-head.hud-row{
+  margin-bottom:0;padding:.8rem var(--pad);
+  border-bottom:1px solid var(--line);
+}
+main{padding-top:clamp(2.5rem,6vh,4rem)}
+
+@media(max-width:760px){
+  .sec-head.hud-bar{margin-inline:-1.25rem;padding:.7rem 1.25rem}
+  .sec-meta{display:none}
+  .sec-tick.l{left:1.25rem}
+  .sec-tick.r{right:1.25rem}
+}
