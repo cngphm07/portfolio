@@ -710,6 +710,36 @@ const PORTFOLIO_DATA = {
       "thumb": "https://drive.google.com/thumbnail?id=12_KzkvDhzzlU1VqVbgRSzqkxhYAacBDl&sz=w400"
     },
     {
+      "id": "1OHArjZfdK1j-mfyFOZnYyt0KyyC1HRoi",
+      "title": "260928 Christopher Chua WL 02 v002",
+      "thumb": "https://drive.google.com/thumbnail?id=1OHArjZfdK1j-mfyFOZnYyt0KyyC1HRoi&sz=w400"
+    },
+    {
+      "id": "12vqZcS0QDSwH7lse1QXnBWH7cyKzXTWW",
+      "title": "260929 Yupars",
+      "thumb": "https://drive.google.com/thumbnail?id=12vqZcS0QDSwH7lse1QXnBWH7cyKzXTWW&sz=w400"
+    },
+    {
+      "id": "1sahrfRjgd1rIwnEZB8jHVJKohnhq_CEm",
+      "title": "Bukit Regency - Doreen",
+      "thumb": "https://drive.google.com/thumbnail?id=1sahrfRjgd1rIwnEZB8jHVJKohnhq_CEm&sz=w400"
+    },
+    {
+      "id": "1ZzGBuAkfmYJVb__ltxGN1kRcqaJkwxvs",
+      "title": "Christopher Chua WL 03",
+      "thumb": "https://drive.google.com/thumbnail?id=1ZzGBuAkfmYJVb__ltxGN1kRcqaJkwxvs&sz=w400"
+    },
+    {
+      "id": "11tJz2Yv78_EgkXdh3GD8Bst3rIgE_FJ1",
+      "title": "Chrístopher Chua WL 04",
+      "thumb": "https://drive.google.com/thumbnail?id=11tJz2Yv78_EgkXdh3GD8Bst3rIgE_FJ1&sz=w400"
+    },
+    {
+      "id": "1D9v79lJFat_doF1NgFM5ytPyhvG9ZTmG",
+      "title": "Doreen NeramRoad",
+      "thumb": "https://drive.google.com/thumbnail?id=1D9v79lJFat_doF1NgFM5ytPyhvG9ZTmG&sz=w400"
+    },
+    {
       "id": "12jrpiTrqgsiN1prYJ6JG1H5sb1cwFMZg",
       "title": "Hãy cùng gặp một Người chia sẻ trên Kalpha Kelly",
       "thumb": "https://drive.google.com/thumbnail?id=12jrpiTrqgsiN1prYJ6JG1H5sb1cwFMZg&sz=w400"
