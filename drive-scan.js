@@ -15,6 +15,7 @@ const FOLDERS = {
 };
 
 const SAIGONTOURIST_ROOT = "1SyHI868_X9sloaWt1uO8peNQINB1RCam";
+const SOLARIS_ROOT = "1WZ2L_Jj6Z899zxNqvTM4ym2Uly6Hx1AX";
 const ARCH_VIDEOGRAPHY_ROOT = "1b4Nyhcg_UVP6jDQsXLASxWJoGzo51d7P";
 // subfolder that duplicates the standalone "Architecture Video" category
 const ARCH_VIDEOGRAPHY_SKIP = ["Architecture Video"];
@@ -61,12 +62,12 @@ async function scanAll() {
       out[name] = [];
     }
   }
-  try {
-    const sgtr = await scanFolderRecursive(SAIGONTOURIST_ROOT);
-    out["Social Video"] = (out["Social Video"] || []).concat(sgtr);
-  } catch (e) {
-    console.error("[scan] Saigontourist: " + e.message);
-  }
+  const otherSocial = out["Social Video"];
+  out["Social Video"] = {
+    Saigontourist: await scanFolderRecursive(SAIGONTOURIST_ROOT),
+    Solaris: await scanFolderRecursive(SOLARIS_ROOT),
+    Other: otherSocial,
+  };
 
   // Architecture Videography: nested category — one entry per subfolder
   try {
