@@ -204,6 +204,11 @@ const PORTFOLIO_DATA = {
       "thumb": "https://drive.google.com/thumbnail?id=1KxeUVn8tnTrWFs0vN0ABwdV2esnYtZ0a&sz=w400"
     },
     {
+      "id": "1Ra5_MfgCcvw54wcv177wJLzFVMdE7_To",
+      "title": "231108 C3BD Introduction Promotion [OFFLINE] v002 revised03",
+      "thumb": "https://drive.google.com/thumbnail?id=1Ra5_MfgCcvw54wcv177wJLzFVMdE7_To&sz=w400"
+    },
+    {
       "id": "19N7FU7E9PtT5SvHkZAfVbUpIBDoBVqK1",
       "title": "231222 Christmas Video [OFFLINE] v002 revised3",
       "thumb": "https://drive.google.com/thumbnail?id=19N7FU7E9PtT5SvHkZAfVbUpIBDoBVqK1&sz=w400"
@@ -704,6 +709,11 @@ const PORTFOLIO_DATA = {
       "id": "1XJeeAeR5YPFnCRPMEKkBFNdQ_gdt3X1W",
       "title": "260430 KEO Binh V002",
       "thumb": "https://drive.google.com/thumbnail?id=1XJeeAeR5YPFnCRPMEKkBFNdQ_gdt3X1W&sz=w400"
+    },
+    {
+      "id": "1mkVcUdzagRNdJPxVx47AFBvhF7feDCX_",
+      "title": "Copy of 231218 C3BD MienXaoCua",
+      "thumb": "https://drive.google.com/thumbnail?id=1mkVcUdzagRNdJPxVx47AFBvhF7feDCX_&sz=w400"
     },
     {
       "id": "12jrpiTrqgsiN1prYJ6JG1H5sb1cwFMZg",
