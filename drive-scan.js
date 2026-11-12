@@ -62,12 +62,11 @@ async function scanAll() {
       out[name] = [];
     }
   }
-  const otherSocial = out["Social Video"];
-  out["Social Video"] = {
-    Saigontourist: await scanFolderRecursive(SAIGONTOURIST_ROOT),
-    Solaris: await scanFolderRecursive(SOLARIS_ROOT),
-    Other: otherSocial,
-  };
+  out["Social Video"] = [
+    ...await scanFolderRecursive(SAIGONTOURIST_ROOT),
+    ...await scanFolderRecursive(SOLARIS_ROOT),
+    ...out["Social Video"],
+  ];
 
   // Architecture Videography: nested category — one entry per subfolder
   try {
