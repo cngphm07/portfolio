@@ -699,6 +699,7 @@
         reloadDenied: 'Chỉ chủ portfolio mới có thể cập nhật video.',
         reloadFailed: 'Gửi yêu cầu thất bại. Kiểm tra kết nối và cấu hình đồng bộ rồi thử lại.',
         loginSub: 'Đăng nhập để truy cập bộ công cụ làm việc của bạn.',
+        newPass: 'Mật khẩu mới', savePass: 'Lưu mật khẩu mới', savedPass: 'Đã đổi mật khẩu.',
         lblEmail: 'Email',
         lblPass: 'Mật khẩu',
         btnLogin: 'Đăng nhập',
@@ -731,6 +732,7 @@
         reloadDenied: 'Only the portfolio owner can update videos.',
         reloadFailed: 'Request failed. Check the connection and sync configuration, then retry.',
         loginSub: 'Sign in to access your workspace tools.',
+        newPass: 'New password', savePass: 'Save new password', savedPass: 'Password updated.',
         lblEmail: 'Email',
         lblPass: 'Password',
         btnLogin: 'Sign in',
@@ -840,13 +842,22 @@
       $('localLabel').textContent = t('localLabel');
     }
 
+    function authButtonLabel() {
+      if (authMode === 'recovery') return t('savePass');
+      return authMode === 'login' ? t('btnLogin') : t('btnSignup');
+    }
+
     function applyLang() {
       document.documentElement.lang = lang;
       $('langBtn').textContent = lang === 'vi' ? 'EN' : 'VI';
-      $('loginSub').textContent = t('loginSub');
+      const recovering = authMode === 'recovery';
+      $('loginSub').textContent = recovering ? $('emailInput').value : t('loginSub');
+      $('emailInput').disabled = recovering;
+      $('emailInput').parentElement.classList.toggle('hidden', recovering);
+      $('forgotBtn').parentElement.classList.toggle('hidden', recovering);
       $('lblEmail').textContent = t('lblEmail');
-      $('lblPass').textContent = t('lblPass');
-      $('authBtn').textContent = authMode === 'login' ? t('btnLogin') : t('btnSignup');
+      $('lblPass').textContent = recovering ? t('newPass') : t('lblPass');
+      $('authBtn').textContent = authButtonLabel();
       $('switchModeBtn').textContent = authMode === 'login' ? t('toSignup') : t('toLogin');
       $('forgotBtn').textContent = t('forgot');
       $('logoutBtn').textContent = t('logout');
@@ -908,7 +919,7 @@
     function setBusy(busy) {
       const btn = $('authBtn');
       btn.disabled = busy;
-      btn.innerHTML = busy ? '<span class="spinner"></span>' : (authMode === 'login' ? t('btnLogin') : t('btnSignup'));
+      btn.innerHTML = busy ? '<span class="spinner"></span>' : authButtonLabel();
     }
 
     async function submitAuth(e) {
@@ -918,6 +929,15 @@
       if (!email || pass.length < 6) { toast(t('errRequired'), 'err'); return; }
       setBusy(true);
       try {
+        if (authMode === 'recovery') {
+          const { error } = await sb.auth.updateUser({ password: pass });
+          if (error) { toast(error.message, 'err'); return; }
+          $('passInput').value = '';
+          setMode('login');
+          enterApp(email);
+          toast(t('savedPass'), 'ok');
+          return;
+        }
         const res = authMode === 'signup'
           ? await sb.auth.signUp({ email, password: pass })
           : await sb.auth.signInWithPassword({ email, password: pass });
@@ -939,14 +959,14 @@
       const email = $('emailInput').value.trim();
       if (!email) { toast(t('errRequired'), 'err'); return; }
       try {
-        const { error } = await sb.auth.resetPasswordForEmail(email);
+        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: new URL('/tools/', location.origin).href });
         toast(error ? mapAuthError(error.message) : t('okReset'), error ? 'err' : 'ok');
       } catch { toast(t('errGeneric'), 'err'); }
     }
 
     function setMode(mode) {
       authMode = mode;
-      $('passInput').autocomplete = mode === 'signup' ? 'new-password' : 'current-password';
+      $('passInput').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
       applyLang();
     }
 
@@ -963,12 +983,20 @@
         sb = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey, {
           auth: { persistSession: true, autoRefreshToken: true }
         });
-        const { data: { session } } = await sb.auth.getSession();
-        if (session?.user?.email) enterApp(session.user.email);
-        else showLogin();
-        sb.auth.onAuthStateChange((event, s) => {
-          if (event === 'SIGNED_OUT') showLogin();
-          else if (event === 'SIGNED_IN' && s?.user?.email && currentUser !== s.user.email) enterApp(s.user.email);
+        sb.auth.onAuthStateChange((event, session) => {
+          const email = session?.user?.email;
+          if (event === 'PASSWORD_RECOVERY' && email) {
+            $('emailInput').value = email;
+            $('passInput').value = '';
+            setMode('recovery');
+            showLogin();
+            $('passInput').focus();
+          } else if (!email) {
+            setMode('login');
+            showLogin();
+          } else if (authMode !== 'recovery' && currentUser !== email) {
+            enterApp(email);
+          }
         });
       } catch (err) {
         $('bootScreen').textContent = 'Supabase load failed — check your connection.';
