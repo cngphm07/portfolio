@@ -168,7 +168,7 @@ function syncURL(cat, sub){
   if(cat && cat !== 'TVC') q.set('cat', cat);
   if(sub && sub !== 'all') q.set('sub', sub);
   var qs = q.toString();
-  history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
+  history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
 }
 
 function buildSubFilters(cat, activeSub){
