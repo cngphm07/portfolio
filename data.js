@@ -576,6 +576,29 @@ const PORTFOLIO_DATA = {
       "thumb": "https://drive.google.com/thumbnail?id=1wl6iKLl3Td6IiT-8_Kwn2rkjT-7CBFGU&sz=w400"
     },
     {
+      "id": "1zyCjFLWBADonrQ-3iaa2OtDo8wtYjabL",
+      "title": "250722 Podcast XNBV ChongTham AnhAn v002",
+      "thumb": "https://drive.google.com/thumbnail?id=1zyCjFLWBADonrQ-3iaa2OtDo8wtYjabL&sz=w400"
+    },
+    {
+      "id": "1UJX-t5qOYfKBXMQrdiLYYRCd29DNtPK6",
+      "title": "250723 Podcast Chong Nong Chi Linh v002",
+      "thumb": "https://drive.google.com/thumbnail?id=1UJX-t5qOYfKBXMQrdiLYYRCd29DNtPK6&sz=w400",
+      "thumbDark": true
+    },
+    {
+      "id": "1FQR83grSwkn0ksqx-dVd72oE7qMmcYbj",
+      "title": "250723 Podcast NhaLaReSort Duc V002 intro",
+      "thumb": "https://drive.google.com/thumbnail?id=1FQR83grSwkn0ksqx-dVd72oE7qMmcYbj&sz=w400",
+      "thumbDark": true
+    },
+    {
+      "id": "1lbm2WFA6MmKtY5lJIebLelsyk3H50ioM",
+      "title": "250808 Podcast NLRS AnhDung v002",
+      "thumb": "https://drive.google.com/thumbnail?id=1lbm2WFA6MmKtY5lJIebLelsyk3H50ioM&sz=w400",
+      "thumbDark": true
+    },
+    {
       "id": "1bN470GsTR_u_7WjgS5fgbQHVNft8GtOI",
       "title": "250915 Podcast XNBV AnhAn ThiCongNuoc v003",
       "thumb": "https://drive.google.com/thumbnail?id=1bN470GsTR_u_7WjgS5fgbQHVNft8GtOI&sz=w400"
@@ -1121,6 +1144,11 @@ const PORTFOLIO_DATA = {
       "thumb": "https://drive.google.com/thumbnail?id=11e5yz2PuAAizdsie5DwORdlVi-E-ikSo&sz=w400"
     },
     {
+      "id": "1mkVcUdzagRNdJPxVx47AFBvhF7feDCX_",
+      "title": "231218 C3BD MienXaoCua",
+      "thumb": "https://drive.google.com/thumbnail?id=1mkVcUdzagRNdJPxVx47AFBvhF7feDCX_&sz=w400"
+    },
+    {
       "id": "1Bh9u8Y6Teo8u5MKlWgCUJ3K7xdGwDeSM",
       "title": "250304 VIDEOANHDUNG BETONMACCAO v003",
       "thumb": "https://drive.google.com/thumbnail?id=1Bh9u8Y6Teo8u5MKlWgCUJ3K7xdGwDeSM&sz=w400"
@@ -1179,11 +1207,6 @@ const PORTFOLIO_DATA = {
       "id": "1XJeeAeR5YPFnCRPMEKkBFNdQ_gdt3X1W",
       "title": "260430 KEO Binh V002",
       "thumb": "https://drive.google.com/thumbnail?id=1XJeeAeR5YPFnCRPMEKkBFNdQ_gdt3X1W&sz=w400"
-    },
-    {
-      "id": "1mkVcUdzagRNdJPxVx47AFBvhF7feDCX_",
-      "title": "Copy of 231218 C3BD MienXaoCua",
-      "thumb": "https://drive.google.com/thumbnail?id=1mkVcUdzagRNdJPxVx47AFBvhF7feDCX_&sz=w400"
     },
     {
       "id": "12jrpiTrqgsiN1prYJ6JG1H5sb1cwFMZg",
@@ -1250,6 +1273,66 @@ const PORTFOLIO_DATA = {
       "id": "12ZuNV128LwYZr-YhadJXOb5RxDfHSuS-",
       "title": "LIFE OF FILMMAKER TravelShoot",
       "thumb": "https://drive.google.com/thumbnail?id=12ZuNV128LwYZr-YhadJXOb5RxDfHSuS-&sz=w400"
+    },
+    {
+      "id": "1rOQZjxVByH61F37YI0AxtdFniRtxvDtm",
+      "title": "PINPOINT VIDEO01 MASTER v001",
+      "thumb": "https://drive.google.com/thumbnail?id=1rOQZjxVByH61F37YI0AxtdFniRtxvDtm&sz=w400"
+    },
+    {
+      "id": "1LOGQZg3yTdcKTFmhoIUUGVlSxaKHzzvg",
+      "title": "PINPOINT VIDEO02 MASTER v001",
+      "thumb": "https://drive.google.com/thumbnail?id=1LOGQZg3yTdcKTFmhoIUUGVlSxaKHzzvg&sz=w400"
+    },
+    {
+      "id": "1MmVUqqXVPxkIU9zPQWSn0TZMawr2Qdec",
+      "title": "PINPOINT VIDEO04 MASTER v001",
+      "thumb": "https://drive.google.com/thumbnail?id=1MmVUqqXVPxkIU9zPQWSn0TZMawr2Qdec&sz=w400"
+    },
+    {
+      "id": "1qo58wSaWV0OqNpi_m8RG2H51DUSb5APD",
+      "title": "PINPOINT VIDEO05 MASTER v001",
+      "thumb": "https://drive.google.com/thumbnail?id=1qo58wSaWV0OqNpi_m8RG2H51DUSb5APD&sz=w400"
+    },
+    {
+      "id": "1jBnrClv0TZzxxmVVWHtv6_UjaTP3Wioo",
+      "title": "PINPOINT VIDEO06 MASTER v001",
+      "thumb": "https://drive.google.com/thumbnail?id=1jBnrClv0TZzxxmVVWHtv6_UjaTP3Wioo&sz=w400"
+    },
+    {
+      "id": "17QgO3bhtqrqaGKTzeDPA_ReVADvzS-PF",
+      "title": "PINPOINT VIDEO09 MASTER v001",
+      "thumb": "https://drive.google.com/thumbnail?id=17QgO3bhtqrqaGKTzeDPA_ReVADvzS-PF&sz=w400"
+    },
+    {
+      "id": "12W8wwWPnKc_bdpMN2SwdEJtdCTzJrlgf",
+      "title": "PINPOINT VIDEO10 MASTER v001",
+      "thumb": "https://drive.google.com/thumbnail?id=12W8wwWPnKc_bdpMN2SwdEJtdCTzJrlgf&sz=w400"
+    },
+    {
+      "id": "1aPCpXxKO0V__owJ_TjG99E79a4d61Veh",
+      "title": "PINPOINT VIDEO11 MASTER v001",
+      "thumb": "https://drive.google.com/thumbnail?id=1aPCpXxKO0V__owJ_TjG99E79a4d61Veh&sz=w400"
+    },
+    {
+      "id": "1iD53T5eAq-JMSqwKDS1y4Bhrfq9_WA7W",
+      "title": "PINPOINT VIDEO12 MASTER v001",
+      "thumb": "https://drive.google.com/thumbnail?id=1iD53T5eAq-JMSqwKDS1y4Bhrfq9_WA7W&sz=w400"
+    },
+    {
+      "id": "1RLobCV__ngoA2MyvQ6ZNihhlJcwuOrRK",
+      "title": "PINPOINT VIDEO13 MASTER v001",
+      "thumb": "https://drive.google.com/thumbnail?id=1RLobCV__ngoA2MyvQ6ZNihhlJcwuOrRK&sz=w400"
+    },
+    {
+      "id": "1sAMDl3P-aRhZZEfWJadpujYkh-siJhlN",
+      "title": "PINPOINT VIDEO14 MASTER v001",
+      "thumb": "https://drive.google.com/thumbnail?id=1sAMDl3P-aRhZZEfWJadpujYkh-siJhlN&sz=w400"
+    },
+    {
+      "id": "1OUzAMnNx6LQxcAP68iJRbT0SfqDA3tlW",
+      "title": "PINPOINT VIDEO15 MASTER v001",
+      "thumb": "https://drive.google.com/thumbnail?id=1OUzAMnNx6LQxcAP68iJRbT0SfqDA3tlW&sz=w400"
     }
   ],
   "Spa": [
@@ -1994,6 +2077,11 @@ const PORTFOLIO_DATA = {
         "thumb": "https://drive.google.com/thumbnail?id=1JPgeI9hz_je-w7YKwwi1dHilMPRmaOzW&sz=w400"
       },
       {
+        "id": "1fKJfrDKNfpazrjF9LipXwogIzpyCsLky",
+        "title": "250709 CookieStudio-T7 v002",
+        "thumb": "https://drive.google.com/thumbnail?id=1fKJfrDKNfpazrjF9LipXwogIzpyCsLky&sz=w400"
+      },
+      {
         "id": "1AZ8Tdl72GTa32FSBafsvUIEBmuB4RCMy",
         "title": "250722 Podcast XNBV ChongTham AnhAn v002",
         "thumb": "https://drive.google.com/thumbnail?id=1AZ8Tdl72GTa32FSBafsvUIEBmuB4RCMy&sz=w400"
@@ -2010,6 +2098,11 @@ const PORTFOLIO_DATA = {
         "thumb": "https://drive.google.com/thumbnail?id=1Kg6PCZ3Jy_8EXx2i7ZGMWuiLyR8uQ3WD&sz=w400"
       },
       {
+        "id": "12n8aqz60DFqZas2tWA-ABiyuXFpJqZ2F",
+        "title": "2508016 Thenaolaxaydungbenvung v004",
+        "thumb": "https://drive.google.com/thumbnail?id=12n8aqz60DFqZas2tWA-ABiyuXFpJqZ2F&sz=w400"
+      },
+      {
         "id": "1tZK6cC5OsDXQ60-QgG0HoVHPYCyIjKUu",
         "title": "250808 Podcast NLRS AnhDung v002",
         "thumb": "https://drive.google.com/thumbnail?id=1tZK6cC5OsDXQ60-QgG0HoVHPYCyIjKUu&sz=w400",
@@ -2019,6 +2112,11 @@ const PORTFOLIO_DATA = {
         "id": "14X0QlElqF47jBdV8N30gaeO-1y9Q7FvQ",
         "title": "250816 NKTC NguyenHouse T7 V003",
         "thumb": "https://drive.google.com/thumbnail?id=14X0QlElqF47jBdV8N30gaeO-1y9Q7FvQ&sz=w400"
+      },
+      {
+        "id": "1e5jymVPqoWHIQuxiCc8C01GPMEuOAiMo",
+        "title": "250816 NKTC NguyenHouse T7 V003",
+        "thumb": "https://drive.google.com/thumbnail?id=1e5jymVPqoWHIQuxiCc8C01GPMEuOAiMo&sz=w400"
       },
       {
         "id": "1EtiIY89jA8tpkk3cya8EUEAT161UOXMc",
